@@ -60,5 +60,6 @@ def label_row(row):
     return "Other"
 
 
-df = read_from_files()
-df.head()
+def get_dataframe():
+    df = read_from_files()
+    return df
