@@ -42,7 +42,7 @@ def label_row(row):
     return "Other"
 
 
-def read_accounts_from_folders():
+def read_accounts_from_folders(date_from=None, date_to=None):
     path_loans = "Loans"
 
     df = None
@@ -51,12 +51,19 @@ def read_accounts_from_folders():
     df = read_account_from_folder(path_loans, "Offset", df)
 
     df.drop_duplicates(inplace=True)
+    df = df.iloc[::-1]  # invert order
+    df.sort_values(by="DateSeries", inplace=True, kind="stable", ascending=True)
+
+    if date_from:
+        df = df[df["DateSeries"] >= date_from]
+    if date_to:
+        df = df[df["DateSeries"] <= date_to]
 
     df["Label"] = df.apply(label_row, axis=1)
 
     return df
 
 
-def get_dataframe():
-    df = read_accounts_from_folders()
+def get_dataframe(date_from=None, date_to=None):
+    df = read_accounts_from_folders(date_from, date_to)
     return df

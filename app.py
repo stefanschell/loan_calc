@@ -8,47 +8,53 @@ import home_loan
 
 # get data
 
-df_in = account_reader.get_dataframe()
+df_in = account_reader.get_dataframe(date_from=pd.to_datetime("2024-09-16"))
 
-# filters for accounts
+dates_in = df_in["DateSeries"].drop_duplicates().tolist()
+
+# setup
 
 st.set_page_config(layout="wide")
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    toggleFixed = st.toggle("Fixed", True)
-with col2:
-    toggleVariable = st.toggle("Variable", True)
-with col3:
-    toggleOffset = st.toggle("Offset", False)
-
-df = pd.DataFrame(df_in)
-if not toggleFixed:
-    df = df[df["AccountName"] != "Fixed"]
-if not toggleVariable:
-    df = df[df["AccountName"] != "Variable"]
-if not toggleOffset:
-    df = df[df["AccountName"] != "Offset"]
-
-dates = df["DateSeries"].drop_duplicates().tolist()
-
 # dataframe as a table
 
-st.dataframe(df)
+col1, col2, col3 = st.columns(3)
+with col1:
+    toggle_fixed = st.toggle("Fixed", True)
+with col2:
+    toggle_variable = st.toggle("Variable", True)
+with col3:
+    toggle_offset = st.toggle("Offset", True)
+
+df_table = pd.DataFrame(df_in)
+if not toggle_fixed:
+    df_table = df_table[df_table["AccountName"] != "Fixed"]
+if not toggle_variable:
+    df_table = df_table[df_table["AccountName"] != "Variable"]
+if not toggle_offset:
+    df_table = df_table[df_table["AccountName"] != "Offset"]
+
+st.dataframe(df_table)
 
 # balance over time
 
 df_balance_fixed = account_interpreter.get_balance_over_time(
-    df, "Fixed", add_col_with_account_name=True, return_positive_balance=True
+    df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
 )
 df_balance_variable = account_interpreter.get_balance_over_time(
-    df, "Variable", add_col_with_account_name=True, return_positive_balance=True
+    df_in, "Variable", add_col_with_account_name=True, return_positive_balance=True
 )
 df_balance_offset = account_interpreter.get_balance_over_time(
-    df, "Offset", add_col_with_account_name=True, return_positive_balance=True
+    df_in, "Offset", add_col_with_account_name=True, return_positive_balance=True
 )
 
-df_plot = pd.concat([df_balance_fixed, df_balance_variable, df_balance_offset])
+df_balance_total = account_interpreter.get_total_balance_over_time(
+    df_in, add_col_with_account_name=True, return_positive_balance=True
+)
+
+df_plot = pd.concat(
+    [df_balance_fixed, df_balance_variable, df_balance_offset, df_balance_total]
+)
 
 fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="Account")
 fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
@@ -58,19 +64,18 @@ st.plotly_chart(fig)
 
 # data selectiom
 
-selected_date = st.selectbox("Select a row:", dates)
+selected_date = st.selectbox("Select a day:", dates_in)
 
-selected_row = df[df["DateSeries"] == selected_date].iloc[0]
-
-balance = abs(selected_row["Balance"])
-
-st.text(balance)
-
-print(balance)
+selected_balance = account_interpreter.get_total_balance_over_time(
+    df_in,
+    selected_dates=[selected_date],
+    add_col_with_account_name=True,
+    return_positive_balance=True,
+)["Balance"].iloc[0]
 
 # plot
 
-P = balance
+P = selected_balance
 N = 25
 k = 12
 R0 = 0.062
