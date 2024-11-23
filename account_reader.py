@@ -51,13 +51,16 @@ def read_accounts_from_folders(date_from=None, date_to=None):
     df = read_account_from_folder(path_loans, "Offset", df)
 
     df.drop_duplicates(inplace=True)
-    df = df.iloc[::-1]  # invert order
-    df.sort_values(by="DateSeries", inplace=True, kind="stable", ascending=True)
 
     if date_from:
         df = df[df["DateSeries"] >= date_from]
     if date_to:
         df = df[df["DateSeries"] <= date_to]
+
+    df = df.iloc[::-1]  # invert order
+    df.sort_values(by="DateSeries", inplace=True, kind="stable", ascending=True)  # sort
+    df["OriginalIndex"] = df.index
+    df.reset_index(inplace=True, drop=True)
 
     df["Label"] = df.apply(label_row, axis=1)
 

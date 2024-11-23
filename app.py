@@ -9,6 +9,7 @@ import home_loan
 # get data
 
 df_in = account_reader.get_dataframe(date_from=pd.to_datetime("2024-09-16"))
+df_in = account_interpreter.add_interest_information(df_in)
 
 dates_in = df_in["DateSeries"].drop_duplicates().tolist()
 
@@ -62,7 +63,7 @@ df_plot = pd.concat(
     [df_balance_fixed, df_balance_variable, df_balance_offset, df_balance_total]
 )
 
-fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="Account")
+fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="AccountName")
 fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
 fig.update_yaxes(title_text="Balance")
 fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def get_balance_over_time(
@@ -12,7 +13,7 @@ def get_balance_over_time(
     df = df.drop_duplicates(subset=["DateSeries"], keep="last")
 
     if add_col_with_account_name:
-        df["Account"] = account_name
+        df["AccountName"] = account_name
     if return_positive_balance:
         df["Balance"] = abs(df["Balance"])
 
@@ -24,6 +25,18 @@ def find_balance(df, date):
     if len(previous) > 0:
         return previous.iloc[-1]
     return 0
+
+
+def find_mean_balance(df, start_date, end_date):
+    dates = (
+        pd.date_range(start=start_date, end=end_date, freq="D").to_pydatetime().tolist()
+    )
+
+    balances = []
+    for date in dates:
+        balances.append(find_balance(df, date))
+
+    return np.mean(balances)
 
 
 def get_total_balance_over_time(
@@ -59,8 +72,58 @@ def get_total_balance_over_time(
     df = pd.DataFrame({"DateSeries": dates, "Balance": balances})
 
     if add_col_with_account_name:
-        df["Account"] = "Total"
+        df["AccountName"] = "Total"
     if return_positive_balance:
         df["Balance"] = abs(df["Balance"])
 
+    return df
+
+
+def add_interest_information_for_account(df, account_name):
+    df_account = get_balance_over_time(df, account_name)
+    if account_name == "Variable":
+        df_offset = get_balance_over_time(df, "Offset")
+
+    for curr_index, curr_row in df.iterrows():
+        if curr_row["AccountName"] == account_name and curr_row["Label"] == "Interest":
+            prev_rows = df[
+                (df["AccountName"] == account_name)
+                & (df["Label"] == "Interest")
+                & (df["DateSeries"] < curr_row["DateSeries"])
+            ]
+
+            if len(prev_rows) > 0:
+                prev_row = prev_rows.iloc[-1]
+            else:
+                prev_row = df.iloc[0]
+
+            prev_date = prev_row["DateSeries"]
+            curr_date = curr_row["DateSeries"]
+
+            interest_period = curr_date - prev_date
+            df.loc[curr_index, "InterestPeriod"] = interest_period
+
+            approx_offset = 0
+            if account_name == "Variable":
+                # use mean offset in interest period
+                approx_offset = abs(find_mean_balance(df_offset, prev_date, curr_date))
+
+            # use mean loan in interest period
+            approx_loan = abs(find_mean_balance(df_account, prev_date, curr_date))
+
+            approx_owing = max(0, approx_loan - approx_offset)
+
+            df.loc[curr_index, "ApproxInterest"] = (
+                (abs(curr_row["Debit"]) / approx_owing)
+                / interest_period.days
+                * 365
+                * 100
+            )
+
+    return df
+
+
+def add_interest_information(df):
+    df = add_interest_information_for_account(df, "Fixed")
+    df = add_interest_information_for_account(df, "Variable")
     return df
