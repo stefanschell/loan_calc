@@ -1,22 +1,69 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import bank
+import account_reader
+import account_interpreter
 import home_loan
 
-df = bank.get_dataframe()
+# get data
 
-dates = df["Date"].drop_duplicates().tolist()
+df_in = account_reader.get_dataframe()
+
+# filters for accounts
+
+st.set_page_config(layout="wide")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    toggleFixed = st.toggle("Fixed", True)
+with col2:
+    toggleVariable = st.toggle("Variable", True)
+with col3:
+    toggleOffset = st.toggle("Offset", False)
+
+df = pd.DataFrame(df_in)
+if not toggleFixed:
+    df = df[df["AccountName"] != "Fixed"]
+if not toggleVariable:
+    df = df[df["AccountName"] != "Variable"]
+if not toggleOffset:
+    df = df[df["AccountName"] != "Offset"]
+
+dates = df["DateSeries"].drop_duplicates().tolist()
+
+# dataframe as a table
 
 st.dataframe(df)
 
+# balance over time
+
+df_balance_fixed = account_interpreter.get_balance_over_time(df, "Fixed")
+df_balance_variable = account_interpreter.get_balance_over_time(df, "Variable")
+df_balance_offset = account_interpreter.get_balance_over_time(df, "Offset")
+
+fig, ax = plt.subplots()
+ax.plot(df_balance_fixed["DateSeries"], -df_balance_fixed["Balance"], ".")
+ax.plot(df_balance_variable["DateSeries"], -df_balance_variable["Balance"], ".")
+ax.plot(df_balance_offset["DateSeries"], df_balance_offset["Balance"], ".")
+
+ax.set_xlabel("Date")
+ax.set_ylabel("Balance")
+
+st.pyplot(fig)
+
+# data selectiom
+
 selected_date = st.selectbox("Select a row:", dates)
 
-selected_row = df[df["Date"] == selected_date].iloc[0]
+selected_row = df[df["DateSeries"] == selected_date].iloc[0]
 
-balance = int(-selected_row["Balance"])
+balance = abs(selected_row["Balance"])
+
+st.text(balance)
 
 print(balance)
+
+# plot
 
 P = balance
 N = 25
