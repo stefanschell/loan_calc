@@ -16,7 +16,11 @@ dates_in = df_in["DateSeries"].drop_duplicates().tolist()
 
 st.set_page_config(layout="wide")
 
-# dataframe as a table
+st.write("# Home Loan")
+
+# Transactions
+
+st.write("## Transactions")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -36,7 +40,9 @@ if not toggle_offset:
 
 st.dataframe(df_table)
 
-# balance over time
+# Over time
+
+st.write("## Over time")
 
 df_balance_fixed = account_interpreter.get_balance_over_time(
     df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
@@ -59,10 +65,13 @@ df_plot = pd.concat(
 fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="Account")
 fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
 fig.update_yaxes(title_text="Balance")
+fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])
 
 st.plotly_chart(fig)
 
-# data selectiom
+# Calculation
+
+st.write("## Calculation")
 
 selected_date = st.selectbox("Select a day:", dates_in)
 
