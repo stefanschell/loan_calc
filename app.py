@@ -1,6 +1,7 @@
-import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
+import streamlit as st
 import account_reader
 import account_interpreter
 import home_loan
@@ -37,19 +38,23 @@ st.dataframe(df)
 
 # balance over time
 
-df_balance_fixed = account_interpreter.get_balance_over_time(df, "Fixed")
-df_balance_variable = account_interpreter.get_balance_over_time(df, "Variable")
-df_balance_offset = account_interpreter.get_balance_over_time(df, "Offset")
+df_balance_fixed = account_interpreter.get_balance_over_time(
+    df, "Fixed", add_col_with_account_name=True, return_positive_balance=True
+)
+df_balance_variable = account_interpreter.get_balance_over_time(
+    df, "Variable", add_col_with_account_name=True, return_positive_balance=True
+)
+df_balance_offset = account_interpreter.get_balance_over_time(
+    df, "Offset", add_col_with_account_name=True, return_positive_balance=True
+)
 
-fig, ax = plt.subplots()
-ax.plot(df_balance_fixed["DateSeries"], -df_balance_fixed["Balance"], ".")
-ax.plot(df_balance_variable["DateSeries"], -df_balance_variable["Balance"], ".")
-ax.plot(df_balance_offset["DateSeries"], df_balance_offset["Balance"], ".")
+df_plot = pd.concat([df_balance_fixed, df_balance_variable, df_balance_offset])
 
-ax.set_xlabel("Date")
-ax.set_ylabel("Balance")
+fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="Account")
+fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+fig.update_yaxes(title_text="Balance")
 
-st.pyplot(fig)
+st.plotly_chart(fig)
 
 # data selectiom
 
