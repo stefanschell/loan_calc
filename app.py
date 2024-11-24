@@ -108,6 +108,14 @@ with col1:
     st.write("Balance: " + str(balance_fixed))
     st.write("Repayment (every 14 days): " + str(repayment_fixed))
     st.write("Interest: " + str(interest_fixed))
+
+    toggle_interest = st.toggle("Override interest rate", False, key="k1a")
+
+    if toggle_interest:
+        interest_fixed = float(
+            st.number_input("Interest rate override: ", 0.0, 15.0, 5.74, key="k1b")
+        )
+
     st.write("Offset: None")
 
     extra_slider_fixed = st.slider(
@@ -116,12 +124,12 @@ with col1:
         800,
         0,
         200,
-        key="k1",
+        key="k1c",
     )
 
     repayment_extra_fixed = extra_slider_fixed / 30 * 14
 
-    st.write(st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_fixed)))
+    st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_fixed))
 
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
@@ -174,6 +182,8 @@ with col1:
     else:
         st.write("Principal reached zero before end of fixed term.")
 
+    st.write(".")
+
     fig1 = px.line(df_schedule_fixed, x="Date", y="Principal")
     fig1.add_trace(px.line(df_schedule_fixed_wo_extra, x="Date", y="Principal").data[0])
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
@@ -203,17 +213,23 @@ with col2:
     st.write("Balance: " + str(balance_variable))
     st.write("Repayment (every 30 days) " + str(repayment_variable))
     st.write("Interest: " + str(interest_variable))
+
+    toggle_interest = st.toggle("Override interest rate", False, key="k2a")
+
+    if toggle_interest:
+        interest_variable = float(
+            st.number_input("Interest rate override: ", 0.0, 15.0, 6.14, key="k2b")
+        )
+
     st.write("Offset: " + str(balance_offset))
 
     extra_slider_variable = st.slider(
-        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2"
+        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2e"
     )
 
     repayment_extra_variable = extra_slider_variable / 30 * 14
 
-    st.write(
-        st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_variable))
-    )
+    st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_variable))
 
     df_schedule_variable = home_loan_simulator.simulate(
         balance_variable,
@@ -265,6 +281,17 @@ with col2:
         )
     else:
         st.write("Principal reached zero before end of fixed term.")
+
+    principal_smaller_offset = df_schedule_variable[
+        df_schedule_variable["Principal"] <= balance_offset
+    ]
+
+    if len(principal_smaller_offset) > 0:
+        principal_smaller_offset = principal_smaller_offset.iloc[0]
+        st.write(
+            "Date when principal smaller than offset for the first time: "
+            + str(principal_smaller_offset["Date"])
+        )
 
     fig1 = px.line(df_schedule_variable, x="Date", y="Principal")
     fig1.add_trace(
