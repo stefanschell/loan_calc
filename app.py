@@ -16,7 +16,7 @@ df_in = account_interpreter.add_interest_information(df_in)
 
 # assuming that the last interest or repayment event is the start of the simulation
 simulation_start = df_in[
-    (df_in["AccountName"] == "Fixed")
+    ((df_in["AccountName"] == "Fixed") | (df_in["AccountName"] == "Variable"))
     & ((df_in["Label"] == "Interest") | (df_in["Label"] == "Repayment"))
 ]["DateSeries"].iloc[-1]
 
