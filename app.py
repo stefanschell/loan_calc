@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import plotly.express as px
 import streamlit as st
 import account_reader
@@ -9,13 +8,17 @@ from datetime import timedelta
 
 # get data
 
-loan_term_start = pd.to_datetime("2024-09-16")
-fixed_term_end = loan_term_start + timedelta(days=365 * 5)
+loan_start = pd.to_datetime("2024-09-16")
+loan_end = loan_start + timedelta(days=365 * 5)
 
-df_in = account_reader.get_dataframe(date_from=loan_term_start)
+df_in = account_reader.get_dataframe(date_from=loan_start)
 df_in = account_interpreter.add_interest_information(df_in)
 
-dates_in = df_in["DateSeries"].drop_duplicates().tolist()
+# assuming that the last interest or repayment event is the start of the simulation
+simulation_start = df_in[
+    (df_in["AccountName"] == "Fixed")
+    & ((df_in["Label"] == "Interest") | (df_in["Label"] == "Repayment"))
+]["DateSeries"].iloc[-1]
 
 # setup
 
@@ -77,9 +80,7 @@ st.plotly_chart(fig)
 
 st.write("## Calculation")
 
-start_date = dates_in[-1]
-
-balance_fixed = account_interpreter.find_balance(df_balance_fixed, start_date)
+balance_fixed = account_interpreter.find_balance(df_balance_fixed, simulation_start)
 repayment_fixed = df_in[
     (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Repayment")
 ].iloc[-1]["Credit"]
@@ -87,7 +88,9 @@ interest_fixed = df_in[
     (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Interest")
 ].iloc[-1]["ApproxInterest"]
 
-balance_variable = account_interpreter.find_balance(df_balance_variable, start_date)
+balance_variable = account_interpreter.find_balance(
+    df_balance_variable, simulation_start
+)
 repayment_variable = df_in[
     (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Repayment")
 ].iloc[-1]["Credit"]
@@ -95,7 +98,7 @@ interest_variable = df_in[
     (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Interest")
 ].iloc[-1]["ApproxInterest"]
 
-balance_offset = account_interpreter.find_balance(df_balance_offset, start_date)
+balance_offset = account_interpreter.find_balance(df_balance_offset, simulation_start)
 
 col1, col2 = st.columns(2)
 
@@ -138,7 +141,7 @@ with col1:
         30,
         repayment_fixed + repayment_extra_fixed,
         14,
-        start_date,
+        simulation_start,
     )
 
     df_schedule_fixed_wo_extra = home_loan_simulator.simulate(
@@ -148,7 +151,7 @@ with col1:
         30,
         repayment_fixed,
         14,
-        start_date,
+        simulation_start,
     )
 
     st.write(df_schedule_fixed)
@@ -167,20 +170,18 @@ with col1:
         + "%)"
     )
 
-    end_of_fixed_term_balance = df_schedule_fixed[
-        df_schedule_fixed["Date"] >= fixed_term_end
-    ]
+    end_of_fixed_loan_balance = df_schedule_fixed[df_schedule_fixed["Date"] >= loan_end]
 
-    if len(end_of_fixed_term_balance) > 0:
-        end_of_fixed_term_balance = end_of_fixed_term_balance.iloc[0]["Principal"]
+    if len(end_of_fixed_loan_balance) > 0:
+        end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
         st.write(
-            "Balance at end of fixed term ("
-            + str(fixed_term_end)
+            "Balance at end of fixed loan ("
+            + str(loan_end)
             + "): "
-            + str(end_of_fixed_term_balance)
+            + str(end_of_fixed_loan_balance)
         )
     else:
-        st.write("Principal reached zero before end of fixed term.")
+        st.write("Principal reached zero before end of fixed loan.")
 
     st.write(".")
 
@@ -238,7 +239,7 @@ with col2:
         30,
         repayment_variable + repayment_extra_variable,
         14,
-        start_date,
+        simulation_start,
     )
 
     df_schedule_variable_wo_extra = home_loan_simulator.simulate(
@@ -248,7 +249,7 @@ with col2:
         30,
         repayment_variable,
         14,
-        start_date,
+        simulation_start,
     )
 
     st.write(df_schedule_variable)
@@ -267,20 +268,20 @@ with col2:
         + "%)"
     )
 
-    end_of_fixed_term_balance = df_schedule_variable[
-        df_schedule_variable["Date"] >= fixed_term_end
+    end_of_fixed_loan_balance = df_schedule_variable[
+        df_schedule_variable["Date"] >= loan_end
     ]
 
-    if len(end_of_fixed_term_balance) > 0:
-        end_of_fixed_term_balance = end_of_fixed_term_balance.iloc[0]["Principal"]
+    if len(end_of_fixed_loan_balance) > 0:
+        end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
         st.write(
-            "Balance at end of fixed term ("
-            + str(fixed_term_end)
+            "Balance at end of fixed loan ("
+            + str(loan_end)
             + "): "
-            + str(end_of_fixed_term_balance)
+            + str(end_of_fixed_loan_balance)
         )
     else:
-        st.write("Principal reached zero before end of fixed term.")
+        st.write("Principal reached zero before end of fixed loan.")
 
     principal_smaller_offset = df_schedule_variable[
         df_schedule_variable["Principal"] <= balance_offset

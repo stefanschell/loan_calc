@@ -10,18 +10,29 @@ def simulate(
     interest_period,
     repayment,
     repayment_period,
-    start_day,
+    schedule_start,
 ):
     interest_period = timedelta(days=interest_period)
     repayment_period = timedelta(days=repayment_period)
 
-    prev_interest_date = start_day
-    prev_repayment_date = start_day
+    prev_interest_date = schedule_start
+    prev_repayment_date = schedule_start
 
-    curr_date = start_day
+    curr_date = schedule_start
 
     schedule = []
     owing_daily_hist = []
+
+    schedule.append(
+        (
+            0,
+            0,
+            curr_date,
+            0,
+            0,
+            principal,
+        )
+    )
 
     while principal > 0:
         curr_date = curr_date + timedelta(days=1)
@@ -60,8 +71,8 @@ def simulate(
         if curr_repayment != 0 or curr_interest != 0:
             schedule.append(
                 (
-                    (curr_date - start_day).days / 30,
-                    (curr_date - start_day).days / 365,
+                    (curr_date - schedule_start).days / 30,
+                    (curr_date - schedule_start).days / 365,
                     curr_date,
                     curr_repayment,
                     curr_interest,
