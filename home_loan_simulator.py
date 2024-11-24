@@ -64,5 +64,5 @@ def simulate(
 
     return pd.DataFrame(
         schedule,
-        columns=["Month", "Years", "Date", "Repayment", "Interest", "Principal"],
+        columns=["Months", "Years", "Date", "Repayment", "Interest", "Principal"],
     )

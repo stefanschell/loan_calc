@@ -5,10 +5,14 @@ import streamlit as st
 import account_reader
 import account_interpreter
 import home_loan_simulator
+from datetime import timedelta
 
 # get data
 
-df_in = account_reader.get_dataframe(date_from=pd.to_datetime("2024-09-16"))
+loan_term_start = pd.to_datetime("2024-09-16")
+fixed_term_end = loan_term_start + timedelta(days=365 * 5)
+
+df_in = account_reader.get_dataframe(date_from=loan_term_start)
 df_in = account_interpreter.add_interest_information(df_in)
 
 dates_in = df_in["DateSeries"].drop_duplicates().tolist()
@@ -16,8 +20,7 @@ dates_in = df_in["DateSeries"].drop_duplicates().tolist()
 # setup
 
 st.set_page_config(layout="wide")
-
-st.write("# Home Loan")
+st.title("Home Loan")
 
 # Transactions
 
@@ -142,9 +145,34 @@ with col1:
 
     st.write(df_schedule_fixed)
 
-    st.write("Years to go: " + str(df_schedule_fixed.iloc[-1]["Years"]))
-    st.write("Total repayments to go: " + str(df_schedule_fixed["Repayment"].sum()))
-    st.write("Total interest to go: " + str(df_schedule_fixed["Interest"].sum()))
+    total_years = df_schedule_fixed.iloc[-1]["Years"]
+    total_repayments = df_schedule_fixed["Repayment"].sum()
+    total_interest = df_schedule_fixed["Interest"].sum()
+
+    st.write("Years to go: " + str(total_years))
+    st.write("Total repayments to go: " + str(total_repayments))
+    st.write(
+        "Total interest to go: "
+        + str(total_interest)
+        + " ("
+        + str(100 * total_interest / total_repayments)
+        + "%)"
+    )
+
+    end_of_fixed_term_balance = df_schedule_fixed[
+        df_schedule_fixed["Date"] >= fixed_term_end
+    ]
+
+    if len(end_of_fixed_term_balance) > 0:
+        end_of_fixed_term_balance = end_of_fixed_term_balance.iloc[0]["Principal"]
+        st.write(
+            "Balance at end of fixed term ("
+            + str(fixed_term_end)
+            + "): "
+            + str(end_of_fixed_term_balance)
+        )
+    else:
+        st.write("Principal reached zero before end of fixed term.")
 
     fig1 = px.line(df_schedule_fixed, x="Date", y="Principal")
     fig1.add_trace(px.line(df_schedule_fixed_wo_extra, x="Date", y="Principal").data[0])
@@ -159,9 +187,9 @@ with col1:
     interest_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
     interest_wo_extra = interest_wo_extra[interest_wo_extra["Interest"] > 0]
 
-    fig2 = px.line(interest, x="Date", y="Interest")
-    fig2.add_trace(px.line(interest_wo_extra, x="Date", y="Interest").data[0])
-    fig2.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig2 = px.line(interest, x="Years", y="Interest")
+    fig2.add_trace(px.line(interest_wo_extra, x="Years", y="Interest").data[0])
+    fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest")
 
     st.plotly_chart(fig2)
@@ -209,9 +237,34 @@ with col2:
 
     st.write(df_schedule_variable)
 
-    st.write("Years to go: " + str(df_schedule_variable.iloc[-1]["Years"]))
-    st.write("Total repayments to go: " + str(df_schedule_variable["Repayment"].sum()))
-    st.write("Total interest to go: " + str(df_schedule_variable["Interest"].sum()))
+    total_years = df_schedule_variable.iloc[-1]["Years"]
+    total_repayments = df_schedule_variable["Repayment"].sum()
+    total_interest = df_schedule_variable["Interest"].sum()
+
+    st.write("Years to go: " + str(total_years))
+    st.write("Total repayments to go: " + str(total_repayments))
+    st.write(
+        "Total interest to go: "
+        + str(total_interest)
+        + " ("
+        + str(100 * total_interest / total_repayments)
+        + "%)"
+    )
+
+    end_of_fixed_term_balance = df_schedule_variable[
+        df_schedule_variable["Date"] >= fixed_term_end
+    ]
+
+    if len(end_of_fixed_term_balance) > 0:
+        end_of_fixed_term_balance = end_of_fixed_term_balance.iloc[0]["Principal"]
+        st.write(
+            "Balance at end of fixed term ("
+            + str(fixed_term_end)
+            + "): "
+            + str(end_of_fixed_term_balance)
+        )
+    else:
+        st.write("Principal reached zero before end of fixed term.")
 
     fig1 = px.line(df_schedule_variable, x="Date", y="Principal")
     fig1.add_trace(
@@ -228,9 +281,9 @@ with col2:
     interest_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
     interest_wo_extra = interest_wo_extra[interest_wo_extra["Interest"] > 0]
 
-    fig2 = px.line(interest, x="Date", y="Interest")
-    fig2.add_trace(px.line(interest_wo_extra, x="Date", y="Interest").data[0])
-    fig2.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig2 = px.line(interest, x="Years", y="Interest")
+    fig2.add_trace(px.line(interest_wo_extra, x="Years", y="Interest").data[0])
+    fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest")
 
     st.plotly_chart(fig2)
