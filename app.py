@@ -4,7 +4,7 @@ import plotly.express as px
 import streamlit as st
 import account_reader
 import account_interpreter
-import home_loan
+import home_loan_simulator
 
 # get data
 
@@ -74,39 +74,175 @@ st.plotly_chart(fig)
 
 st.write("## Calculation")
 
-selected_date = st.selectbox("Select a day:", dates_in)
+start_date = dates_in[-1]
 
-selected_balance = account_interpreter.get_total_balance_over_time(
-    df_in,
-    selected_dates=[selected_date],
-    add_col_with_account_name=True,
-    return_positive_balance=True,
-)["Balance"].iloc[0]
+balance_fixed = account_interpreter.find_balance(df_balance_fixed, start_date)
+repayment_fixed = df_in[
+    (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Repayment")
+].iloc[-1]["Credit"]
+interest_fixed = df_in[
+    (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Interest")
+].iloc[-1]["ApproxInterest"]
 
-# plot
+balance_variable = account_interpreter.find_balance(df_balance_variable, start_date)
+repayment_variable = df_in[
+    (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Repayment")
+].iloc[-1]["Credit"]
+interest_variable = df_in[
+    (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Interest")
+].iloc[-1]["ApproxInterest"]
 
-P = selected_balance
-N = 25
-k = 12
-R0 = 0.062
+balance_offset = account_interpreter.find_balance(df_balance_offset, start_date)
 
-Rs = []
-# Rs.append((24, 0.085))
-# Rs.append((48, 0.065))
-Rs = pd.DataFrame(Rs, columns=["month", "rate"])
-Rs.set_index("month", drop=False, inplace=True)
+col1, col2 = st.columns(2)
 
-Os = []
-Os.append((0, 200000))
-# for month in range(1, N * 12):
-#    Os.append((month, 2000))
-Os = pd.DataFrame(Os, columns=["month", "amount"])
-Os.set_index("month", drop=False, inplace=True)
+with col1:
 
-myLoan1 = home_loan.HomeLoan("Loan 1", N=N, k=k, P=P, R0=R0)
-myLoan1.print()
-plan1 = myLoan1.simulate()
+    # Fixed
 
-fig, ax = plt.subplots()
-home_loan.plot(ax, myLoan1.label, plan1)
-st.pyplot(fig)
+    st.write("### Fixed")
+
+    st.write("Balance: " + str(balance_fixed))
+    st.write("Repayment (every 14 days): " + str(repayment_fixed))
+    st.write("Interest: " + str(interest_fixed))
+    st.write("Offset: None")
+
+    extra_slider_fixed = st.slider(
+        "Extra-Repayment (every 30 days), limited to AUD 10000 per year, i.e. AUD 800 every 30 days: ",
+        0,
+        800,
+        0,
+        200,
+        key="k1",
+    )
+
+    repayment_extra_fixed = extra_slider_fixed / 30 * 14
+
+    st.write(st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_fixed)))
+
+    df_schedule_fixed = home_loan_simulator.simulate(
+        balance_fixed,
+        0,
+        interest_fixed,
+        30,
+        repayment_fixed + repayment_extra_fixed,
+        14,
+        start_date,
+    )
+
+    df_schedule_fixed_wo_extra = home_loan_simulator.simulate(
+        balance_fixed,
+        0,
+        interest_fixed,
+        30,
+        repayment_fixed,
+        14,
+        start_date,
+    )
+
+    st.write(df_schedule_fixed)
+
+    st.write("Years to go: " + str(df_schedule_fixed.iloc[-1]["Years"]))
+    st.write("Total repayments to go: " + str(df_schedule_fixed["Repayment"].sum()))
+    st.write("Total interest to go: " + str(df_schedule_fixed["Interest"].sum()))
+
+    fig1 = px.line(df_schedule_fixed, x="Date", y="Principal")
+    fig1.add_trace(px.line(df_schedule_fixed_wo_extra, x="Date", y="Principal").data[0])
+    fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig1.update_yaxes(title_text="Principal")
+
+    st.plotly_chart(fig1)
+
+    interest = pd.DataFrame(df_schedule_fixed)
+    interest = interest[interest["Interest"] > 0]
+
+    interest_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
+    interest_wo_extra = interest_wo_extra[interest_wo_extra["Interest"] > 0]
+
+    fig2 = px.line(interest, x="Date", y="Interest")
+    fig2.add_trace(px.line(interest_wo_extra, x="Date", y="Interest").data[0])
+    fig2.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig2.update_yaxes(title_text="Interest")
+
+    st.plotly_chart(fig2)
+
+with col2:
+
+    # Variable
+
+    st.write("### Variable")
+
+    st.write("Balance: " + str(balance_variable))
+    st.write("Repayment (every 30 days) " + str(repayment_variable))
+    st.write("Interest: " + str(interest_variable))
+    st.write("Offset: " + str(balance_offset))
+
+    extra_slider_variable = st.slider(
+        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2"
+    )
+
+    repayment_extra_variable = extra_slider_variable / 30 * 14
+
+    st.write(
+        st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_variable))
+    )
+
+    df_schedule_variable = home_loan_simulator.simulate(
+        balance_variable,
+        balance_offset,
+        interest_variable,
+        30,
+        repayment_variable + repayment_extra_variable,
+        14,
+        start_date,
+    )
+
+    df_schedule_variable_wo_extra = home_loan_simulator.simulate(
+        balance_variable,
+        balance_offset,
+        interest_variable,
+        30,
+        repayment_variable,
+        14,
+        start_date,
+    )
+
+    st.write(df_schedule_variable)
+
+    st.write("Years to go: " + str(df_schedule_variable.iloc[-1]["Years"]))
+    st.write("Total repayments to go: " + str(df_schedule_variable["Repayment"].sum()))
+    st.write("Total interest to go: " + str(df_schedule_variable["Interest"].sum()))
+
+    fig1 = px.line(df_schedule_variable, x="Date", y="Principal")
+    fig1.add_trace(
+        px.line(df_schedule_variable_wo_extra, x="Date", y="Principal").data[0]
+    )
+    fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig1.update_yaxes(title_text="Principal")
+
+    st.plotly_chart(fig1)
+
+    interest = pd.DataFrame(df_schedule_variable)
+    interest = interest[interest["Interest"] > 0]
+
+    interest_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
+    interest_wo_extra = interest_wo_extra[interest_wo_extra["Interest"] > 0]
+
+    fig2 = px.line(interest, x="Date", y="Interest")
+    fig2.add_trace(px.line(interest_wo_extra, x="Date", y="Interest").data[0])
+    fig2.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig2.update_yaxes(title_text="Interest")
+
+    st.plotly_chart(fig2)
+
+# total
+
+st.write("### Total")
+
+total_wo_extra = (30 / 14) * (repayment_fixed + repayment_variable)
+total_extra = (30 / 14) * (repayment_extra_fixed + repayment_extra_variable)
+total = total_wo_extra + total_extra
+
+st.write("Total base payment (every 30 days): " + str(total_wo_extra))
+st.write("Total extra payment (every 30 days): " + str(total_extra))
+st.write("Total payment (every 30 days): " + str(total))

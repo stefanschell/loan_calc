@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-class HomeLoan:
+class HomeLoanPlanner:
 
     @staticmethod
     def get_recurring_payment_c(*, n, p, r):
@@ -39,6 +39,9 @@ class HomeLoan:
         self.r0 = self.R0 / self.k
         self.c0 = self.get_recurring_payment_c(n=self.n, p=self.P, r=self.r0)
         self.m0 = self.c0 * self.k / 12
+
+    def __init__(self, label, *, N, k, P, R0):
+        pass
 
     def print(self):
         print("--------------------------------------------------------")
@@ -205,13 +208,13 @@ if __name__ == "__main__":
 
     # loan 1
 
-    myLoan1 = HomeLoan("Loan 1", N=N, k=k, P=P, R0=R0)
+    myLoan1 = HomeLoanPlanner("Loan 1", N=N, k=k, P=P, R0=R0)
     myLoan1.print()
     plan1 = myLoan1.simulate()
 
     # loan2
 
-    myLoan2 = HomeLoan("Loan 2", N=N, k=k, P=P, R0=R0)
+    myLoan2 = HomeLoanPlanner("Loan 2", N=N, k=k, P=P, R0=R0)
     myLoan2.print()
     plan2 = myLoan2.simulate(Rs=Rs, Os=Os)
 
