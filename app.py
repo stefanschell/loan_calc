@@ -122,7 +122,7 @@ with col1:
         "Extra-Repayment (every 30 days), limited to AUD 10000 per year, i.e. AUD 800 every 30 days: ",
         0,
         800,
-        0,
+        800,
         200,
         key="k1c",
     )
