@@ -1,5 +1,6 @@
 from datetime import timedelta
 import pandas as pd
+import numpy as np
 
 
 def simulate(
@@ -20,6 +21,7 @@ def simulate(
     curr_date = start_day
 
     schedule = []
+    owing_daily_hist = []
 
     while principal > 0:
         curr_date = curr_date + timedelta(days=1)
@@ -27,15 +29,20 @@ def simulate(
         curr_interest = 0
         curr_repayment = 0
 
-        # interest: assuming that nothing was repaid in the previous interest period,
-        #           since in general there were repayments, the interest charged here is too low
+        # interest
+        # note: we keep track of the amount owning on a daily basis,
+        #       back to the previous interest calculation
+
+        owing_daily_hist.append(max(0, principal - offset))
 
         if curr_date == prev_interest_date + interest_period:
             curr_interest = (
-                max(0, principal - offset)
+                np.mean(owing_daily_hist)
                 * (interest_period.days / 365)
                 * (interest / 100)
             )
+
+            owing_daily_hist = []
 
             principal = principal + curr_interest
             prev_interest_date = curr_date
