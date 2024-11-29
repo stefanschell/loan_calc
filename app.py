@@ -218,7 +218,7 @@ with col2:
     st.write("### Variable")
 
     st.write("Balance: " + str(balance_variable))
-    st.write("Repayment (every 30 days) " + str(repayment_variable))
+    st.write("Repayment (every 14 days) " + str(repayment_variable))
 
     with st.expander("Override interest and/or offset"):
 
