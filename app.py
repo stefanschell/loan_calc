@@ -108,18 +108,31 @@ with col1:
 
     st.write("### Fixed")
 
-    st.write("Balance: " + str(balance_fixed))
-    st.write("Repayment (every 14 days): " + str(repayment_fixed))
+    with st.expander("Override variables"):
 
-    with st.expander("Override interest rate"):
+        toggle_balance_fixed = st.toggle("Override balance", False, key="k1a")
 
-        toggle_interest_fixed = st.toggle("Override interest rate", False, key="k1a")
-
-        if toggle_interest_fixed:
-            interest_fixed = float(
-                st.number_input("Interest rate override: ", 0.0, 15.0, 5.74, key="k1b")
+        if toggle_balance_fixed:
+            balance_fixed = st.number_input(
+                "Balance override: ", 0, 2000000, 625000, 1000, key="k1b"
             )
 
+        toggle_repayment_fixed = st.toggle("Override repayment", False, key="k1c")
+
+        if toggle_repayment_fixed:
+            repayment_fixed = st.number_input(
+                "Repayment override (every 14 days): ", 0, 10000, 2000, 50, key="k1d"
+            )
+
+        toggle_interest_fixed = st.toggle("Override interest rate", False, key="k1e")
+
+        if toggle_interest_fixed:
+            interest_fixed = st.number_input(
+                "Interest rate override: ", 0.0, 15.0, 5.74, key="k1f"
+            )
+
+    st.write("Balance: " + str(balance_fixed))
+    st.write("Repayment (every 14 days): " + str(repayment_fixed))
     st.write("Interest: " + str(interest_fixed))
     st.write("Offset: None")
 
@@ -129,7 +142,7 @@ with col1:
         800,
         800,
         200,
-        key="k1c",
+        key="k1g",
     )
 
     repayment_extra_fixed = extra_slider_fixed / 30 * 14
@@ -217,30 +230,48 @@ with col2:
 
     st.write("### Variable")
 
-    st.write("Balance: " + str(balance_variable))
-    st.write("Repayment (every 14 days) " + str(repayment_variable))
+    with st.expander("Override variable"):
 
-    with st.expander("Override interest and/or offset"):
+        toggle_balance_variable = st.toggle("Override balance", False, key="k2a")
 
-        toggle_interest_variable = st.toggle("Override interest rate", False, key="k2a")
-
-        if toggle_interest_variable:
-            interest_variable = float(
-                st.number_input("Interest rate override: ", 0.0, 15.0, 6.14, key="k2b")
+        if toggle_balance_variable:
+            balance_variable = st.number_input(
+                "Balance override: ", 0, 2000000, 625000, 1000, key="k2b"
             )
 
-        toggle_offset = st.toggle("Override offset", False, key="k2c")
+        toggle_repayment_variable = st.toggle("Override repayment", False, key="k2c")
+
+        if toggle_repayment_variable:
+            repayment_variable = st.number_input(
+                "Repayment override (every 14 days): ",
+                0,
+                10000,
+                2000,
+                50,
+                key="k2d",
+            )
+
+        toggle_interest_variable = st.toggle("Override interest rate", False, key="k2e")
+
+        if toggle_interest_variable:
+            interest_variable = st.number_input(
+                "Interest rate override: ", 0.0, 15.0, 6.14, key="k2f"
+            )
+
+        toggle_offset = st.toggle("Override offset", False, key="k2g")
 
         if toggle_offset:
             balance_offset = st.number_input(
-                "Offset overide: ", 0, 300000, 100000, 1000, key="k2d"
+                "Offset overide: ", 0, 300000, 100000, 1000, key="k2h"
             )
 
+    st.write("Balance: " + str(balance_variable))
+    st.write("Repayment (every 14 days) " + str(repayment_variable))
     st.write("Interest: " + str(interest_variable))
     st.write("Offset: " + str(balance_offset))
 
     extra_slider_variable = st.slider(
-        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2e"
+        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2i"
     )
 
     repayment_extra_variable = extra_slider_variable / 30 * 14
