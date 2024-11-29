@@ -112,9 +112,9 @@ with col1:
     st.write("Repayment (every 14 days): " + str(repayment_fixed))
     st.write("Interest: " + str(interest_fixed))
 
-    toggle_interest = st.toggle("Override interest rate", False, key="k1a")
+    toggle_interest_fixed = st.toggle("Override interest rate", False, key="k1a")
 
-    if toggle_interest:
+    if toggle_interest_fixed:
         interest_fixed = float(
             st.number_input("Interest rate override: ", 0.0, 15.0, 5.74, key="k1b")
         )
@@ -156,17 +156,17 @@ with col1:
 
     st.write(df_schedule_fixed)
 
-    total_years = df_schedule_fixed.iloc[-1]["Years"]
-    total_repayments = df_schedule_fixed["Repayment"].sum()
-    total_interest = df_schedule_fixed["Interest"].sum()
+    total_years_fixed = df_schedule_fixed.iloc[-1]["Years"]
+    total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
+    total_interest_fixed = df_schedule_fixed["Interest"].sum()
 
-    st.write("Years to go: " + str(total_years))
-    st.write("Total repayments to go: " + str(total_repayments))
+    st.write("Years to go: " + str(total_years_fixed))
+    st.write("Total repayments to go: " + str(total_repayments_fixed))
     st.write(
         "Total interest to go: "
-        + str(total_interest)
+        + str(total_interest_fixed)
         + " ("
-        + str(100 * total_interest / total_repayments)
+        + str(100 * total_interest_fixed / total_repayments_fixed)
         + "%)"
     )
 
@@ -192,14 +192,18 @@ with col1:
 
     st.plotly_chart(fig1)
 
-    interest = pd.DataFrame(df_schedule_fixed)
-    interest = interest[interest["Interest"] > 0]
+    interest_plot_fixed = pd.DataFrame(df_schedule_fixed)
+    interest_plot_fixed = interest_plot_fixed[interest_plot_fixed["Interest"] > 0]
 
-    interest_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
-    interest_wo_extra = interest_wo_extra[interest_wo_extra["Interest"] > 0]
+    interest_plot_fixed_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
+    interest_plot_fixed_wo_extra = interest_plot_fixed_wo_extra[
+        interest_plot_fixed_wo_extra["Interest"] > 0
+    ]
 
-    fig2 = px.line(interest, x="Years", y="Interest")
-    fig2.add_trace(px.line(interest_wo_extra, x="Years", y="Interest").data[0])
+    fig2 = px.line(interest_plot_fixed, x="Years", y="Interest")
+    fig2.add_trace(
+        px.line(interest_plot_fixed_wo_extra, x="Years", y="Interest").data[0]
+    )
     fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest")
 
@@ -215,9 +219,9 @@ with col2:
     st.write("Repayment (every 30 days) " + str(repayment_variable))
     st.write("Interest: " + str(interest_variable))
 
-    toggle_interest = st.toggle("Override interest rate", False, key="k2a")
+    toggle_interest_variable = st.toggle("Override interest rate", False, key="k2a")
 
-    if toggle_interest:
+    if toggle_interest_variable:
         interest_variable = float(
             st.number_input("Interest rate override: ", 0.0, 15.0, 6.14, key="k2b")
         )
@@ -254,17 +258,17 @@ with col2:
 
     st.write(df_schedule_variable)
 
-    total_years = df_schedule_variable.iloc[-1]["Years"]
-    total_repayments = df_schedule_variable["Repayment"].sum()
-    total_interest = df_schedule_variable["Interest"].sum()
+    total_years_variable = df_schedule_variable.iloc[-1]["Years"]
+    total_repayments_variable = df_schedule_variable["Repayment"].sum()
+    total_interest_variable = df_schedule_variable["Interest"].sum()
 
-    st.write("Years to go: " + str(total_years))
-    st.write("Total repayments to go: " + str(total_repayments))
+    st.write("Years to go: " + str(total_years_variable))
+    st.write("Total repayments to go: " + str(total_repayments_variable))
     st.write(
         "Total interest to go: "
-        + str(total_interest)
+        + str(total_interest_variable)
         + " ("
-        + str(100 * total_interest / total_repayments)
+        + str(100 * total_interest_variable / total_repayments_variable)
         + "%)"
     )
 
@@ -303,14 +307,20 @@ with col2:
 
     st.plotly_chart(fig1)
 
-    interest = pd.DataFrame(df_schedule_variable)
-    interest = interest[interest["Interest"] > 0]
+    interest_plot_variable = pd.DataFrame(df_schedule_variable)
+    interest_plot_variable = interest_plot_variable[
+        interest_plot_variable["Interest"] > 0
+    ]
 
-    interest_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
-    interest_wo_extra = interest_wo_extra[interest_wo_extra["Interest"] > 0]
+    interest_plot_variable_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
+    interest_plot_variable_wo_extra = interest_plot_variable_wo_extra[
+        interest_plot_variable_wo_extra["Interest"] > 0
+    ]
 
-    fig2 = px.line(interest, x="Years", y="Interest")
-    fig2.add_trace(px.line(interest_wo_extra, x="Years", y="Interest").data[0])
+    fig2 = px.line(interest_plot_variable, x="Years", y="Interest")
+    fig2.add_trace(
+        px.line(interest_plot_variable_wo_extra, x="Years", y="Interest").data[0]
+    )
     fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest")
 
