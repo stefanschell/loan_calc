@@ -230,7 +230,7 @@ with col2:
 
     st.write("### Variable")
 
-    with st.expander("Override variable"):
+    with st.expander("Override variables"):
 
         toggle_balance_variable = st.toggle("Override balance", False, key="k2a")
 
