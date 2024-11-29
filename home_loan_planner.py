@@ -40,9 +40,6 @@ class HomeLoanPlanner:
         self.c0 = self.get_recurring_payment_c(n=self.n, p=self.P, r=self.r0)
         self.m0 = self.c0 * self.k / 12
 
-    def __init__(self, label, *, N, k, P, R0):
-        pass
-
     def print(self):
         print("--------------------------------------------------------")
         print("-" + self.label + "-")

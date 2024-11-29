@@ -4,6 +4,7 @@ import streamlit as st
 import account_reader
 import account_interpreter
 import home_loan_simulator
+import home_loan_planner
 from datetime import timedelta
 
 # get data
@@ -136,13 +137,29 @@ with col1:
     st.write("Interest: " + str(interest_fixed))
     st.write("Offset: None")
 
+    with st.expander("Theoretical plan"):
+        years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
+        pay_cycles_per_year_planner_fixed = st.number_input(
+            "Pay cycles per year", 1, 365, 26, 1, key="k1h"
+        )
+
+        planner_fixed = home_loan_planner.HomeLoanPlanner(
+            "Fixed",
+            N=years_planner_fixed,
+            k=pay_cycles_per_year_planner_fixed,
+            P=balance_fixed,
+            R0=interest_fixed / 100,
+        )
+
+        st.write("Payment per pay cycle: " + str(planner_fixed.c0))
+
     extra_slider_fixed = st.slider(
         "Extra-Repayment (every 30 days), limited to AUD 10000 per year, i.e. AUD 800 every 30 days: ",
         0,
         800,
         800,
         200,
-        key="k1g",
+        key="k1i",
     )
 
     repayment_extra_fixed = extra_slider_fixed / 30 * 14
@@ -270,8 +287,24 @@ with col2:
     st.write("Interest: " + str(interest_variable))
     st.write("Offset: " + str(balance_offset))
 
+    with st.expander("Theoretical plan"):
+        years_planner_variable = st.number_input("Years", 1, 40, 25, 1, key="k2i")
+        pay_cycles_per_year_planner_variable = st.number_input(
+            "Pay cycles per year", 1, 365, 26, 1, key="k2j"
+        )
+
+        planner_variable = home_loan_planner.HomeLoanPlanner(
+            "Fixed",
+            N=years_planner_variable,
+            k=pay_cycles_per_year_planner_variable,
+            P=balance_variable - balance_offset,
+            R0=interest_variable / 100,
+        )
+
+        st.write("Payment per pay cycle: " + str(planner_variable.c0))
+
     extra_slider_variable = st.slider(
-        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2i"
+        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2k"
     )
 
     repayment_extra_variable = extra_slider_variable / 30 * 14
