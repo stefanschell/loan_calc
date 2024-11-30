@@ -34,12 +34,22 @@ def read_account_from_folder(path_loans, account_name, df):
 
 def label_row(row):
     if row["AccountName"] == "Offset":
-        return "Offset"
-    if "Repayment" in row["Description"]:
-        return "Repayment"
-    if "Interest" in row["Description"]:
-        return "Interest"
-    return "Other"
+        if row["Debit"] < 0:
+            return "Offset-"
+        if row["Credit"] > 0:
+            return "Offset+"
+    if row["Debit"] < 0:
+        if "Interest" in row["Description"]:
+            return "Interest"
+        else:
+            return "Redraw"
+    if row["Credit"] > 0:
+        if "Repayment" in row["Description"]:
+            return "Repayment"
+        if row["Credit"] > 0:
+            return "Extra-Repayment"
+    else:
+        return "Unknown"
 
 
 def read_accounts_from_folders(date_from=None, date_to=None):
