@@ -50,7 +50,9 @@ def read_accounts_from_folders(date_from=None, date_to=None):
     df = read_account_from_folder(path_loans, "Variable", df)
     df = read_account_from_folder(path_loans, "Offset", df)
 
-    df.drop_duplicates(inplace=True)
+    df.drop_duplicates(
+        inplace=True, subset=["Date", "Description", "Credit", "Debit", "Balance"]
+    )
 
     if date_from:
         df = df[df["DateSeries"] >= date_from]
