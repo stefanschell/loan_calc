@@ -154,7 +154,7 @@ with col1:
         st.write("Payment per pay cycle: " + str(planner_fixed.c0))
 
     extra_slider_fixed = st.slider(
-        "Extra-Repayment (every 30 days), limited to AUD 10000 per year, i.e. AUD 800 every 30 days: ",
+        "Extra-Repayment (every 30.x days), limited to AUD 10000 per year, i.e. AUD 800 every 30.x days: ",
         0,
         800,
         800,
@@ -162,7 +162,7 @@ with col1:
         key="k1i",
     )
 
-    repayment_extra_fixed = extra_slider_fixed / 30 * 14
+    repayment_extra_fixed = extra_slider_fixed / (365 / 12) * 14
 
     st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_fixed))
 
@@ -170,7 +170,7 @@ with col1:
         balance_fixed,
         0,
         interest_fixed,
-        30,
+        365 / 12,
         repayment_fixed + repayment_extra_fixed,
         14,
         simulation_start,
@@ -180,7 +180,7 @@ with col1:
         balance_fixed,
         0,
         interest_fixed,
-        30,
+        365 / 12,
         repayment_fixed,
         14,
         simulation_start,
@@ -304,10 +304,10 @@ with col2:
         st.write("Payment per pay cycle: " + str(planner_variable.c0))
 
     extra_slider_variable = st.slider(
-        "Extra-Repayment (every 30 days): ", 0, 10000, 3000, 500, key="k2k"
+        "Extra-Repayment (every 30.x days): ", 0, 10000, 3000, 500, key="k2k"
     )
 
-    repayment_extra_variable = extra_slider_variable / 30 * 14
+    repayment_extra_variable = extra_slider_variable / (365 / 12) * 14
 
     st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_variable))
 
@@ -315,7 +315,7 @@ with col2:
         balance_variable,
         balance_offset,
         interest_variable,
-        30,
+        365 / 12,
         repayment_variable + repayment_extra_variable,
         14,
         simulation_start,
@@ -325,7 +325,7 @@ with col2:
         balance_variable,
         balance_offset,
         interest_variable,
-        30,
+        365 / 12,
         repayment_variable,
         14,
         simulation_start,
@@ -405,10 +405,10 @@ with col2:
 
 st.write("### Total")
 
-total_wo_extra = (30 / 14) * (repayment_fixed + repayment_variable)
-total_extra = (30 / 14) * (repayment_extra_fixed + repayment_extra_variable)
+total_wo_extra = ((365 / 12) / 14) * (repayment_fixed + repayment_variable)
+total_extra = ((365 / 12) / 14) * (repayment_extra_fixed + repayment_extra_variable)
 total = total_wo_extra + total_extra
 
-st.write("Total base payment (every 30 days): " + str(total_wo_extra))
-st.write("Total extra payment (every 30 days): " + str(total_extra))
-st.write("Total payment (every 30 days): " + str(total))
+st.write("Total base payment (every 30.x days): " + str(total_wo_extra))
+st.write("Total extra payment (every 30.x days): " + str(total_extra))
+st.write("Total payment (every 30.x days): " + str(total))

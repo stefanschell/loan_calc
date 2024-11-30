@@ -46,7 +46,7 @@ def simulate(
 
         owing_daily_hist.append(max(0, principal - offset))
 
-        if curr_date == prev_interest_date + interest_period:
+        if curr_date >= prev_interest_date + interest_period:
             curr_interest = (
                 np.mean(owing_daily_hist)
                 * (interest_period.days / 365)
@@ -56,22 +56,22 @@ def simulate(
             owing_daily_hist = []
 
             principal = principal + curr_interest
-            prev_interest_date = curr_date
+            prev_interest_date = prev_interest_date + interest_period
 
         # repayment
 
-        if curr_date == prev_repayment_date + repayment_period:
+        if curr_date >= prev_repayment_date + repayment_period:
             curr_repayment = min(principal, repayment)
 
             principal = principal - curr_repayment
-            prev_repayment_date = curr_date
+            prev_repayment_date = prev_repayment_date + repayment_period
 
         # data collection
 
         if curr_repayment != 0 or curr_interest != 0:
             schedule.append(
                 (
-                    (curr_date - schedule_start).days / 30,
+                    (curr_date - schedule_start).days / (365 / 12),
                     (curr_date - schedule_start).days / 365,
                     curr_date,
                     curr_repayment,
