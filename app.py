@@ -143,10 +143,10 @@ with col1:
         if toggle_repayment_fixed:
             repayment_fixed = st.number_input(
                 "Repayment override (" + repayment_cycle + "): ",
-                0,
-                10000,
-                2000,
-                50,
+                0.0,
+                10000.0,
+                1812.84,
+                50.0,
                 key="k1d",
             )
 
@@ -154,7 +154,7 @@ with col1:
 
         if toggle_interest_fixed:
             interest_fixed = st.number_input(
-                "Interest rate override: ", 0.0, 15.0, 5.74, key="k1f"
+                "Interest rate override: ", 0.1, 15.0, 5.74, key="k1f"
             )
 
     st.write("Balance: " + str(balance_fixed))
@@ -166,7 +166,7 @@ with col1:
     st.write("Interest: " + str(interest_fixed))
     st.write("Offset: None")
 
-    with st.expander("Theoretical plan"):
+    with st.expander("Theoretical plan (for information only, not used)"):
         years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
 
         planner_fixed = home_loan_planner.HomeLoanPlanner(
@@ -177,7 +177,12 @@ with col1:
             R0=interest_fixed / 100,
         )
 
-        st.write("Repayment (" + repayment_cycle + "): " + str(planner_fixed.c0))
+        st.write(
+            "Repayment ("
+            + repayment_cycle
+            + "), for identical repayment and interest cycles: "
+            + str(planner_fixed.c0)
+        )
 
     extra_slider_fixed = st.slider(
         "Extra-Repayment (monthly), limited to AUD 10000 yearly, i.e. AUD 800 monthly: ",
@@ -290,10 +295,10 @@ with col2:
         if toggle_repayment_variable:
             repayment_variable = st.number_input(
                 "Repayment override (" + repayment_cycle + "): ",
-                0,
-                10000,
-                2000,
-                50,
+                0.0,
+                10000.0,
+                1883.17,
+                50.0,
                 key="k2d",
             )
 
@@ -301,7 +306,7 @@ with col2:
 
         if toggle_interest_variable:
             interest_variable = st.number_input(
-                "Interest rate override: ", 0.0, 15.0, 6.14, key="k2f"
+                "Interest rate override: ", 0.1, 15.0, 6.14, key="k2f"
             )
 
         toggle_offset = st.toggle("Override offset", False, key="k2g")
@@ -320,7 +325,7 @@ with col2:
     st.write("Interest: " + str(interest_variable))
     st.write("Offset: " + str(balance_offset))
 
-    with st.expander("Theoretical plan"):
+    with st.expander("Theoretical plan (for information only, not used)"):
         years_planner_variable = st.number_input("Years", 1, 40, 25, 1, key="k2i")
 
         planner_variable = home_loan_planner.HomeLoanPlanner(
@@ -331,10 +336,15 @@ with col2:
             R0=interest_variable / 100,
         )
 
-        st.write("Repayment (" + repayment_cycle + "): " + str(planner_variable.c0))
+        st.write(
+            "Repayment ("
+            + repayment_cycle
+            + "), for identical repayment and interest cycles: "
+            + str(planner_variable.c0)
+        )
 
     extra_slider_variable = st.slider(
-        "Extra-Repayment (monthly): ", 0, 10000, 3000, 500, key="k2k"
+        "Extra-Repayment (monthly): ", 0, 10000, 3000, 500, key="k2j"
     )
 
     repayment_extra_variable = extra_slider_variable
