@@ -101,6 +101,26 @@ interest_variable = df_in[
 
 balance_offset = account_interpreter.find_balance(df_balance_offset, simulation_start)
 
+repayment_cycle = "fortnightly"
+interest_cycle = "monthly"
+
+with st.expander("Overide interest and repayment cycle"):
+
+    interest_cycle_sel = st.selectbox(
+        "Interest cycle override", ("fortnightly", "monthly"), index=1
+    )
+    if interest_cycle_sel is not None:
+        interest_cycle = interest_cycle_sel
+
+    repayment_cycle_sel = st.selectbox(
+        "Repayment cycle override", ("fortnightly", "monthly"), index=0
+    )
+    if repayment_cycle_sel is not None:
+        repayment_cycle = repayment_cycle_sel
+
+st.write("Interest cycle: " + interest_cycle)
+st.write("Repayment cycle: " + repayment_cycle)
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -122,7 +142,12 @@ with col1:
 
         if toggle_repayment_fixed:
             repayment_fixed = st.number_input(
-                "Repayment override (every 14 days): ", 0, 10000, 2000, 50, key="k1d"
+                "Repayment override (" + repayment_cycle + "): ",
+                0,
+                10000,
+                2000,
+                50,
+                key="k1d",
             )
 
         toggle_interest_fixed = st.toggle("Override interest rate", False, key="k1e")
@@ -133,28 +158,29 @@ with col1:
             )
 
     st.write("Balance: " + str(balance_fixed))
-    st.write("Repayment (every 14 days): " + str(repayment_fixed))
+    st.write("Repayment (" + repayment_cycle + "): " + str(repayment_fixed))
+
+    if repayment_cycle == "fortnightly":
+        st.write("Repayment (monthly): " + str(repayment_fixed / 14 * (365 / 12)))
+
     st.write("Interest: " + str(interest_fixed))
     st.write("Offset: None")
 
     with st.expander("Theoretical plan"):
         years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
-        pay_cycles_per_year_planner_fixed = st.number_input(
-            "Pay cycles per year", 1, 365, 26, 1, key="k1h"
-        )
 
         planner_fixed = home_loan_planner.HomeLoanPlanner(
             "Fixed",
             N=years_planner_fixed,
-            k=pay_cycles_per_year_planner_fixed,
+            k=26 if repayment_cycle == "fortnightly" else 12,
             P=balance_fixed,
             R0=interest_fixed / 100,
         )
 
-        st.write("Payment per pay cycle: " + str(planner_fixed.c0))
+        st.write("Repayment (" + repayment_cycle + "): " + str(planner_fixed.c0))
 
     extra_slider_fixed = st.slider(
-        "Extra-Repayment (every 30.x days), limited to AUD 10000 per year, i.e. AUD 800 every 30.x days: ",
+        "Extra-Repayment (monthly), limited to AUD 10000 yearly, i.e. AUD 800 monthly: ",
         0,
         800,
         800,
@@ -162,17 +188,18 @@ with col1:
         key="k1i",
     )
 
-    repayment_extra_fixed = extra_slider_fixed / (365 / 12) * 14
-
-    st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_fixed))
+    repayment_extra_fixed = extra_slider_fixed
+    if repayment_cycle == "fortnightly":
+        repayment_extra_fixed = repayment_extra_fixed / (365 / 12) * 14
+        st.write("Extra-Repayment (fortnightly): " + str(repayment_extra_fixed))
 
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
         0,
         interest_fixed,
-        365 / 12,
+        14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_fixed + repayment_extra_fixed,
-        14,
+        14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
     )
 
@@ -180,9 +207,9 @@ with col1:
         balance_fixed,
         0,
         interest_fixed,
-        365 / 12,
+        14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_fixed,
-        14,
+        14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
     )
 
@@ -260,7 +287,7 @@ with col2:
 
         if toggle_repayment_variable:
             repayment_variable = st.number_input(
-                "Repayment override (every 14 days): ",
+                "Repayment override (" + repayment_cycle + "): ",
                 0,
                 10000,
                 2000,
@@ -283,41 +310,43 @@ with col2:
             )
 
     st.write("Balance: " + str(balance_variable))
-    st.write("Repayment (every 14 days) " + str(repayment_variable))
+    st.write("Repayment (" + repayment_cycle + "): " + str(repayment_variable))
+
+    if repayment_cycle == "fortnightly":
+        st.write("Repayment (monthly): " + str(repayment_variable / 14 * (365 / 12)))
+
     st.write("Interest: " + str(interest_variable))
     st.write("Offset: " + str(balance_offset))
 
     with st.expander("Theoretical plan"):
         years_planner_variable = st.number_input("Years", 1, 40, 25, 1, key="k2i")
-        pay_cycles_per_year_planner_variable = st.number_input(
-            "Pay cycles per year", 1, 365, 26, 1, key="k2j"
-        )
 
         planner_variable = home_loan_planner.HomeLoanPlanner(
             "Fixed",
             N=years_planner_variable,
-            k=pay_cycles_per_year_planner_variable,
+            k=26 if repayment_cycle == "fortnightly" else 12,
             P=balance_variable - balance_offset,
             R0=interest_variable / 100,
         )
 
-        st.write("Payment per pay cycle: " + str(planner_variable.c0))
+        st.write("Repayment (" + repayment_cycle + "): " + str(planner_variable.c0))
 
     extra_slider_variable = st.slider(
-        "Extra-Repayment (every 30.x days): ", 0, 10000, 3000, 500, key="k2k"
+        "Extra-Repayment (monthly): ", 0, 10000, 3000, 500, key="k2k"
     )
 
-    repayment_extra_variable = extra_slider_variable / (365 / 12) * 14
-
-    st.write("Extra-Repayment (every 14 days) " + str(repayment_extra_variable))
+    repayment_extra_variable = extra_slider_variable
+    if repayment_cycle == "fortnightly":
+        repayment_extra_variable = repayment_extra_variable / (365 / 12) * 14
+        st.write("Extra-Repayment (fortnightly): " + str(repayment_extra_variable))
 
     df_schedule_variable = home_loan_simulator.simulate(
         balance_variable,
         balance_offset,
         interest_variable,
-        365 / 12,
+        14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_variable + repayment_extra_variable,
-        14,
+        14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
     )
 
@@ -325,9 +354,9 @@ with col2:
         balance_variable,
         balance_offset,
         interest_variable,
-        365 / 12,
+        14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_variable,
-        14,
+        14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
     )
 
@@ -405,10 +434,15 @@ with col2:
 
 st.write("### Total")
 
-total_wo_extra = ((365 / 12) / 14) * (repayment_fixed + repayment_variable)
-total_extra = ((365 / 12) / 14) * (repayment_extra_fixed + repayment_extra_variable)
+total_wo_extra = repayment_fixed + repayment_variable
+total_extra = repayment_extra_fixed + repayment_extra_variable
+
+if repayment_cycle == "fortnightly":
+    total_wo_extra = total_wo_extra / 14 * (365 / 12)
+    total_extra = total_extra / 14 * (365 / 12)
+
 total = total_wo_extra + total_extra
 
-st.write("Total base payment (every 30.x days): " + str(total_wo_extra))
-st.write("Total extra payment (every 30.x days): " + str(total_extra))
-st.write("Total payment (every 30.x days): " + str(total))
+st.write("Total base payment (monthly): " + str(total_wo_extra))
+st.write("Total extra payment (monthly): " + str(total_extra))
+st.write("Total payment (monthly): " + str(total))
