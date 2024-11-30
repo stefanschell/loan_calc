@@ -10,7 +10,7 @@ from datetime import timedelta
 # get data
 
 loan_start = pd.to_datetime("2024-09-16")
-loan_end = loan_start + timedelta(days=365 * 5)
+fixed_loan_end = loan_start + timedelta(days=365 * 5)
 
 df_in = account_reader.get_dataframe(date_from=loan_start)
 df_in = account_interpreter.add_interest_information(df_in)
@@ -172,7 +172,7 @@ with col1:
         planner_fixed = home_loan_planner.HomeLoanPlanner(
             "Fixed",
             N=years_planner_fixed,
-            k=26 if repayment_cycle == "fortnightly" else 12,
+            k=(365 / 14) if repayment_cycle == "fortnightly" else 12,
             P=balance_fixed,
             R0=interest_fixed / 100,
         )
@@ -229,13 +229,15 @@ with col1:
         + "%)"
     )
 
-    end_of_fixed_loan_balance = df_schedule_fixed[df_schedule_fixed["Date"] >= loan_end]
+    end_of_fixed_loan_balance = df_schedule_fixed[
+        df_schedule_fixed["Date"] >= fixed_loan_end
+    ]
 
     if len(end_of_fixed_loan_balance) > 0:
         end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
         st.write(
             "Balance at end of fixed loan ("
-            + str(loan_end)
+            + str(fixed_loan_end)
             + "): "
             + str(end_of_fixed_loan_balance)
         )
@@ -324,7 +326,7 @@ with col2:
         planner_variable = home_loan_planner.HomeLoanPlanner(
             "Fixed",
             N=years_planner_variable,
-            k=26 if repayment_cycle == "fortnightly" else 12,
+            k=(365 / 14) if repayment_cycle == "fortnightly" else 12,
             P=balance_variable - balance_offset,
             R0=interest_variable / 100,
         )
@@ -377,14 +379,14 @@ with col2:
     )
 
     end_of_fixed_loan_balance = df_schedule_variable[
-        df_schedule_variable["Date"] >= loan_end
+        df_schedule_variable["Date"] >= fixed_loan_end
     ]
 
     if len(end_of_fixed_loan_balance) > 0:
         end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
         st.write(
             "Balance at end of fixed loan ("
-            + str(loan_end)
+            + str(fixed_loan_end)
             + "): "
             + str(end_of_fixed_loan_balance)
         )

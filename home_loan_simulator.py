@@ -6,14 +6,14 @@ import numpy as np
 def simulate(
     principal,
     offset,
-    interest,
-    interest_period,
+    interest_rate,
+    interest_cycle_days,
     repayment,
-    repayment_period,
+    repayment_cycle_days,
     schedule_start,
 ):
-    interest_period = timedelta(days=interest_period)
-    repayment_period = timedelta(days=repayment_period)
+    interest_cycle_days = timedelta(days=interest_cycle_days)
+    repayment_cycle_days = timedelta(days=repayment_cycle_days)
 
     prev_interest_date = schedule_start
     prev_repayment_date = schedule_start
@@ -46,28 +46,28 @@ def simulate(
 
         owing_daily_hist.append(max(0, principal - offset))
 
-        if curr_date >= prev_interest_date + interest_period:
+        if curr_date >= prev_interest_date + interest_cycle_days:
             curr_interest = (
                 np.mean(owing_daily_hist)
                 * (
-                    (interest_period.days / float(365))
-                    + (interest_period.seconds / float(60 * 60 * 24 * 365))
+                    (interest_cycle_days.days / float(365))
+                    + (interest_cycle_days.seconds / float(60 * 60 * 24 * 365))
                 )
-                * (interest / 100)
+                * (interest_rate / 100)
             )
 
             owing_daily_hist = []
 
             principal = principal + curr_interest
-            prev_interest_date = prev_interest_date + interest_period
+            prev_interest_date = prev_interest_date + interest_cycle_days
 
         # repayment
 
-        if curr_date >= prev_repayment_date + repayment_period:
+        if curr_date >= prev_repayment_date + repayment_cycle_days:
             curr_repayment = min(principal, repayment)
 
             principal = principal - curr_repayment
-            prev_repayment_date = prev_repayment_date + repayment_period
+            prev_repayment_date = prev_repayment_date + repayment_cycle_days
 
         # data collection
 
