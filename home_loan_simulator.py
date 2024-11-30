@@ -49,7 +49,10 @@ def simulate(
         if curr_date >= prev_interest_date + interest_period:
             curr_interest = (
                 np.mean(owing_daily_hist)
-                * (interest_period.days / 365)
+                * (
+                    (interest_period.days / float(365))
+                    + (interest_period.seconds / float(60 * 60 * 24 * 365))
+                )
                 * (interest / 100)
             )
 
