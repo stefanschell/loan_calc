@@ -88,9 +88,18 @@ with col1:
 
     df_change = account_interpreter.get_change_overt_time(df_in, "Fixed", loan_start)
 
-    fig = px.scatter(df_change, x="DateSeries", y="Change", color="Label")
+    df_change = account_interpreter.add_interpolated_value(
+        df_change, "Interest", "Change", timedelta(days=20), timedelta(days=365 / 12)
+    )
+
+    df_change = account_interpreter.add_interpolated_value(
+        df_change, "Repayment", "Change", timedelta(days=20), timedelta(days=365 / 12)
+    )
+
+    fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig.update_yaxes(title_text="Change")
+    fig.update_layout(yaxis_range=[0, 1.3 * df_change["Change"].max()])
 
     st.plotly_chart(fig, key="p1")
 
@@ -99,9 +108,18 @@ with col2:
 
     df_change = account_interpreter.get_change_overt_time(df_in, "Variable", loan_start)
 
-    fig = px.scatter(df_change, x="DateSeries", y="Change", color="Label")
+    df_change = account_interpreter.add_interpolated_value(
+        df_change, "Interest", "Change", timedelta(days=20), timedelta(days=365 / 12)
+    )
+
+    df_change = account_interpreter.add_interpolated_value(
+        df_change, "Repayment", "Change", timedelta(days=20), timedelta(days=365 / 12)
+    )
+
+    fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig.update_yaxes(title_text="Change")
+    fig.update_layout(yaxis_range=[0, 1.3 * df_change["Change"].max()])
 
     st.plotly_chart(fig, key="p2")
 
