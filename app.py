@@ -9,7 +9,7 @@ from datetime import timedelta
 
 # get data
 
-loan_start = pd.to_datetime("2024-09-16")
+loan_start = pd.to_datetime("2024-10-16")
 fixed_loan_end = loan_start + timedelta(days=365 * 5)
 
 df_in = account_reader.get_dataframe(date_from=loan_start)
@@ -48,9 +48,11 @@ if not toggle_offset:
 
 st.dataframe(df_table)
 
-# Over time
+# Rertrospective
 
-st.write("## Over time")
+st.write("## Retrospective")
+
+st.write("### Balance")
 
 df_balance_fixed = account_interpreter.get_balance_over_time(
     df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
@@ -77,9 +79,35 @@ fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])
 
 st.plotly_chart(fig)
 
-# Calculation
+st.write("### Change")
 
-st.write("## Calculation")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.write("#### Fixed")
+
+    df_change = account_interpreter.get_change_overt_time(df_in, "Fixed", loan_start)
+
+    fig = px.scatter(df_change, x="DateSeries", y="Change", color="Label")
+    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig.update_yaxes(title_text="Change")
+
+    st.plotly_chart(fig, key="p1")
+
+with col2:
+    st.write("#### Variable")
+
+    df_change = account_interpreter.get_change_overt_time(df_in, "Variable", loan_start)
+
+    fig = px.scatter(df_change, x="DateSeries", y="Change", color="Label")
+    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig.update_yaxes(title_text="Change")
+
+    st.plotly_chart(fig, key="p2")
+
+# Prospective
+
+st.write("## Prospective")
 
 balance_fixed = account_interpreter.find_balance(df_balance_fixed, simulation_start)
 repayment_fixed = df_in[
@@ -127,7 +155,7 @@ with col1:
 
     # Fixed
 
-    st.write("### Fixed")
+    st.write("#### Fixed")
 
     with st.expander("Override variables"):
 
@@ -279,7 +307,7 @@ with col2:
 
     # Variable
 
-    st.write("### Variable")
+    st.write("#### Variable")
 
     with st.expander("Override variables"):
 

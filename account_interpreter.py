@@ -127,3 +127,40 @@ def add_interest_information(df):
     df = add_interest_information_for_account(df, "Fixed")
     df = add_interest_information_for_account(df, "Variable")
     return df
+
+
+def get_interest_over_time(df, account_name, exclude_up_to_date):
+    return_df = df[(df["AccountName"] == account_name) & (df["Label"] == "Interest")][
+        ["DateSeries", "Debit", "Label"]
+    ]
+    return_df = return_df.rename(columns={"Debit": "Change"})
+    return_df["Change"] = abs(return_df["Change"])
+    return_df = return_df[return_df["DateSeries"] > exclude_up_to_date]
+    return return_df
+
+
+def get_redraw_repayment_extrarepayment_over_time(df, account_name, exclude_up_to_date):
+    return_df = df[
+        (df["AccountName"] == account_name)
+        & (
+            (df["Label"] == "Redraw")
+            | (df["Label"] == "Repayment")
+            | (df["Label"] == "Extrarepayment")
+        )
+    ][["DateSeries", "Debit", "Credit", "Label"]]
+    return_df["Debit"] = return_df["Debit"].fillna(0)
+    return_df["Credit"] = return_df["Credit"].fillna(0)
+    return_df["Change"] = abs(return_df["Debit"]) + abs(return_df["Credit"])
+    return_df.drop("Debit", axis=1, inplace=True)
+    return_df.drop("Credit", axis=1, inplace=True)
+    return_df = return_df[return_df["DateSeries"] > exclude_up_to_date]
+    return return_df
+
+
+def get_change_overt_time(df, account_name, exclude_up_to_date):
+    df1 = get_interest_over_time(df, account_name, exclude_up_to_date)
+    df2 = get_redraw_repayment_extrarepayment_over_time(
+        df, account_name, exclude_up_to_date
+    )
+    df = pd.concat([df1, df2], axis=0)
+    return df

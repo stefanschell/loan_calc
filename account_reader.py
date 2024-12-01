@@ -35,9 +35,9 @@ def read_account_from_folder(path_loans, account_name, df):
 def label_row(row):
     if row["AccountName"] == "Offset":
         if row["Debit"] < 0:
-            return "Offset-"
+            return "OffsetDown"
         if row["Credit"] > 0:
-            return "Offset+"
+            return "OffsetUp"
     if row["Debit"] < 0:
         if "Interest" in row["Description"]:
             return "Interest"
@@ -47,7 +47,7 @@ def label_row(row):
         if "Repayment" in row["Description"]:
             return "Repayment"
         if row["Credit"] > 0:
-            return "Extra-Repayment"
+            return "Extrarepayment"
     else:
         return "Unknown"
 
