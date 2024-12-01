@@ -89,17 +89,28 @@ with col1:
     df_change = account_interpreter.get_change_overt_time(df_in, "Fixed", loan_start)
 
     df_change = account_interpreter.add_interpolated_value(
-        df_change, "Interest", "Change", timedelta(days=20), timedelta(days=365 / 12)
+        df_change,
+        "Interest",
+        "Change",
+        timespan_search=timedelta(days=35),
+        timespan_include=timedelta(days=20),
+        timespane_normalize=timedelta(days=365 / 12),
+        drop_original=False,
     )
 
     df_change = account_interpreter.add_interpolated_value(
-        df_change, "Repayment", "Change", timedelta(days=20), timedelta(days=365 / 12)
+        df_change,
+        "Repayment",
+        "Change",
+        timespan_search=timedelta(days=20),
+        timespan_include=timedelta(days=20),
+        timespane_normalize=timedelta(days=365 / 12),
+        drop_original=False,
     )
 
     fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig.update_yaxes(title_text="Change")
-    fig.update_layout(yaxis_range=[0, 1.3 * df_change["Change"].max()])
 
     st.plotly_chart(fig, key="p1")
 
@@ -109,17 +120,28 @@ with col2:
     df_change = account_interpreter.get_change_overt_time(df_in, "Variable", loan_start)
 
     df_change = account_interpreter.add_interpolated_value(
-        df_change, "Interest", "Change", timedelta(days=20), timedelta(days=365 / 12)
+        df_change,
+        "Interest",
+        "Change",
+        timespan_search=timedelta(days=35),
+        timespan_include=timedelta(days=20),
+        timespane_normalize=timedelta(days=365 / 12),
+        drop_original=False,
     )
 
     df_change = account_interpreter.add_interpolated_value(
-        df_change, "Repayment", "Change", timedelta(days=20), timedelta(days=365 / 12)
+        df_change,
+        "Repayment",
+        "Change",
+        timespan_search=timedelta(days=20),
+        timespan_include=timedelta(days=20),
+        timespane_normalize=timedelta(days=365 / 12),
+        drop_original=False,
     )
 
     fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig.update_yaxes(title_text="Change")
-    fig.update_layout(yaxis_range=[0, 1.3 * df_change["Change"].max()])
 
     st.plotly_chart(fig, key="p2")
 

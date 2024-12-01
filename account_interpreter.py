@@ -166,37 +166,74 @@ def get_change_overt_time(df, account_name, exclude_up_to_date):
     return df
 
 
-def add_interpolated_value(df, label, col_name, timespan_include, timespane_normalize):
+def add_interpolated_value(
+    df,
+    label,
+    col_name,
+    timespan_search,
+    timespan_include,
+    timespane_normalize,
+    drop_original,
+):
     new_rows = []
 
     for _, curr_row in df.iterrows():
         if curr_row["Label"] == label:
-            df_previous = df[
+            df_previous_search = df[
+                (df["Label"] == label)
+                & (df["DateSeries"] > curr_row["DateSeries"] - timespan_search)
+                & (df["DateSeries"] <= curr_row["DateSeries"])
+            ]
+            timespan_data_search = (
+                df_previous_search.iloc[-1]["DateSeries"]
+                - df_previous_search.iloc[0]["DateSeries"]
+            )
+            df_previous_include = df[
                 (df["Label"] == label)
                 & (df["DateSeries"] > curr_row["DateSeries"] - timespan_include)
                 & (df["DateSeries"] <= curr_row["DateSeries"])
             ]
-            timespan_data = (
-                df_previous.iloc[-1]["DateSeries"] - df_previous.iloc[0]["DateSeries"]
+            timespan_data_include = (
+                df_previous_include.iloc[-1]["DateSeries"]
+                - df_previous_include.iloc[0]["DateSeries"]
             )
 
             new_row = curr_row.to_dict()
 
-            if timespan_data.days > 0:
+            if timespan_data_include.days > 0:
                 new_row[col_name] = (
-                    df_previous[col_name].mean()
-                    / (timespan_data.days + timespan_data.seconds / (60 * 60 * 24))
+                    df_previous_include[col_name].mean()
+                    / (
+                        timespan_data_include.days
+                        + timespan_data_include.seconds / (60 * 60 * 24)
+                    )
                     * (
                         timespane_normalize.days
                         + timespane_normalize.seconds / (60 * 60 * 24)
                     )
                 )
             else:
-                new_row[col_name] = curr_row[col_name]
+                if timespan_data_search.days > 0 or timespan_data_search.seconds > 0:
+                    new_row[col_name] = (
+                        curr_row[col_name]
+                        / (
+                            timespan_data_search.days
+                            + timespan_data_search.seconds / (60 * 60 * 24)
+                        )
+                        * (
+                            timespane_normalize.days
+                            + timespane_normalize.seconds / (60 * 60 * 24)
+                        )
+                    )
+                else:
+                    new_row[col_name] = np.nan
 
             new_row["Label"] = curr_row["Label"] + "_interpolated"
             new_rows.append(new_row)
 
     df = pd.concat([df, pd.DataFrame(new_rows)])
+
+    if drop_original:
+        df = df[df["Label"] != label]
 
     return df
