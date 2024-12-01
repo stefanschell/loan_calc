@@ -26,9 +26,13 @@ simulation_start = df_in[
 st.set_page_config(layout="wide")
 st.title("Home Loan")
 
-# Transactions
+# Rertrospective
 
-st.write("## Transactions")
+st.write("## Retrospective")
+
+# - Transactions
+
+st.write("### Transactions")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -48,9 +52,7 @@ if not toggle_offset:
 
 st.dataframe(df_table)
 
-# Rertrospective
-
-st.write("## Retrospective")
+# - Balance
 
 st.write("### Balance")
 
@@ -78,6 +80,8 @@ fig.update_yaxes(title_text="Balance")
 fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])
 
 st.plotly_chart(fig)
+
+# - Change
 
 st.write("### Change")
 
@@ -193,7 +197,7 @@ col1, col2 = st.columns(2)
 
 with col1:
 
-    # Fixed
+    # - Fixed
 
     st.write("#### Fixed")
 
@@ -347,7 +351,7 @@ with col1:
 
 with col2:
 
-    # Variable
+    # - Variable
 
     st.write("#### Variable")
 
@@ -516,7 +520,7 @@ with col2:
 
     st.plotly_chart(fig2)
 
-# total
+# - total
 
 st.write("### Total")
 
