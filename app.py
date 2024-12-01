@@ -6,13 +6,46 @@ import account_interpreter
 import home_loan_simulator
 import home_loan_planner
 from datetime import timedelta
+import zipfile
+import os
+import shutil
 
-# get data
+# config
 
 loan_start = pd.to_datetime("2024-10-16")
 fixed_loan_end = loan_start + timedelta(days=365 * 5)
 
-df_in = account_reader.get_dataframe(date_from=loan_start)
+# setup
+
+st.set_page_config(layout="wide")
+st.title("Home Loan")
+
+# load files
+
+st.write("## Data")
+
+browser_file = st.file_uploader("Upload account statements")
+
+if browser_file is not None:
+    data_folder = "external_data"
+    if os.path.isdir(data_folder):
+        shutil.rmtree(data_folder)
+    with zipfile.ZipFile(browser_file, "r") as zip_file:
+        zip_file.extractall(data_folder)
+    st.write("Using uploaded account statements.")
+else:
+    data_folder = "internal_data"
+    if not os.path.isdir(data_folder):
+        st.write(
+            "No internal account statements available, please upload account statements instead."
+        )
+        st.stop()
+    else:
+        st.write("Using internal account statements because none were uploaded.")
+
+# get data
+
+df_in = account_reader.get_dataframe(data_folder, date_from=loan_start)
 df_in = account_interpreter.add_interest_information(df_in)
 
 # assuming that the last interest or repayment event is the start of the simulation
@@ -21,12 +54,7 @@ simulation_start = df_in[
     & ((df_in["Label"] == "Interest") | (df_in["Label"] == "Repayment"))
 ]["DateSeries"].iloc[-1]
 
-# setup
-
-st.set_page_config(layout="wide")
-st.title("Home Loan")
-
-# Rertrospective
+# Retrospective
 
 st.write("## Retrospective")
 

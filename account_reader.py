@@ -52,8 +52,8 @@ def label_row(row):
         return "Unknown"
 
 
-def read_accounts_from_folders(date_from=None, date_to=None):
-    path_loans = "Loans"
+def read_accounts_from_folders(data_folder, date_from=None, date_to=None):
+    path_loans = join(data_folder, "Loans")
 
     df = None
     df = read_account_from_folder(path_loans, "Fixed", df)
@@ -79,6 +79,6 @@ def read_accounts_from_folders(date_from=None, date_to=None):
     return df
 
 
-def get_dataframe(date_from=None, date_to=None):
-    df = read_accounts_from_folders(date_from, date_to)
+def get_dataframe(data_folder, date_from=None, date_to=None):
+    df = read_accounts_from_folders(data_folder, date_from, date_to)
     return df
