@@ -58,41 +58,56 @@ simulation_start = df_in[
 
 st.write("## Retrospective")
 
+st.write(
+    "Data shown in this section uses the account statements and displays information about the past only."
+)
+
 # - Transactions
 
 st.write("### Transactions")
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    toggle_fixed = st.toggle("Fixed", True)
-with col2:
-    toggle_variable = st.toggle("Variable", True)
-with col3:
-    toggle_offset = st.toggle("Offset", True)
+st.write("Transactions to and from the accounts: Fixed, Variable, Offset")
 
-df_table = pd.DataFrame(df_in)
-if not toggle_fixed:
-    df_table = df_table[df_table["AccountName"] != "Fixed"]
-if not toggle_variable:
-    df_table = df_table[df_table["AccountName"] != "Variable"]
-if not toggle_offset:
-    df_table = df_table[df_table["AccountName"] != "Offset"]
+with st.expander("View transactions"):
 
-st.dataframe(
-    df_table.style.format(
-        {
-            "Credit": "${:,.0f}",
-            "Debit": "${:,.0f}",
-            "Balance": "${:,.0f}",
-            "ApproxInterest": "{:,.4f}%",
-            "DateSeries": lambda x: x.strftime("%d/%m/%Y"),
-        }
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        toggle_fixed = st.toggle("Fixed", True)
+    with col2:
+        toggle_variable = st.toggle("Variable", True)
+    with col3:
+        toggle_offset = st.toggle("Offset", True)
+
+    df_table = pd.DataFrame(df_in)
+    if not toggle_fixed:
+        df_table = df_table[df_table["AccountName"] != "Fixed"]
+    if not toggle_variable:
+        df_table = df_table[df_table["AccountName"] != "Variable"]
+    if not toggle_offset:
+        df_table = df_table[df_table["AccountName"] != "Offset"]
+
+    st.dataframe(
+        df_table.style.format(
+            {
+                "Credit": "${:,.0f}",
+                "Debit": "${:,.0f}",
+                "Balance": "${:,.0f}",
+                "ApproxInterest": "{:,.3f}%",
+                "InterestPeriod": lambda x: (
+                    str(x.days + (x.seconds / (60 * 60 * 24))) + " days"
+                    if not pd.isnull(x)
+                    else ""
+                ),
+                "DateSeries": lambda x: x.strftime("%d/%m/%Y"),
+            }
+        )
     )
-)
 
-# - Balance
+# - Balance over time
 
-st.write("### Balance")
+st.write("### Balance over time")
+
+st.write("Accounts from beginning of loan till now.")
 
 df_balance_fixed = account_interpreter.get_balance_over_time(
     df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
@@ -114,14 +129,16 @@ df_plot = pd.concat(
 
 fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="AccountName")
 fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-fig.update_yaxes(title_text="Balance")
+fig.update_yaxes(title_text="Balance ($)")
 fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])
 
 st.plotly_chart(fig)
 
-# - Change
+# - Change of balance over time
 
-st.write("### Change")
+st.write("### Change of balance over time")
+
+st.write("Accounts from beginning of loan till now.")
 
 col1, col2 = st.columns(2)
 
@@ -151,8 +168,9 @@ with col1:
     )
 
     fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
+    fig.update_layout(title={"text": "Fixed", "x": 0.5})
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig.update_yaxes(title_text="Change")
+    fig.update_yaxes(title_text="Change ($)")
 
     st.plotly_chart(fig, key="p1")
 
@@ -182,14 +200,19 @@ with col2:
     )
 
     fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
+    fig.update_layout(title={"text": "Variable", "x": 0.5})
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig.update_yaxes(title_text="Change")
+    fig.update_yaxes(title_text="Change ($)")
 
     st.plotly_chart(fig, key="p2")
 
 # Prospective
 
 st.write("## Prospective")
+
+st.write(
+    "Data shown in this section uses the account statements to extract balances, base repayments and interest rates. It then projects the accounts into the future, based on extra repayments adjustable by the user."
+)
 
 balance_fixed = account_interpreter.find_balance(df_balance_fixed, simulation_start)
 repayment_fixed = df_in[
@@ -214,22 +237,26 @@ balance_offset = account_interpreter.find_balance(df_balance_offset, simulation_
 repayment_cycle = "fortnightly"
 interest_cycle = "monthly"
 
-with st.expander("Overide interest and repayment cycle"):
+_, col2, _ = st.columns(3)
 
-    interest_cycle_sel = st.selectbox(
-        "Interest cycle override", ("fortnightly", "monthly"), index=1
-    )
-    if interest_cycle_sel is not None:
-        interest_cycle = interest_cycle_sel
+with col2:
 
-    repayment_cycle_sel = st.selectbox(
-        "Repayment cycle override", ("fortnightly", "monthly"), index=0
-    )
-    if repayment_cycle_sel is not None:
-        repayment_cycle = repayment_cycle_sel
+    with st.expander("Overide interest and repayment cycle"):
 
-st.write("Interest cycle: " + interest_cycle)
-st.write("Repayment cycle: " + repayment_cycle)
+        interest_cycle_sel = st.selectbox(
+            "Interest cycle override", ("fortnightly", "monthly"), index=1
+        )
+        if interest_cycle_sel is not None:
+            interest_cycle = interest_cycle_sel
+
+        repayment_cycle_sel = st.selectbox(
+            "Repayment cycle override", ("fortnightly", "monthly"), index=0
+        )
+        if repayment_cycle_sel is not None:
+            repayment_cycle = repayment_cycle_sel
+
+    st.write("Interest cycle: " + interest_cycle)
+    st.write("Repayment cycle: " + repayment_cycle)
 
 col1, col2 = st.columns(2)
 
@@ -245,14 +272,14 @@ with col1:
 
         if toggle_balance_fixed:
             balance_fixed = st.number_input(
-                "Balance override ($): ", 0, 2000000, 625000, 1000, key="k1b"
+                "Balance override ($)", 0, 2000000, 625000, 1000, key="k1b"
             )
 
-        toggle_repayment_fixed = st.toggle("Override repayment", False, key="k1c")
+        toggle_repayment_fixed = st.toggle("Override base repayment", False, key="k1c")
 
         if toggle_repayment_fixed:
             repayment_fixed = st.number_input(
-                "Repayment override (" + repayment_cycle + ", $): ",
+                ":orange[Base repayment override (" + repayment_cycle + ", $)]",
                 0.0,
                 10000.0,
                 1812.84,
@@ -264,18 +291,24 @@ with col1:
 
         if toggle_interest_fixed:
             interest_fixed = st.number_input(
-                "Interest rate override (%): ", 0.1, 15.0, 5.74, key="k1f"
+                ":red[Interest rate override (%)]", 0.1, 15.0, 5.74, key="k1f"
             )
 
     st.write("Balance: " + f"${balance_fixed:,.0f}")
-    st.write("Repayment (" + repayment_cycle + "): " + f"${repayment_fixed:,.0f}")
+    st.write(
+        ":orange[Base repayment ("
+        + repayment_cycle
+        + "): "
+        + f"${repayment_fixed:,.0f}]"
+    )
 
     if repayment_cycle == "fortnightly":
         st.write(
-            "Repayment (monthly): " + f"${(repayment_fixed / 14 * (365 / 12)):,.0f}"
+            ":orange[Base repayment (monthly): "
+            + f"${(repayment_fixed / 14 * (365 / 12)):,.0f}]"
         )
 
-    st.write("Interest: " + f"{interest_fixed:.4f}%")
+    st.write(":red[Interest: " + f"{interest_fixed:.3f}%]")
     st.write("Offset: None")
 
     with st.expander("Theoretical plan (for information only, not used)"):
@@ -297,7 +330,7 @@ with col1:
         )
 
     extra_slider_fixed = st.slider(
-        "Extra-Repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly: ",
+        ":green[Extra repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly]",
         0,
         800,
         800,
@@ -308,7 +341,9 @@ with col1:
     repayment_extra_fixed = extra_slider_fixed
     if repayment_cycle == "fortnightly":
         repayment_extra_fixed = repayment_extra_fixed / (365 / 12) * 14
-        st.write("Extra-Repayment (fortnightly): " + f"${repayment_extra_fixed:,.0f}")
+        st.write(
+            ":green[Extra repayment (fortnightly): " + f"${repayment_extra_fixed:,.0f}]"
+        )
 
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
@@ -330,31 +365,33 @@ with col1:
         simulation_start,
     )
 
-    st.write(
-        df_schedule_fixed.style.format(
-            {
-                "Months": "{:,.2f}",
-                "Years": "{:,.2f}",
-                "Date": lambda x: x.strftime("%d/%m/%Y"),
-                "Repayment": "${:,.0f}",
-                "Interest": "${:,.0f}",
-                "Principal": "${:,.0f}",
-            }
+    with st.expander("View payment schedule"):
+
+        st.write(
+            df_schedule_fixed.style.format(
+                {
+                    "Months": "{:,.2f}",
+                    "Years": "{:,.2f}",
+                    "Date": lambda x: x.strftime("%d/%m/%Y"),
+                    "Repayment": "${:,.0f}",
+                    "Interest": "${:,.0f}",
+                    "Principal": "${:,.0f}",
+                }
+            )
         )
-    )
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["Years"]
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
 
-    st.write("Years to go: " + f"{total_years_fixed:.3f}")
-    st.write("Total repayments to go: " + f"${total_repayments_fixed:,.0f}")
+    st.write("Years to go: " + f"{total_years_fixed:.2f}")
+    st.write(":blue[Total repayment to go: " + f"${total_repayments_fixed:,.0f}]")
     st.write(
-        "Total interest to go: "
+        ":red[Interest to go: "
         + f"${total_interest_fixed:,.0f}"
         + " ("
         + f"{(100 * total_interest_fixed / total_repayments_fixed):.1f}%"
-        + ")"
+        + ")]"
     )
 
     end_of_fixed_loan_balance = df_schedule_fixed[
@@ -364,8 +401,8 @@ with col1:
     if len(end_of_fixed_loan_balance) > 0:
         end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
         st.write(
-            "Balance at end of fixed loan ("
-            + str(fixed_loan_end)
+            "Fixed loan balance at end of fixed loan term ("
+            + fixed_loan_end.strftime("%d/%m/%Y")
             + "): "
             + f"${end_of_fixed_loan_balance:,.0f}"
         )
@@ -374,10 +411,16 @@ with col1:
 
     st.write(".")
 
-    fig1 = px.line(df_schedule_fixed, x="Date", y="Principal")
-    fig1.add_trace(px.line(df_schedule_fixed_wo_extra, x="Date", y="Principal").data[0])
+    df_schedule_fixed["Schedule"] = "Fast"
+    df_schedule_fixed_wo_extra["Schedule"] = "Slow"
+    df_schedule_fixed_merged = pd.concat(
+        [df_schedule_fixed, df_schedule_fixed_wo_extra]
+    )
+
+    fig1 = px.line(df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule")
+    fig1.update_layout(title={"text": "Fixed", "x": 0.5})
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig1.update_yaxes(title_text="Principal")
+    fig1.update_yaxes(title_text="Principal ($)")
 
     st.plotly_chart(fig1)
 
@@ -389,12 +432,18 @@ with col1:
         interest_plot_fixed_wo_extra["Interest"] > 0
     ]
 
-    fig2 = px.line(interest_plot_fixed, x="Years", y="Interest")
-    fig2.add_trace(
-        px.line(interest_plot_fixed_wo_extra, x="Years", y="Interest").data[0]
+    interest_plot_fixed["Schedule"] = "Fast"
+    interest_plot_fixed_wo_extra["Schedule"] = "Slow"
+    interest_plot_fixed_merged = pd.concat(
+        [interest_plot_fixed, interest_plot_fixed_wo_extra]
     )
+
+    fig2 = px.line(
+        interest_plot_fixed_merged, x="Years", y="Interest", color="Schedule"
+    )
+    fig2.update_layout(title={"text": "Fixed", "x": 0.5})
     fig2.update_xaxes(title_text="Years")
-    fig2.update_yaxes(title_text="Interest")
+    fig2.update_yaxes(title_text="Interest ($)")
 
     st.plotly_chart(fig2)
 
@@ -413,11 +462,13 @@ with col2:
                 "Balance override ($): ", 0, 2000000, 625000, 1000, key="k2b"
             )
 
-        toggle_repayment_variable = st.toggle("Override repayment", False, key="k2c")
+        toggle_repayment_variable = st.toggle(
+            "Override base repayment", False, key="k2c"
+        )
 
         if toggle_repayment_variable:
             repayment_variable = st.number_input(
-                "Repayment override (" + repayment_cycle + ", $): ",
+                ":orange[Base repayment override (" + repayment_cycle + ", $)]",
                 0.0,
                 10000.0,
                 1883.17,
@@ -429,25 +480,31 @@ with col2:
 
         if toggle_interest_variable:
             interest_variable = st.number_input(
-                "Interest rate override (%): ", 0.1, 15.0, 6.14, key="k2f"
+                ":red[Interest rate override (%)]", 0.1, 15.0, 6.14, key="k2f"
             )
 
         toggle_offset = st.toggle("Override offset", False, key="k2g")
 
         if toggle_offset:
             balance_offset = st.number_input(
-                "Offset overide ($): ", 0, 300000, 100000, 1000, key="k2h"
+                "Offset overide ($)", 0, 300000, 100000, 1000, key="k2h"
             )
 
     st.write("Balance: " + f"${balance_variable:,.0f}")
-    st.write("Repayment (" + repayment_cycle + "): " + f"${repayment_variable:,.0f}")
+    st.write(
+        ":orange[Base repayment ("
+        + repayment_cycle
+        + "): "
+        + f"${repayment_variable:,.0f}]"
+    )
 
     if repayment_cycle == "fortnightly":
         st.write(
-            "Repayment (monthly): " + f"${(repayment_variable / 14 * (365 / 12)):,.0f}"
+            ":orange[Base repayment (monthly): "
+            + f"${(repayment_variable / 14 * (365 / 12)):,.0f}]"
         )
 
-    st.write("Interest: " + f"{interest_variable:.4f}%")
+    st.write(":red[Interest: " + f"{interest_variable:.3f}%]")
     st.write("Offset: " + f"${balance_offset:,.0f}")
 
     with st.expander("Theoretical plan (for information only, not used)"):
@@ -469,14 +526,15 @@ with col2:
         )
 
     extra_slider_variable = st.slider(
-        "Extra-Repayment (monthly): ", 0, 10000, 3000, 500, key="k2j"
+        ":green[Extra repayment (monthly)]", 0, 10000, 3000, 500, key="k2j"
     )
 
     repayment_extra_variable = extra_slider_variable
     if repayment_cycle == "fortnightly":
         repayment_extra_variable = repayment_extra_variable / (365 / 12) * 14
         st.write(
-            "Extra-Repayment (fortnightly): " + f"${repayment_extra_variable:,.0f}"
+            ":green[Extra repayment (fortnightly): "
+            + f"${repayment_extra_variable:,.0f}]"
         )
 
     df_schedule_variable = home_loan_simulator.simulate(
@@ -499,31 +557,33 @@ with col2:
         simulation_start,
     )
 
-    st.write(
-        df_schedule_variable.style.format(
-            {
-                "Months": "{:,.2f}",
-                "Years": "{:,.2f}",
-                "Date": lambda x: x.strftime("%d/%m/%Y"),
-                "Repayment": "${:,.0f}",
-                "Interest": "${:,.0f}",
-                "Principal": "${:,.0f}",
-            }
+    with st.expander("View payment schedule"):
+
+        st.write(
+            df_schedule_variable.style.format(
+                {
+                    "Months": "{:,.2f}",
+                    "Years": "{:,.2f}",
+                    "Date": lambda x: x.strftime("%d/%m/%Y"),
+                    "Repayment": "${:,.0f}",
+                    "Interest": "${:,.0f}",
+                    "Principal": "${:,.0f}",
+                }
+            )
         )
-    )
 
     total_years_variable = df_schedule_variable.iloc[-1]["Years"]
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
-    st.write("Years to go: " + f"{total_years_variable:.3f}")
-    st.write("Total repayments to go: " + f"${total_repayments_variable:,.2f}")
+    st.write("Years to go: " + f"{total_years_variable:.2f}")
+    st.write(":blue[Total repayment to go: " + f"${total_repayments_variable:,.2f}]")
     st.write(
-        "Total interest to go: "
-        + f"${total_interest_variable:,.2f}"
+        ":red[Interest to go: "
+        + f"${total_interest_variable:,.0f}"
         + " ("
         + f"{(100 * total_interest_variable / total_repayments_variable):.1f}"
-        + "%)"
+        + "%)]"
     )
 
     end_of_fixed_loan_balance = df_schedule_variable[
@@ -533,10 +593,10 @@ with col2:
     if len(end_of_fixed_loan_balance) > 0:
         end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
         st.write(
-            "Balance at end of fixed loan ("
-            + str(fixed_loan_end)
+            "Variable loan balance at end of fixed loan term ("
+            + fixed_loan_end.strftime("%d/%m/%Y")
             + "): "
-            + f"${end_of_fixed_loan_balance:,.2f}"
+            + f"${end_of_fixed_loan_balance:,.0f}"
         )
     else:
         st.write("Principal reached zero before end of fixed loan.")
@@ -549,15 +609,21 @@ with col2:
         principal_smaller_offset = principal_smaller_offset.iloc[0]
         st.write(
             "Date when principal smaller than offset for the first time: "
-            + str(principal_smaller_offset["Date"])
+            + principal_smaller_offset["Date"].strftime("%d/%m/%Y")
         )
 
-    fig1 = px.line(df_schedule_variable, x="Date", y="Principal")
-    fig1.add_trace(
-        px.line(df_schedule_variable_wo_extra, x="Date", y="Principal").data[0]
+    df_schedule_variable["Schedule"] = "Fast"
+    df_schedule_variable_wo_extra["Schedule"] = "Slow"
+    df_schedule_variable_merged = pd.concat(
+        [df_schedule_variable, df_schedule_variable_wo_extra]
     )
+
+    fig1 = px.line(
+        df_schedule_variable_merged, x="Date", y="Principal", color="Schedule"
+    )
+    fig1.update_layout(title={"text": "Variable", "x": 0.5})
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig1.update_yaxes(title_text="Principal")
+    fig1.update_yaxes(title_text="Principal ($)")
 
     st.plotly_chart(fig1)
 
@@ -571,28 +637,47 @@ with col2:
         interest_plot_variable_wo_extra["Interest"] > 0
     ]
 
-    fig2 = px.line(interest_plot_variable, x="Years", y="Interest")
-    fig2.add_trace(
-        px.line(interest_plot_variable_wo_extra, x="Years", y="Interest").data[0]
+    interest_plot_variable["Schedule"] = "Fast"
+    interest_plot_variable_wo_extra["Schedule"] = "Slow"
+    interest_plot_variable_merged = pd.concat(
+        [interest_plot_variable, interest_plot_variable_wo_extra]
     )
+
+    fig2 = px.line(
+        interest_plot_variable_merged, x="Years", y="Interest", color="Schedule"
+    )
+    fig2.update_layout(title={"text": "Variable", "x": 0.5})
     fig2.update_xaxes(title_text="Years")
-    fig2.update_yaxes(title_text="Interest")
+    fig2.update_yaxes(title_text="Interest($)")
 
     st.plotly_chart(fig2)
 
 # - total
 
-st.write("### Total")
+_, col2, _ = st.columns(3)
 
-total_wo_extra = repayment_fixed + repayment_variable
-total_extra = repayment_extra_fixed + repayment_extra_variable
+with col2:
 
-if repayment_cycle == "fortnightly":
-    total_wo_extra = total_wo_extra / 14 * (365 / 12)
-    total_extra = total_extra / 14 * (365 / 12)
+    st.write("### Fixed and Variable combined")
 
-total = total_wo_extra + total_extra
+    total_wo_extra = repayment_fixed + repayment_variable
+    total_extra = repayment_extra_fixed + repayment_extra_variable
 
-st.write("Total base payment (monthly): " + f"${total_wo_extra:,.0f}")
-st.write("Total extra payment (monthly): " + f"${total_extra:,.0f}")
-st.write("Total payment (monthly): " + f"${total:,.0f}")
+    if repayment_cycle == "fortnightly":
+        total_wo_extra = total_wo_extra / 14 * (365 / 12)
+        total_extra = total_extra / 14 * (365 / 12)
+
+    total = total_wo_extra + total_extra
+
+    st.write(":orange[Base repayment (monthly): " + f"${total_wo_extra:,.0f}]")
+    st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
+    st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
+
+    st.write(
+        ":blue[Total repayment to go: "
+        + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
+    )
+    st.write(
+        ":red[Interest to go: "
+        + f"${(total_interest_fixed+total_interest_variable):,.0f}]"
+    )
