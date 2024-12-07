@@ -78,7 +78,17 @@ if not toggle_variable:
 if not toggle_offset:
     df_table = df_table[df_table["AccountName"] != "Offset"]
 
-st.dataframe(df_table)
+st.dataframe(
+    df_table.style.format(
+        {
+            "Credit": "${:,.0f}",
+            "Debit": "${:,.0f}",
+            "Balance": "${:,.0f}",
+            "ApproxInterest": "{:,.4f}%",
+            "DateSeries": lambda x: x.strftime("%d/%m/%Y"),
+        }
+    )
+)
 
 # - Balance
 
@@ -235,14 +245,14 @@ with col1:
 
         if toggle_balance_fixed:
             balance_fixed = st.number_input(
-                "Balance override: ", 0, 2000000, 625000, 1000, key="k1b"
+                "Balance override ($): ", 0, 2000000, 625000, 1000, key="k1b"
             )
 
         toggle_repayment_fixed = st.toggle("Override repayment", False, key="k1c")
 
         if toggle_repayment_fixed:
             repayment_fixed = st.number_input(
-                "Repayment override (" + repayment_cycle + "): ",
+                "Repayment override (" + repayment_cycle + ", $): ",
                 0.0,
                 10000.0,
                 1812.84,
@@ -254,15 +264,15 @@ with col1:
 
         if toggle_interest_fixed:
             interest_fixed = st.number_input(
-                "Interest rate override: ", 0.1, 15.0, 5.74, key="k1f"
+                "Interest rate override (%): ", 0.1, 15.0, 5.74, key="k1f"
             )
 
-    st.write("Balance: " + f"${balance_fixed:,.2f}")
-    st.write("Repayment (" + repayment_cycle + "): " + f"${repayment_fixed:,.2f}")
+    st.write("Balance: " + f"${balance_fixed:,.0f}")
+    st.write("Repayment (" + repayment_cycle + "): " + f"${repayment_fixed:,.0f}")
 
     if repayment_cycle == "fortnightly":
         st.write(
-            "Repayment (monthly): " + f"${(repayment_fixed / 14 * (365 / 12)):,.2f}"
+            "Repayment (monthly): " + f"${(repayment_fixed / 14 * (365 / 12)):,.0f}"
         )
 
     st.write("Interest: " + f"{interest_fixed:.4f}%")
@@ -283,7 +293,7 @@ with col1:
             "Repayment ("
             + repayment_cycle
             + "), for identical repayment and interest cycles: "
-            + f"${planner_fixed.c0:,.2f}"
+            + f"${planner_fixed.c0:,.0f}"
         )
 
     extra_slider_fixed = st.slider(
@@ -298,7 +308,7 @@ with col1:
     repayment_extra_fixed = extra_slider_fixed
     if repayment_cycle == "fortnightly":
         repayment_extra_fixed = repayment_extra_fixed / (365 / 12) * 14
-        st.write("Extra-Repayment (fortnightly): " + f"${repayment_extra_fixed:,.2f}")
+        st.write("Extra-Repayment (fortnightly): " + f"${repayment_extra_fixed:,.0f}")
 
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
@@ -320,17 +330,28 @@ with col1:
         simulation_start,
     )
 
-    st.write(df_schedule_fixed)
+    st.write(
+        df_schedule_fixed.style.format(
+            {
+                "Months": "{:,.2f}",
+                "Years": "{:,.2f}",
+                "Date": lambda x: x.strftime("%d/%m/%Y"),
+                "Repayment": "${:,.0f}",
+                "Interest": "${:,.0f}",
+                "Principal": "${:,.0f}",
+            }
+        )
+    )
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["Years"]
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
 
     st.write("Years to go: " + f"{total_years_fixed:.3f}")
-    st.write("Total repayments to go: " + f"${total_repayments_fixed:,.2f}")
+    st.write("Total repayments to go: " + f"${total_repayments_fixed:,.0f}")
     st.write(
         "Total interest to go: "
-        + f"${total_interest_fixed:,.2f}"
+        + f"${total_interest_fixed:,.0f}"
         + " ("
         + f"{(100 * total_interest_fixed / total_repayments_fixed):.1f}%"
         + ")"
@@ -346,7 +367,7 @@ with col1:
             "Balance at end of fixed loan ("
             + str(fixed_loan_end)
             + "): "
-            + f"${end_of_fixed_loan_balance:,.2f}"
+            + f"${end_of_fixed_loan_balance:,.0f}"
         )
     else:
         st.write("Principal reached zero before end of fixed loan.")
@@ -389,14 +410,14 @@ with col2:
 
         if toggle_balance_variable:
             balance_variable = st.number_input(
-                "Balance override: ", 0, 2000000, 625000, 1000, key="k2b"
+                "Balance override ($): ", 0, 2000000, 625000, 1000, key="k2b"
             )
 
         toggle_repayment_variable = st.toggle("Override repayment", False, key="k2c")
 
         if toggle_repayment_variable:
             repayment_variable = st.number_input(
-                "Repayment override (" + repayment_cycle + "): ",
+                "Repayment override (" + repayment_cycle + ", $): ",
                 0.0,
                 10000.0,
                 1883.17,
@@ -408,26 +429,26 @@ with col2:
 
         if toggle_interest_variable:
             interest_variable = st.number_input(
-                "Interest rate override: ", 0.1, 15.0, 6.14, key="k2f"
+                "Interest rate override (%): ", 0.1, 15.0, 6.14, key="k2f"
             )
 
         toggle_offset = st.toggle("Override offset", False, key="k2g")
 
         if toggle_offset:
             balance_offset = st.number_input(
-                "Offset overide: ", 0, 300000, 100000, 1000, key="k2h"
+                "Offset overide ($): ", 0, 300000, 100000, 1000, key="k2h"
             )
 
-    st.write("Balance: " + f"${balance_variable:,.2f}")
-    st.write("Repayment (" + repayment_cycle + "): " + f"${repayment_variable:,.2f}")
+    st.write("Balance: " + f"${balance_variable:,.0f}")
+    st.write("Repayment (" + repayment_cycle + "): " + f"${repayment_variable:,.0f}")
 
     if repayment_cycle == "fortnightly":
         st.write(
-            "Repayment (monthly): " + f"${(repayment_variable / 14 * (365 / 12)):,.2f}"
+            "Repayment (monthly): " + f"${(repayment_variable / 14 * (365 / 12)):,.0f}"
         )
 
     st.write("Interest: " + f"{interest_variable:.4f}%")
-    st.write("Offset: " + f"${balance_offset:,.2f}")
+    st.write("Offset: " + f"${balance_offset:,.0f}")
 
     with st.expander("Theoretical plan (for information only, not used)"):
         years_planner_variable = st.number_input("Years", 1, 40, 25, 1, key="k2i")
@@ -444,7 +465,7 @@ with col2:
             "Repayment ("
             + repayment_cycle
             + "), for identical repayment and interest cycles: "
-            + f"${planner_variable.c0:,.2f}"
+            + f"${planner_variable.c0:,.0f}"
         )
 
     extra_slider_variable = st.slider(
@@ -455,7 +476,7 @@ with col2:
     if repayment_cycle == "fortnightly":
         repayment_extra_variable = repayment_extra_variable / (365 / 12) * 14
         st.write(
-            "Extra-Repayment (fortnightly): " + f"${repayment_extra_variable:,.2f}"
+            "Extra-Repayment (fortnightly): " + f"${repayment_extra_variable:,.0f}"
         )
 
     df_schedule_variable = home_loan_simulator.simulate(
@@ -478,7 +499,18 @@ with col2:
         simulation_start,
     )
 
-    st.write(df_schedule_variable)
+    st.write(
+        df_schedule_variable.style.format(
+            {
+                "Months": "{:,.2f}",
+                "Years": "{:,.2f}",
+                "Date": lambda x: x.strftime("%d/%m/%Y"),
+                "Repayment": "${:,.0f}",
+                "Interest": "${:,.0f}",
+                "Principal": "${:,.0f}",
+            }
+        )
+    )
 
     total_years_variable = df_schedule_variable.iloc[-1]["Years"]
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
@@ -490,7 +522,7 @@ with col2:
         "Total interest to go: "
         + f"${total_interest_variable:,.2f}"
         + " ("
-        + f"{(100 * total_interest_variable / total_repayments_variable):.1f}%"
+        + f"{(100 * total_interest_variable / total_repayments_variable):.1f}"
         + "%)"
     )
 
@@ -561,6 +593,6 @@ if repayment_cycle == "fortnightly":
 
 total = total_wo_extra + total_extra
 
-st.write("Total base payment (monthly): " + f"${total_wo_extra:,.2f}")
-st.write("Total extra payment (monthly): " + f"${total_extra:,.2f}")
-st.write("Total payment (monthly): " + f"${total:,.2f}")
+st.write("Total base payment (monthly): " + f"${total_wo_extra:,.0f}")
+st.write("Total extra payment (monthly): " + f"${total_extra:,.0f}")
+st.write("Total payment (monthly): " + f"${total:,.0f}")
