@@ -199,6 +199,16 @@ with col2:
         drop_original=False,
     )
 
+    df_change = account_interpreter.add_interpolated_value(
+        df_change,
+        "Extrarepayment",
+        "Change",
+        timespan_search=timedelta(days=35),
+        timespan_include=timedelta(days=20),
+        timespane_normalize=timedelta(days=365 / 12),
+        drop_original=False,
+    )
+
     fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
     fig.update_layout(title={"text": "Variable", "x": 0.5})
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
