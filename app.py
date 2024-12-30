@@ -308,7 +308,7 @@ with col1:
 
 with col2:
     st.write(
-        ":green[Variable loan extra repapayment (monthly): "
+        ":green[Variable loan extra repayment (monthly): "
         + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
     )
 
