@@ -123,8 +123,16 @@ df_balance_total = account_interpreter.get_total_balance_over_time(
     df_in, add_col_with_account_name=True, return_positive_balance=True
 )
 
+df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
+
 df_plot = pd.concat(
-    [df_balance_fixed, df_balance_variable, df_balance_offset, df_balance_total]
+    [
+        df_balance_fixed,
+        df_balance_variable,
+        df_balance_offset,
+        df_balance_total,
+        df_balance_total_fitted,
+    ]
 )
 
 fig = px.line(
