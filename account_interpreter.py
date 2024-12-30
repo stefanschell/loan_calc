@@ -233,7 +233,6 @@ def add_interpolated_value(
                 else:
                     new_row[col_name] = np.nan
 
-            new_row["Label"] = curr_row["Label"] + "_interpolated"
             new_rows.append(new_row)
 
     df = pd.concat([df, pd.DataFrame(new_rows)])

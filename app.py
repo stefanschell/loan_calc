@@ -127,11 +127,12 @@ df_plot = pd.concat(
     [df_balance_fixed, df_balance_variable, df_balance_offset, df_balance_total]
 )
 
-fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="AccountName")
+fig = px.line(
+    df_plot, x="DateSeries", y="Balance", color="AccountName", symbol="AccountName"
+)
 fig.update_layout(title={"text": "Balance over time", "x": 0.5, "xanchor": "center"})
 fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
 fig.update_yaxes(title_text="Balance ($)")
-fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])
 
 st.plotly_chart(fig)
 
@@ -169,11 +170,12 @@ with col1:
         drop_original=False,
     )
 
-    fig = px.scatter(
+    fig = px.line(
         df_change[df_change["interpolated"] == False],
         x="DateSeries",
         y=["Change"],
         color="Label",
+        symbol="Label",
     )
     fig.update_layout(
         title={"text": "Raw change / Fixed", "x": 0.5, "xanchor": "center"}
@@ -238,11 +240,12 @@ with col2:
         drop_original=False,
     )
 
-    fig = px.scatter(
+    fig = px.line(
         df_change[df_change["interpolated"] == False],
         x="DateSeries",
         y=["Change"],
         color="Label",
+        symbol="Label",
     )
     fig.update_layout(
         title={"text": "Raw change / Variable", "x": 0.5, "xanchor": "center"}
