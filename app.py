@@ -128,6 +128,7 @@ df_plot = pd.concat(
 )
 
 fig = px.scatter(df_plot, x="DateSeries", y="Balance", color="AccountName")
+fig.update_layout(title={"text": "Balance over time", "x": 0.5, "xanchor": "center"})
 fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
 fig.update_yaxes(title_text="Balance ($)")
 fig.update_layout(yaxis_range=[0, 1.3 * df_balance_total["Balance"].max()])
@@ -155,6 +156,7 @@ with col1:
         timespan_include=timedelta(days=20),
         timespane_normalize=timedelta(days=365 / 12),
         drop_original=False,
+        is_first_call=True,
     )
 
     df_change = account_interpreter.add_interpolated_value(
@@ -167,12 +169,38 @@ with col1:
         drop_original=False,
     )
 
-    fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
-    fig.update_layout(title={"text": "Fixed", "x": 0.5})
+    fig = px.scatter(
+        df_change[df_change["interpolated"] == False],
+        x="DateSeries",
+        y=["Change"],
+        color="Label",
+    )
+    fig.update_layout(
+        title={"text": "Raw change / Fixed", "x": 0.5, "xanchor": "center"}
+    )
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig.update_yaxes(title_text="Change ($)")
 
     st.plotly_chart(fig, key="p1")
+
+    fig = px.line(
+        df_change[df_change["interpolated"] == True],
+        x="DateSeries",
+        y=["Change"],
+        color="Label",
+        symbol="Label",
+    )
+    fig.update_layout(
+        title={
+            "text": "Interpolated change (monthly) / Fixed",
+            "x": 0.5,
+            "xanchor": "center",
+        }
+    )
+    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig.update_yaxes(title_text="Change ($)")
+
+    st.plotly_chart(fig, key="p2")
 
 with col2:
     st.write("#### Variable")
@@ -187,6 +215,7 @@ with col2:
         timespan_include=timedelta(days=20),
         timespane_normalize=timedelta(days=365 / 12),
         drop_original=False,
+        is_first_call=True,
     )
 
     df_change = account_interpreter.add_interpolated_value(
@@ -209,12 +238,38 @@ with col2:
         drop_original=False,
     )
 
-    fig = px.scatter(df_change, x="DateSeries", y=["Change"], color="Label")
-    fig.update_layout(title={"text": "Variable", "x": 0.5})
+    fig = px.scatter(
+        df_change[df_change["interpolated"] == False],
+        x="DateSeries",
+        y=["Change"],
+        color="Label",
+    )
+    fig.update_layout(
+        title={"text": "Raw change / Variable", "x": 0.5, "xanchor": "center"}
+    )
     fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig.update_yaxes(title_text="Change ($)")
 
-    st.plotly_chart(fig, key="p2")
+    st.plotly_chart(fig, key="p3")
+
+    fig = px.line(
+        df_change[df_change["interpolated"] == True],
+        x="DateSeries",
+        y=["Change"],
+        color="Label",
+        symbol="Label",
+    )
+    fig.update_layout(
+        title={
+            "text": "Interpolated change (monthly) / Variable",
+            "x": 0.5,
+            "xanchor": "center",
+        }
+    )
+    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig.update_yaxes(title_text="Change ($)")
+
+    st.plotly_chart(fig, key="p4")
 
 # Prospective
 
@@ -428,7 +483,9 @@ with col1:
     )
 
     fig1 = px.line(df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule")
-    fig1.update_layout(title={"text": "Fixed", "x": 0.5})
+    fig1.update_layout(
+        title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
+    )
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig1.update_yaxes(title_text="Principal ($)")
 
@@ -451,7 +508,9 @@ with col1:
     fig2 = px.line(
         interest_plot_fixed_merged, x="Years", y="Interest", color="Schedule"
     )
-    fig2.update_layout(title={"text": "Fixed", "x": 0.5})
+    fig2.update_layout(
+        title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
+    )
     fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest ($)")
 
@@ -631,7 +690,9 @@ with col2:
     fig1 = px.line(
         df_schedule_variable_merged, x="Date", y="Principal", color="Schedule"
     )
-    fig1.update_layout(title={"text": "Variable", "x": 0.5})
+    fig1.update_layout(
+        title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
+    )
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig1.update_yaxes(title_text="Principal ($)")
 
@@ -656,7 +717,9 @@ with col2:
     fig2 = px.line(
         interest_plot_variable_merged, x="Years", y="Interest", color="Schedule"
     )
-    fig2.update_layout(title={"text": "Variable", "x": 0.5})
+    fig2.update_layout(
+        title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
+    )
     fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest($)")
 

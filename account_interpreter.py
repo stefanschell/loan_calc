@@ -174,7 +174,11 @@ def add_interpolated_value(
     timespan_include,
     timespane_normalize,
     drop_original,
+    is_first_call=False,
 ):
+    if is_first_call:
+        df["interpolated"] = False
+
     new_rows = []
 
     for _, curr_row in df.iterrows():
@@ -199,6 +203,7 @@ def add_interpolated_value(
             )
 
             new_row = curr_row.to_dict()
+            new_row["interpolated"] = True
 
             if timespan_data_include.days > 0:
                 new_row[col_name] = (
