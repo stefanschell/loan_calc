@@ -204,6 +204,8 @@ with col1:
 
     st.plotly_chart(fig, key="p2")
 
+    st.write("Extra repayment data extracted from variable loan account only.")
+
 with col2:
     st.write("#### Variable")
 
@@ -398,6 +400,9 @@ with col1:
                 ":red[Interest rate override (%)]", 0.1, 15.0, 5.74, key="k1f"
             )
 
+    st.divider()
+    st.write("##### Now")
+
     st.write("Balance: " + f"${balance_fixed:,.0f}")
 
     st.write(
@@ -465,6 +470,9 @@ with col1:
             ":blue[Total repayment (monthly): "
             + f"${(repayment_total_fixed / 14 * (365 / 12)):,.0f}]"
         )
+
+    st.divider()
+    st.write("##### Future")
 
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
@@ -615,6 +623,9 @@ with col2:
                 "Offset overide ($)", 0, 300000, 100000, 1000, key="k2h"
             )
 
+    st.divider()
+    st.write("##### Now")
+
     st.write("Balance: " + f"${balance_variable:,.0f}")
 
     st.write(
@@ -683,6 +694,9 @@ with col2:
             ":blue[Total repayment (monthly): "
             + f"${(repayment_total_variable / 14 * (365 / 12)):,.0f}]"
         )
+
+    st.divider()
+    st.write("##### Future")
 
     df_schedule_variable = home_loan_simulator.simulate(
         balance_variable,
