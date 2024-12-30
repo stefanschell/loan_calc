@@ -274,6 +274,34 @@ with col2:
 
     st.plotly_chart(fig, key="p4")
 
+    prev_extrarepayment_interpolated = df_change[
+        (df_change["interpolated"] == True) & (df_change["Label"] == "Extrarepayment")
+    ].iloc[-1]["Change"]
+
+    st.write(
+        "Latest extracted extra repayment (monthly): "
+        + f"${prev_extrarepayment_interpolated:,.0f}"
+    )
+
+    st.write("Thus, assumed default extra repayment:")
+
+    round_to_hundred = lambda x: int(round(x / 100) * 100)
+
+    default_extrarepayment_fixed = round_to_hundred(800)
+    default_extrarepayment_variable = round_to_hundred(
+        prev_extrarepayment_interpolated - default_extrarepayment_fixed
+    )
+
+    st.write(
+        ":green[Fixed loan extra repayment (monthly): "
+        + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
+    )
+
+    st.write(
+        ":green[Variable loan extra repapayment (monthly): "
+        + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
+    )
+
 # Prospective
 
 st.write("## Prospective")
@@ -401,8 +429,8 @@ with col1:
         ":green[Extra repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly]",
         0,
         800,
-        800,
-        200,
+        default_extrarepayment_fixed,
+        100,
         key="k1i",
     )
 
@@ -598,7 +626,12 @@ with col2:
         )
 
     extra_slider_variable = st.slider(
-        ":green[Extra repayment (monthly)]", 0, 10000, 3000, 500, key="k2j"
+        ":green[Extra repayment (monthly)]",
+        0,
+        20000,
+        default_extrarepayment_variable,
+        100,
+        key="k2j",
     )
 
     repayment_extra_variable = extra_slider_variable
