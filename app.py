@@ -283,7 +283,7 @@ with col2:
         + f"${prev_extrarepayment_interpolated:,.0f}"
     )
 
-    st.write("Thus, assumed default extra repayment:")
+    st.write("Thus, assumed default future extra repayment:")
 
     round_to_hundred = lambda x: int(round(x / 100) * 100)
 
