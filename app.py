@@ -399,6 +399,7 @@ with col1:
             )
 
     st.write("Balance: " + f"${balance_fixed:,.0f}")
+
     st.write(
         ":orange[Base repayment ("
         + repayment_cycle
@@ -413,6 +414,7 @@ with col1:
         )
 
     st.write(":red[Interest: " + f"{interest_fixed:.3f}%]")
+
     st.write("Offset: None")
 
     with st.expander("Theoretical plan (for information only, not used)"):
@@ -449,12 +451,27 @@ with col1:
             ":green[Extra repayment (fortnightly): " + f"${repayment_extra_fixed:,.0f}]"
         )
 
+    repayment_total_fixed = repayment_fixed + repayment_extra_fixed
+
+    st.write(
+        ":blue[Total repayment ("
+        + repayment_cycle
+        + "): "
+        + f"${repayment_total_fixed:,.0f}]"
+    )
+
+    if repayment_cycle == "fortnightly":
+        st.write(
+            ":blue[Total repayment (monthly): "
+            + f"${(repayment_total_fixed / 14 * (365 / 12)):,.0f}]"
+        )
+
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
         0,
         interest_fixed,
         14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_fixed + repayment_extra_fixed,
+        repayment_total_fixed,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
     )
@@ -599,6 +616,7 @@ with col2:
             )
 
     st.write("Balance: " + f"${balance_variable:,.0f}")
+
     st.write(
         ":orange[Base repayment ("
         + repayment_cycle
@@ -613,6 +631,7 @@ with col2:
         )
 
     st.write(":red[Interest: " + f"{interest_variable:.3f}%]")
+
     st.write("Offset: " + f"${balance_offset:,.0f}")
 
     with st.expander("Theoretical plan (for information only, not used)"):
@@ -650,12 +669,27 @@ with col2:
             + f"${repayment_extra_variable:,.0f}]"
         )
 
+    repayment_total_variable = repayment_variable + repayment_extra_variable
+
+    st.write(
+        ":blue[Total repayment ("
+        + repayment_cycle
+        + "): "
+        + f"${repayment_total_variable:,.0f}]"
+    )
+
+    if repayment_cycle == "fortnightly":
+        st.write(
+            ":blue[Total repayment (monthly): "
+            + f"${(repayment_total_variable / 14 * (365 / 12)):,.0f}]"
+        )
+
     df_schedule_variable = home_loan_simulator.simulate(
         balance_variable,
         balance_offset,
         interest_variable,
         14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_variable + repayment_extra_variable,
+        repayment_total_variable,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
     )
