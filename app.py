@@ -283,20 +283,28 @@ with col2:
         + f"${prev_extrarepayment_interpolated:,.0f}"
     )
 
-    st.write("Thus, assumed default future extra repayment:")
+_, col2, _ = st.columns(3)
+
+with col2:
+
+    st.write("Thus, we assume the following default future extra repayments:")
 
     round_to_hundred = lambda x: int(round(x / 100) * 100)
-
     default_extrarepayment_fixed = round_to_hundred(800)
     default_extrarepayment_variable = round_to_hundred(
         prev_extrarepayment_interpolated - default_extrarepayment_fixed
     )
 
+
+col1, col2 = st.columns(2)
+
+with col1:
     st.write(
         ":green[Fixed loan extra repayment (monthly): "
         + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
     )
 
+with col2:
     st.write(
         ":green[Variable loan extra repapayment (monthly): "
         + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
@@ -307,7 +315,7 @@ with col2:
 st.write("## Prospective")
 
 st.write(
-    "Data shown in this section uses the account statements to extract balances, base repayments and interest rates. It then projects the accounts into the future, based on extra repayments adjustable by the user."
+    "Data shown in this section uses the account statements to extract balances, base repayments, extra repayments and interest rates. It then projects the accounts into the future. For this extra repayments can be adjusted by the user."
 )
 
 balance_fixed = account_interpreter.find_balance(df_balance_fixed, simulation_start)
