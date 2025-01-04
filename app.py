@@ -144,9 +144,9 @@ fig.update_yaxes(title_text="Balance ($)")
 
 st.plotly_chart(fig)
 
-# - Interest, repayments, and extra repayments
+# - Past interest, repayments, and extra repayments
 
-st.write("### Interest, repayments, and extra repayments")
+st.write("### Past interest, repayments, and extra repayments")
 
 st.write("Accounts from beginning of loan till now.")
 
@@ -213,8 +213,92 @@ col1, col2 = st.columns(2)
 with col1:
     st.write("#### Fixed")
 
+    total_interest_so_far_fixed = df_change_fixed[
+        (df_change_fixed["Label"] == "Interest")
+        & (df_change_fixed["interpolated"] == False)
+    ]["Change"].sum()
+
+    base_repayment_so_far_fixed = df_change_fixed[
+        (df_change_fixed["Label"] == "Repayment")
+        & (df_change_fixed["interpolated"] == False)
+    ]["Change"].sum()
+
+    extra_repayment_so_far_fixed = df_change_fixed[
+        (df_change_fixed["Label"] == "Extrarepayment")
+        & (df_change_fixed["interpolated"] == False)
+    ]["Change"].sum()
+
+    total_repayments_so_far_fixed = (
+        base_repayment_so_far_fixed + extra_repayment_so_far_fixed
+    )
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
+    st.write(
+        ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
+    )
+    st.write(
+        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
+    )
+
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+    )
+
 with col2:
     st.write("#### Variable")
+
+    total_interest_so_far_variable = df_change_variable[
+        (df_change_variable["Label"] == "Interest")
+        & (df_change_variable["interpolated"] == False)
+    ]["Change"].sum()
+
+    base_repayment_so_far_variable = df_change_variable[
+        (df_change_variable["Label"] == "Repayment")
+        & (df_change_variable["interpolated"] == False)
+    ]["Change"].sum()
+
+    extra_repayment_so_far_variable = df_change_variable[
+        (df_change_variable["Label"] == "Extrarepayment")
+        & (df_change_variable["interpolated"] == False)
+    ]["Change"].sum()
+
+    total_repayments_so_far_variable = (
+        base_repayment_so_far_variable + extra_repayment_so_far_variable
+    )
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
+    st.write(
+        ":orange[Base repayment so far: " + f"${base_repayment_so_far_variable:,.0f}]"
+    )
+    st.write(
+        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_variable:,.0f}]"
+    )
+
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
+    )
+
+_, col2, _ = st.columns(3)
+
+with col2:
+    st.write("#### Fixed & Variable")
+
+    total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_variable
+
+    base_repayment_so_far = base_repayment_so_far_fixed + base_repayment_so_far_variable
+
+    extra_repayment_so_far = (
+        extra_repayment_so_far_fixed + extra_repayment_so_far_variable
+    )
+
+    total_repayments_so_far = (
+        total_repayments_so_far_fixed + total_repayments_so_far_variable
+    )
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
+    st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
+    st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
+    st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
 # - Change of balance over time
 
@@ -397,6 +481,8 @@ with col1:
 
     st.write("#### Fixed")
 
+    st.write("##### Config")
+
     with st.expander("Override variables"):
 
         toggle_balance_fixed = st.toggle("Override balance", False, key="k1a")
@@ -404,6 +490,13 @@ with col1:
         if toggle_balance_fixed:
             balance_fixed = st.number_input(
                 "Balance override ($)", 0, 2000000, 625000, 1000, key="k1b"
+            )
+
+        toggle_interest_fixed = st.toggle("Override interest rate", False, key="k1e")
+
+        if toggle_interest_fixed:
+            interest_fixed = st.number_input(
+                ":red[Interest rate override (%)]", 0.1, 15.0, 5.74, key="k1f"
             )
 
         toggle_repayment_fixed = st.toggle("Override base repayment", False, key="k1c")
@@ -418,17 +511,9 @@ with col1:
                 key="k1d",
             )
 
-        toggle_interest_fixed = st.toggle("Override interest rate", False, key="k1e")
-
-        if toggle_interest_fixed:
-            interest_fixed = st.number_input(
-                ":red[Interest rate override (%)]", 0.1, 15.0, 5.74, key="k1f"
-            )
-
-    st.divider()
-    st.write("##### Now")
-
     st.write("Balance: " + f"${balance_fixed:,.0f}")
+
+    st.write(":red[Interest: " + f"{interest_fixed:.3f}%]")
 
     st.write(
         ":orange[Base repayment ("
@@ -442,8 +527,6 @@ with col1:
             ":orange[Base repayment (monthly): "
             + f"${(repayment_fixed / 14 * (365 / 12)):,.0f}]"
         )
-
-    st.write(":red[Interest: " + f"{interest_fixed:.3f}%]")
 
     st.write("Offset: None")
 
@@ -464,6 +547,9 @@ with col1:
             + "), for identical repayment and interest cycles: "
             + f"${planner_fixed.c0:,.0f}"
         )
+
+    st.divider()
+    st.write("##### Schedule")
 
     extra_slider_fixed = st.slider(
         ":green[Extra repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly]",
@@ -496,9 +582,6 @@ with col1:
             + f"${(repayment_total_fixed / 14 * (365 / 12)):,.0f}]"
         )
 
-    st.divider()
-    st.write("##### Future")
-
     df_schedule_fixed = home_loan_simulator.simulate(
         balance_fixed,
         0,
@@ -519,7 +602,7 @@ with col1:
         simulation_start,
     )
 
-    with st.expander("View payment schedule"):
+    with st.expander("View detailed schedule"):
 
         st.write(
             df_schedule_fixed.style.format(
@@ -539,13 +622,32 @@ with col1:
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
 
     st.write("Years to go: " + f"{total_years_fixed:.2f}")
-    st.write(":blue[Total repayment to go: " + f"${total_repayments_fixed:,.0f}]")
+
+    st.divider()
+    st.write("##### Sums")
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
     st.write(
         ":red[Interest to go: "
         + f"${total_interest_fixed:,.0f}"
         + " ("
         + f"{(100 * total_interest_fixed / total_repayments_fixed):.1f}%"
         + ")]"
+    )
+    st.write(
+        ":red[Interest so far and to go: "
+        + f"${total_interest_so_far_fixed + total_interest_fixed:,.0f}"
+        + " ("
+        + f"{(100 * (total_interest_so_far_fixed + total_interest_fixed) / (total_repayments_so_far_fixed + total_repayments_fixed)):.1f}%"
+        + ")]"
+    )
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+    )
+    st.write(":blue[Total repayment to go: " + f"${total_repayments_fixed:,.0f}]")
+    st.write(
+        ":blue[Total repayment so far and to go: "
+        + f"${total_repayments_so_far_fixed + total_repayments_fixed:,.0f}]"
     )
 
     end_of_fixed_loan_balance = df_schedule_fixed[
@@ -611,6 +713,8 @@ with col2:
 
     st.write("#### Variable")
 
+    st.write("##### Config")
+
     with st.expander("Override variables"):
 
         toggle_balance_variable = st.toggle("Override balance", False, key="k2a")
@@ -618,6 +722,13 @@ with col2:
         if toggle_balance_variable:
             balance_variable = st.number_input(
                 "Balance override ($): ", 0, 2000000, 625000, 1000, key="k2b"
+            )
+
+        toggle_interest_variable = st.toggle("Override interest rate", False, key="k2e")
+
+        if toggle_interest_variable:
+            interest_variable = st.number_input(
+                ":red[Interest rate override (%)]", 0.1, 15.0, 6.14, key="k2f"
             )
 
         toggle_repayment_variable = st.toggle(
@@ -634,13 +745,6 @@ with col2:
                 key="k2d",
             )
 
-        toggle_interest_variable = st.toggle("Override interest rate", False, key="k2e")
-
-        if toggle_interest_variable:
-            interest_variable = st.number_input(
-                ":red[Interest rate override (%)]", 0.1, 15.0, 6.14, key="k2f"
-            )
-
         toggle_offset = st.toggle("Override offset", False, key="k2g")
 
         if toggle_offset:
@@ -648,10 +752,9 @@ with col2:
                 "Offset overide ($)", 0, 300000, 100000, 1000, key="k2h"
             )
 
-    st.divider()
-    st.write("##### Now")
-
     st.write("Balance: " + f"${balance_variable:,.0f}")
+
+    st.write(":red[Interest: " + f"{interest_variable:.3f}%]")
 
     st.write(
         ":orange[Base repayment ("
@@ -665,8 +768,6 @@ with col2:
             ":orange[Base repayment (monthly): "
             + f"${(repayment_variable / 14 * (365 / 12)):,.0f}]"
         )
-
-    st.write(":red[Interest: " + f"{interest_variable:.3f}%]")
 
     st.write("Offset: " + f"${balance_offset:,.0f}")
 
@@ -687,6 +788,9 @@ with col2:
             + "), for identical repayment and interest cycles: "
             + f"${planner_variable.c0:,.0f}"
         )
+
+    st.divider()
+    st.write("##### Schedule")
 
     extra_slider_variable = st.slider(
         ":green[Extra repayment (monthly)]",
@@ -720,9 +824,6 @@ with col2:
             + f"${(repayment_total_variable / 14 * (365 / 12)):,.0f}]"
         )
 
-    st.divider()
-    st.write("##### Future")
-
     df_schedule_variable = home_loan_simulator.simulate(
         balance_variable,
         balance_offset,
@@ -743,7 +844,7 @@ with col2:
         simulation_start,
     )
 
-    with st.expander("View payment schedule"):
+    with st.expander("View detailed schedule"):
 
         st.write(
             df_schedule_variable.style.format(
@@ -763,13 +864,33 @@ with col2:
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
     st.write("Years to go: " + f"{total_years_variable:.2f}")
-    st.write(":blue[Total repayment to go: " + f"${total_repayments_variable:,.2f}]")
+
+    st.divider()
+    st.write("##### Sums")
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
     st.write(
         ":red[Interest to go: "
         + f"${total_interest_variable:,.0f}"
         + " ("
         + f"{(100 * total_interest_variable / total_repayments_variable):.1f}"
         + "%)]"
+    )
+    st.write(
+        ":red[Interest so far and to go: "
+        + f"${total_interest_so_far_variable + total_interest_variable:,.0f}"
+        + " ("
+        + f"{(100 * (total_interest_so_far_variable + total_interest_variable) / (total_repayments_so_far_variable + total_repayments_variable)):.1f}"
+        + "%)]"
+    )
+
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
+    )
+    st.write(":blue[Total repayment to go: " + f"${total_repayments_variable:,.0f}]")
+    st.write(
+        ":blue[Total repayment so far and to go: "
+        + f"${total_repayments_so_far_variable + total_repayments_variable:,.0f}]"
     )
 
     end_of_fixed_loan_balance = df_schedule_variable[
@@ -842,13 +963,13 @@ with col2:
 
     st.plotly_chart(fig2)
 
-# - total
+# - Fixed & Variable
 
 _, col2, _ = st.columns(3)
 
 with col2:
 
-    st.write("### Fixed and Variable combined")
+    st.write("### Fixed & Variable")
 
     total_wo_extra = repayment_fixed + repayment_variable
     total_extra = repayment_extra_fixed + repayment_extra_variable
@@ -859,15 +980,49 @@ with col2:
 
     total = total_wo_extra + total_extra
 
+    st.write("##### Config")
+
     st.write(":orange[Base repayment (monthly): " + f"${total_wo_extra:,.0f}]")
+
+    st.write("##### Schedule")
+
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
     st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
 
+    st.write("##### Sums")
+
+    effective_loan_amount = (
+        df_balance_total.iloc[0]["Balance"] + df_balance_offset.iloc[0]["Balance"]
+    )
+
+    st.write("Effective loan amount: " + f"${effective_loan_amount:,.0f}")
+
+    st.write(
+        ":red[Interest so far: "
+        + f"${(total_interest_so_far_fixed + total_interest_so_far_variable):,.0f}]"
+    )
+    st.write(
+        ":red[Interest to go: "
+        + f"${(total_interest_fixed + total_interest_variable):,.0f}]"
+    )
+    st.write(
+        ":red[Interest so far and to go: "
+        + f"${(
+            total_interest_so_far_fixed + total_interest_fixed +
+            total_interest_so_far_variable + total_interest_variable):,.0f}]"
+    )
+
+    st.write(
+        ":blue[Total repayment so far: "
+        + f"${(total_repayments_so_far_fixed + total_repayments_so_far_variable):,.0f}]"
+    )
     st.write(
         ":blue[Total repayment to go: "
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
     )
     st.write(
-        ":red[Interest to go: "
-        + f"${(total_interest_fixed+total_interest_variable):,.0f}]"
+        ":blue[Total repayment so far and to go: "
+        + f"${(
+            total_repayments_so_far_fixed + total_repayments_fixed +
+            total_repayments_so_far_variable + total_repayments_variable):,.0f}]"
     )
