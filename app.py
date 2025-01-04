@@ -144,6 +144,78 @@ fig.update_yaxes(title_text="Balance ($)")
 
 st.plotly_chart(fig)
 
+# - Interest, repayments, and extra repayments
+
+st.write("### Interest, repayments, and extra repayments")
+
+st.write("Accounts from beginning of loan till now.")
+
+df_change_fixed = account_interpreter.get_change_overt_time(df_in, "Fixed", loan_start)
+
+df_change_fixed = account_interpreter.add_interpolated_value(
+    df_change_fixed,
+    "Interest",
+    "Change",
+    timespan_search=timedelta(days=35),
+    timespan_include=timedelta(days=20),
+    timespane_normalize=timedelta(days=365 / 12),
+    drop_original=False,
+    is_first_call=True,
+)
+
+df_change_fixed = account_interpreter.add_interpolated_value(
+    df_change_fixed,
+    "Repayment",
+    "Change",
+    timespan_search=timedelta(days=20),
+    timespan_include=timedelta(days=20),
+    timespane_normalize=timedelta(days=365 / 12),
+    drop_original=False,
+)
+
+df_change_variable = account_interpreter.get_change_overt_time(
+    df_in, "Variable", loan_start
+)
+
+df_change_variable = account_interpreter.add_interpolated_value(
+    df_change_variable,
+    "Interest",
+    "Change",
+    timespan_search=timedelta(days=35),
+    timespan_include=timedelta(days=20),
+    timespane_normalize=timedelta(days=365 / 12),
+    drop_original=False,
+    is_first_call=True,
+)
+
+df_change_variable = account_interpreter.add_interpolated_value(
+    df_change_variable,
+    "Repayment",
+    "Change",
+    timespan_search=timedelta(days=20),
+    timespan_include=timedelta(days=20),
+    timespane_normalize=timedelta(days=365 / 12),
+    drop_original=False,
+)
+
+df_change_variable = account_interpreter.add_interpolated_value(
+    df_change_variable,
+    "Extrarepayment",
+    "Change",
+    timespan_search=timedelta(days=35),
+    timespan_include=timedelta(days=20),
+    timespane_normalize=timedelta(days=365 / 12),
+    drop_original=False,
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.write("#### Fixed")
+
+with col2:
+    st.write("#### Variable")
+
 # - Change of balance over time
 
 st.write("### Change of balance over time")
@@ -155,31 +227,8 @@ col1, col2 = st.columns(2)
 with col1:
     st.write("#### Fixed")
 
-    df_change = account_interpreter.get_change_overt_time(df_in, "Fixed", loan_start)
-
-    df_change = account_interpreter.add_interpolated_value(
-        df_change,
-        "Interest",
-        "Change",
-        timespan_search=timedelta(days=35),
-        timespan_include=timedelta(days=20),
-        timespane_normalize=timedelta(days=365 / 12),
-        drop_original=False,
-        is_first_call=True,
-    )
-
-    df_change = account_interpreter.add_interpolated_value(
-        df_change,
-        "Repayment",
-        "Change",
-        timespan_search=timedelta(days=20),
-        timespan_include=timedelta(days=20),
-        timespane_normalize=timedelta(days=365 / 12),
-        drop_original=False,
-    )
-
     fig = px.line(
-        df_change[df_change["interpolated"] == False],
+        df_change_fixed[df_change_fixed["interpolated"] == False],
         x="DateSeries",
         y=["Change"],
         color="Label",
@@ -194,7 +243,7 @@ with col1:
     st.plotly_chart(fig, key="p1")
 
     fig = px.line(
-        df_change[df_change["interpolated"] == True],
+        df_change_fixed[df_change_fixed["interpolated"] == True],
         x="DateSeries",
         y=["Change"],
         color="Label",
@@ -217,41 +266,8 @@ with col1:
 with col2:
     st.write("#### Variable")
 
-    df_change = account_interpreter.get_change_overt_time(df_in, "Variable", loan_start)
-
-    df_change = account_interpreter.add_interpolated_value(
-        df_change,
-        "Interest",
-        "Change",
-        timespan_search=timedelta(days=35),
-        timespan_include=timedelta(days=20),
-        timespane_normalize=timedelta(days=365 / 12),
-        drop_original=False,
-        is_first_call=True,
-    )
-
-    df_change = account_interpreter.add_interpolated_value(
-        df_change,
-        "Repayment",
-        "Change",
-        timespan_search=timedelta(days=20),
-        timespan_include=timedelta(days=20),
-        timespane_normalize=timedelta(days=365 / 12),
-        drop_original=False,
-    )
-
-    df_change = account_interpreter.add_interpolated_value(
-        df_change,
-        "Extrarepayment",
-        "Change",
-        timespan_search=timedelta(days=35),
-        timespan_include=timedelta(days=20),
-        timespane_normalize=timedelta(days=365 / 12),
-        drop_original=False,
-    )
-
     fig = px.line(
-        df_change[df_change["interpolated"] == False],
+        df_change_variable[df_change_variable["interpolated"] == False],
         x="DateSeries",
         y=["Change"],
         color="Label",
@@ -266,7 +282,7 @@ with col2:
     st.plotly_chart(fig, key="p3")
 
     fig = px.line(
-        df_change[df_change["interpolated"] == True],
+        df_change_variable[df_change_variable["interpolated"] == True],
         x="DateSeries",
         y=["Change"],
         color="Label",
@@ -284,8 +300,9 @@ with col2:
 
     st.plotly_chart(fig, key="p4")
 
-    prev_extrarepayment_interpolated = df_change[
-        (df_change["interpolated"] == True) & (df_change["Label"] == "Extrarepayment")
+    prev_extrarepayment_interpolated = df_change_variable[
+        (df_change_variable["interpolated"] == True)
+        & (df_change_variable["Label"] == "Extrarepayment")
     ].iloc[-1]["Change"]
 
     st.write(
