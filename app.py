@@ -66,7 +66,9 @@ st.write(
 
 st.write("### Transactions")
 
-st.write("Transactions to and from the accounts: Fixed, Variable, Offset")
+st.write(
+    "Transactions in accounts (Fixed, Variable, Offset) from beginng of the loan till now."
+)
 
 with st.expander("View transactions"):
 
@@ -107,7 +109,9 @@ with st.expander("View transactions"):
 
 st.write("### Balance over time")
 
-st.write("Accounts from beginning of loan till now.")
+st.write(
+    "Accounts from beginning of loan till now. Shows end of day balances only, thus excludes transactions on day of settlement."
+)
 
 df_balance_fixed = account_interpreter.get_balance_over_time(
     df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
@@ -148,9 +152,15 @@ st.plotly_chart(fig)
 
 st.write("### Past interest, repayments, and extra repayments")
 
-st.write("Accounts from beginning of loan till now.")
+st.write(
+    "Accounts from beginning of loan till now. Excludes transactions on day of settlement."
+)
 
-df_change_fixed = account_interpreter.get_change_overt_time(df_in, "Fixed", loan_start)
+df_change_fixed = account_interpreter.get_change_over_time(
+    df_in,
+    "Fixed",
+    exclude_up_to_date=loan_start,  # excludes initial transactions on day of settlement
+)
 
 df_change_fixed = account_interpreter.add_interpolated_value(
     df_change_fixed,
@@ -173,8 +183,10 @@ df_change_fixed = account_interpreter.add_interpolated_value(
     drop_original=False,
 )
 
-df_change_variable = account_interpreter.get_change_overt_time(
-    df_in, "Variable", loan_start
+df_change_variable = account_interpreter.get_change_over_time(
+    df_in,
+    "Variable",
+    exclude_up_to_date=loan_start,  # excludes initial transactions on day of settlement
 )
 
 df_change_variable = account_interpreter.add_interpolated_value(
@@ -304,7 +316,9 @@ with col2:
 
 st.write("### Change of balance over time")
 
-st.write("Accounts from beginning of loan till now.")
+st.write(
+    "Accounts from beginning of loan till now. Excludes transactions on day of settlement."
+)
 
 col1, col2 = st.columns(2)
 

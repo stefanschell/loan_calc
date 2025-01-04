@@ -158,7 +158,7 @@ def get_redraw_repayment_extrarepayment_over_time(df, account_name, exclude_up_t
     return return_df
 
 
-def get_change_overt_time(df, account_name, exclude_up_to_date):
+def get_change_over_time(df, account_name, exclude_up_to_date):
     df1 = get_interest_over_time(df, account_name, exclude_up_to_date)
     df2 = get_redraw_repayment_extrarepayment_over_time(
         df, account_name, exclude_up_to_date
