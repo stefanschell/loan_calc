@@ -644,11 +644,11 @@ with col1:
 
     st.write(
         ":red[Initial interest: "
-        + f"\${interest_per_month_fixed:,.0f}"
+        + f"\\${interest_per_month_fixed:,.0f}"
         + "/m = "
-        + f"\${interest_per_month_fixed * (12 / 365):,.0f}"
+        + f"\\${interest_per_month_fixed * (12 / 365):,.0f}"
         + "/d = "
-        + f"\${interest_per_month_fixed * (12 / (365 * 24)):,.1f}"
+        + f"\\${interest_per_month_fixed * (12 / (365 * 24)):,.1f}"
         + "/h]"
     )
 
@@ -967,11 +967,11 @@ with col2:
 
     st.write(
         ":red[Initial interest: "
-        + f"\${interest_per_month_variable:,.0f}"
+        + f"\\${interest_per_month_variable:,.0f}"
         + "/m = "
-        + f"\${interest_per_month_variable * (12 / 365):,.0f}"
+        + f"\\${interest_per_month_variable * (12 / 365):,.0f}"
         + "/d = "
-        + f"\${interest_per_month_variable * (12 / (365 * 24)):,.1f}"
+        + f"\\${interest_per_month_variable * (12 / (365 * 24)):,.1f}"
         + "/h]"
     )
 
@@ -1155,11 +1155,11 @@ with col2:
 
     st.write(
         ":red[Initial interest: "
-        + f"\${interest_per_month:,.0f}"
+        + f"\\${interest_per_month:,.0f}"
         + "/m = "
-        + f"\${interest_per_month * (12 / 365):,.0f}"
+        + f"\\${interest_per_month * (12 / 365):,.0f}"
         + "/d = "
-        + f"\${interest_per_month * (12 / (365 * 24)):,.1f}"
+        + f"\\${interest_per_month * (12 / (365 * 24)):,.1f}"
         + "/h]"
     )
 
