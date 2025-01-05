@@ -638,7 +638,21 @@ with col1:
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
 
-    st.write("Years to go: " + f"{total_years_fixed:.2f}")
+    interest_per_month_fixed = (
+        df_schedule_fixed.iloc[0]["Principal"] * (interest_fixed / 100) / 12
+    )
+
+    st.write(
+        ":red[Initial interest: "
+        + f"\${interest_per_month_fixed:,.0f}"
+        + "/m = "
+        + f"\${interest_per_month_fixed * (12 / 365):,.0f}"
+        + "/d = "
+        + f"\${interest_per_month_fixed * (12 / (365 * 24)):,.1f}"
+        + "/h]"
+    )
+
+    st.write("Time to go: " + f"{total_years_fixed:.2f} yrs")
 
     st.divider()
     st.write("##### Sums")
@@ -945,7 +959,23 @@ with col2:
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
-    st.write("Years to go: " + f"{total_years_variable:.2f}")
+    interest_per_month_variable = (
+        (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
+        * (interest_variable / 100)
+        / 12
+    )
+
+    st.write(
+        ":red[Initial interest: "
+        + f"\${interest_per_month_variable:,.0f}"
+        + "/m = "
+        + f"\${interest_per_month_variable * (12 / 365):,.0f}"
+        + "/d = "
+        + f"\${interest_per_month_variable * (12 / (365 * 24)):,.1f}"
+        + "/h]"
+    )
+
+    st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
 
     st.divider()
     st.write("##### Sums")
@@ -1118,6 +1148,20 @@ with col2:
 
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
     st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
+
+    st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
+
+    interest_per_month = interest_per_month_fixed + interest_per_month_variable
+
+    st.write(
+        ":red[Initial interest: "
+        + f"\${interest_per_month:,.0f}"
+        + "/m = "
+        + f"\${interest_per_month * (12 / 365):,.0f}"
+        + "/d = "
+        + f"\${interest_per_month * (12 / (365 * 24)):,.1f}"
+        + "/h]"
+    )
 
     st.write("##### Sums")
 
