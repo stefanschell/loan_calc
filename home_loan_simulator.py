@@ -44,6 +44,8 @@ def simulate(
     ):
         curr_date = curr_date + timedelta(days=1)
 
+        maturity_is_today = schedule_end is not None and curr_date >= schedule_end
+
         curr_interest = None
         curr_redraw = None
         curr_repayment = None
@@ -54,12 +56,20 @@ def simulate(
 
         owing_daily_hist.append(max(0, principal - offset))
 
-        if curr_date >= prev_interest_date + interest_cycle_days:
+        if curr_date >= prev_interest_date + interest_cycle_days or maturity_is_today:
+            curr_interest_date = (
+                prev_interest_date + interest_cycle_days
+                if not maturity_is_today
+                else curr_date
+            )
+
+            curr_interest_cycle_days = curr_interest_date - prev_interest_date
+
             curr_interest = (
                 np.mean(owing_daily_hist)
                 * (
-                    (interest_cycle_days.days / float(365))
-                    + (interest_cycle_days.seconds / float(60 * 60 * 24 * 365))
+                    (curr_interest_cycle_days.days / float(365))
+                    + (curr_interest_cycle_days.seconds / float(60 * 60 * 24 * 365))
                 )
                 * (interest_rate / 100)
             )
@@ -67,7 +77,7 @@ def simulate(
             owing_daily_hist = []
 
             principal = principal + curr_interest
-            prev_interest_date = prev_interest_date + interest_cycle_days
+            prev_interest_date = curr_interest_date
 
         # redraw
 
@@ -97,6 +107,7 @@ def simulate(
             curr_interest is not None
             or curr_redraw is not None
             or curr_repayment is not None
+            or maturity_is_today is True
         ):
             schedule.append(
                 (
@@ -110,7 +121,9 @@ def simulate(
                 )
             )
 
-        if schedule_end is not None and curr_date >= schedule_end:
+        # maturity
+
+        if maturity_is_today:
             break
 
     return pd.DataFrame(

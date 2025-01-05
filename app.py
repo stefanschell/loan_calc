@@ -686,7 +686,9 @@ with col1:
         [df_schedule_fixed, df_schedule_fixed_wo_extra]
     )
 
-    fig1 = px.line(df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule")
+    fig1 = px.scatter(
+        df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule"
+    )
     fig1.update_layout(
         title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
     )
@@ -713,7 +715,7 @@ with col1:
         [interest_plot_fixed, interest_plot_fixed_wo_extra]
     )
 
-    fig2 = px.line(
+    fig2 = px.scatter(
         interest_plot_fixed_merged, x="Years", y="Interest", color="Schedule"
     )
     fig2.update_layout(
@@ -747,7 +749,7 @@ with col1:
             repayment_plot_fixed_merged["Repayment"] / 14 * (365 / 12)
         )
 
-    fig3 = px.line(
+    fig3 = px.scatter(
         repayment_plot_fixed_merged, x="Years", y="Repayment", color="Schedule"
     )
     fig3.update_layout(
@@ -1011,7 +1013,7 @@ with col2:
         [df_schedule_variable, df_schedule_variable_wo_extra]
     )
 
-    fig1 = px.line(
+    fig1 = px.scatter(
         df_schedule_variable_merged, x="Date", y="Principal", color="Schedule"
     )
     fig1.update_layout(
@@ -1040,7 +1042,7 @@ with col2:
         [interest_plot_variable, interest_plot_variable_wo_extra]
     )
 
-    fig2 = px.line(
+    fig2 = px.scatter(
         interest_plot_variable_merged, x="Years", y="Interest", color="Schedule"
     )
     fig2.update_layout(
@@ -1074,7 +1076,7 @@ with col2:
             repayment_plot_variable_merged["Repayment"] / 14 * (365 / 12)
         )
 
-    fig3 = px.line(
+    fig3 = px.scatter(
         repayment_plot_variable_merged, x="Years", y="Repayment", color="Schedule"
     )
     fig3.update_layout(
