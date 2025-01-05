@@ -720,9 +720,38 @@ with col1:
         title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
     )
     fig2.update_xaxes(title_text="Years")
-    fig2.update_yaxes(title_text="Interest ($)")
+    fig2.update_yaxes(title_text="Interest ($, monthly)")
 
     st.plotly_chart(fig2)
+
+    repayment_plot_fixed = pd.DataFrame(df_schedule_fixed)
+    repayment_plot_fixed = repayment_plot_fixed[
+        (repayment_plot_fixed["Repayment"] >= 0)
+        & (repayment_plot_fixed["Date"] > simulation_start)
+    ]
+
+    repayment_plot_fixed_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
+    repayment_plot_fixed_wo_extra = repayment_plot_fixed_wo_extra[
+        (repayment_plot_fixed_wo_extra["Repayment"] >= 0)
+        & (repayment_plot_fixed_wo_extra["Date"] > simulation_start)
+    ]
+
+    repayment_plot_fixed["Schedule"] = "Fast"
+    repayment_plot_fixed_wo_extra["Schedule"] = "Slow"
+    repayment_plot_fixed_merged = pd.concat(
+        [repayment_plot_fixed, repayment_plot_fixed_wo_extra]
+    )
+
+    fig3 = px.line(
+        repayment_plot_fixed_merged, x="Years", y="Repayment", color="Schedule"
+    )
+    fig3.update_layout(
+        title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
+    )
+    fig3.update_xaxes(title_text="Years")
+    fig3.update_yaxes(title_text="Total Repayment ($, fortnightly)")
+
+    st.plotly_chart(fig3)
 
 with col2:
 
@@ -1012,9 +1041,38 @@ with col2:
         title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
     )
     fig2.update_xaxes(title_text="Years")
-    fig2.update_yaxes(title_text="Interest($)")
+    fig2.update_yaxes(title_text="Interest ($, monthly)")
 
     st.plotly_chart(fig2)
+
+    repayment_plot_variable = pd.DataFrame(df_schedule_variable)
+    repayment_plot_variable = repayment_plot_variable[
+        (repayment_plot_variable["Repayment"] >= 0)
+        & (repayment_plot_variable["Date"] > simulation_start)
+    ]
+
+    repayment_plot_variable_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
+    repayment_plot_variable_wo_extra = repayment_plot_variable_wo_extra[
+        (repayment_plot_variable_wo_extra["Repayment"] >= 0)
+        & (repayment_plot_variable_wo_extra["Date"] > simulation_start)
+    ]
+
+    repayment_plot_variable["Schedule"] = "Fast"
+    repayment_plot_variable_wo_extra["Schedule"] = "Slow"
+    repayment_plot_variable_merged = pd.concat(
+        [repayment_plot_variable, repayment_plot_variable_wo_extra]
+    )
+
+    fig3 = px.line(
+        repayment_plot_variable_merged, x="Years", y="Repayment", color="Schedule"
+    )
+    fig3.update_layout(
+        title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
+    )
+    fig3.update_xaxes(title_text="Years")
+    fig3.update_yaxes(title_text="Total Repayment ($, fortnightly)")
+
+    st.plotly_chart(fig3)
 
 # - Fixed & Variable
 
