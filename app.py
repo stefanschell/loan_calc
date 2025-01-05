@@ -742,6 +742,11 @@ with col1:
         [repayment_plot_fixed, repayment_plot_fixed_wo_extra]
     )
 
+    if repayment_cycle == "fortnightly":
+        repayment_plot_fixed_merged["Repayment"] = (
+            repayment_plot_fixed_merged["Repayment"] / 14 * (365 / 12)
+        )
+
     fig3 = px.line(
         repayment_plot_fixed_merged, x="Years", y="Repayment", color="Schedule"
     )
@@ -749,7 +754,7 @@ with col1:
         title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
     )
     fig3.update_xaxes(title_text="Years")
-    fig3.update_yaxes(title_text="Total Repayment ($, fortnightly)")
+    fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
 
     st.plotly_chart(fig3)
 
@@ -990,14 +995,15 @@ with col2:
             + principal_smaller_offset_first_date.strftime("%d/%m/%Y")
         )
 
-        principal_smaller_offset_second_date = df_schedule_variable[
-            (df_schedule_variable["Principal"] <= balance_offset)
-            & (df_schedule_variable["Date"] > fixed_loan_end)
-        ].iloc[0]["Date"]
-        st.write(
-            "Date when principal smaller than offset for the second time: "
-            + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
-        )
+        if principal_smaller_offset_first_date < fixed_loan_end:
+            principal_smaller_offset_second_date = df_schedule_variable[
+                (df_schedule_variable["Principal"] <= balance_offset)
+                & (df_schedule_variable["Date"] > fixed_loan_end)
+            ].iloc[0]["Date"]
+            st.write(
+                "Date when principal smaller than offset for the second time: "
+                + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
+            )
 
     df_schedule_variable["Schedule"] = "Fast"
     df_schedule_variable_wo_extra["Schedule"] = "Slow"
@@ -1063,6 +1069,11 @@ with col2:
         [repayment_plot_variable, repayment_plot_variable_wo_extra]
     )
 
+    if repayment_cycle == "fortnightly":
+        repayment_plot_variable_merged["Repayment"] = (
+            repayment_plot_variable_merged["Repayment"] / 14 * (365 / 12)
+        )
+
     fig3 = px.line(
         repayment_plot_variable_merged, x="Years", y="Repayment", color="Schedule"
     )
@@ -1070,7 +1081,7 @@ with col2:
         title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
     )
     fig3.update_xaxes(title_text="Years")
-    fig3.update_yaxes(title_text="Total Repayment ($, fortnightly)")
+    fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
 
     st.plotly_chart(fig3)
 
