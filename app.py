@@ -692,6 +692,7 @@ with col1:
     fig1.update_layout(
         title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
     )
+    fig1.update_traces(marker=dict(size=3))
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig1.update_yaxes(title_text="Principal ($)")
 
@@ -721,6 +722,7 @@ with col1:
     fig2.update_layout(
         title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
     )
+    fig2.update_traces(marker=dict(size=3))
     fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest ($, monthly)")
 
@@ -755,6 +757,7 @@ with col1:
     fig3.update_layout(
         title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
     )
+    fig3.update_traces(marker=dict(size=3))
     fig3.update_xaxes(title_text="Years")
     fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
 
@@ -1019,6 +1022,7 @@ with col2:
     fig1.update_layout(
         title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
     )
+    fig1.update_traces(marker=dict(size=3))
     fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
     fig1.update_yaxes(title_text="Principal ($)")
 
@@ -1048,6 +1052,7 @@ with col2:
     fig2.update_layout(
         title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
     )
+    fig2.update_traces(marker=dict(size=3))
     fig2.update_xaxes(title_text="Years")
     fig2.update_yaxes(title_text="Interest ($, monthly)")
 
@@ -1082,6 +1087,7 @@ with col2:
     fig3.update_layout(
         title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
     )
+    fig3.update_traces(marker=dict(size=3))
     fig3.update_xaxes(title_text="Years")
     fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
 
