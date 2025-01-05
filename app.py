@@ -604,6 +604,7 @@ with col1:
         repayment_total_fixed,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
+        fixed_loan_end,
     )
 
     df_schedule_fixed_wo_extra = home_loan_simulator.simulate(
@@ -614,6 +615,7 @@ with col1:
         repayment_fixed,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
+        fixed_loan_end,
     )
 
     with st.expander("View detailed schedule"):
@@ -624,8 +626,9 @@ with col1:
                     "Months": "{:,.2f}",
                     "Years": "{:,.2f}",
                     "Date": lambda x: x.strftime("%d/%m/%Y"),
-                    "Repayment": "${:,.0f}",
                     "Interest": "${:,.0f}",
+                    "Redraw": "${:,.0f}",
+                    "Repayment": "${:,.0f}",
                     "Principal": "${:,.0f}",
                 }
             )
@@ -664,22 +667,18 @@ with col1:
         + f"${total_repayments_so_far_fixed + total_repayments_fixed:,.0f}]"
     )
 
-    end_of_fixed_loan_balance = df_schedule_fixed[
-        df_schedule_fixed["Date"] >= fixed_loan_end
+    end_of_fixed_loan_balance = df_schedule_fixed.iloc[-1]["Principal"]
+    end_of_fixed_loan_balance_wo_extra = df_schedule_fixed_wo_extra.iloc[-1][
+        "Principal"
     ]
 
-    if len(end_of_fixed_loan_balance) > 0:
-        end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
-        st.write(
-            "Fixed loan balance at end of fixed loan term ("
-            + fixed_loan_end.strftime("%d/%m/%Y")
-            + "): "
-            + f"${end_of_fixed_loan_balance:,.0f}"
-        )
-    else:
-        st.write("Principal reached zero before end of fixed loan.")
+    st.write("End of fixed loan term: " + fixed_loan_end.strftime("%d/%m/%Y"))
 
-    st.write(".")
+    st.write(
+        "Balance at the end of fixed loan term: " + f"${end_of_fixed_loan_balance:,.0f}"
+    )
+
+    st.write("Afterwards the remaining balance is moved to the variable loan account.")
 
     df_schedule_fixed["Schedule"] = "Fast"
     df_schedule_fixed_wo_extra["Schedule"] = "Slow"
@@ -697,11 +696,15 @@ with col1:
     st.plotly_chart(fig1)
 
     interest_plot_fixed = pd.DataFrame(df_schedule_fixed)
-    interest_plot_fixed = interest_plot_fixed[interest_plot_fixed["Interest"] > 0]
+    interest_plot_fixed = interest_plot_fixed[
+        (interest_plot_fixed["Interest"] >= 0)
+        & (interest_plot_fixed["Date"] > simulation_start)
+    ]
 
     interest_plot_fixed_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
     interest_plot_fixed_wo_extra = interest_plot_fixed_wo_extra[
-        interest_plot_fixed_wo_extra["Interest"] > 0
+        (interest_plot_fixed_wo_extra["Interest"] >= 0)
+        & (interest_plot_fixed_wo_extra["Date"] > simulation_start)
     ]
 
     interest_plot_fixed["Schedule"] = "Fast"
@@ -774,13 +777,19 @@ with col2:
         ":orange[Base repayment ("
         + repayment_cycle
         + "): "
-        + f"${repayment_variable:,.0f}]"
+        + f"${repayment_variable:,.0f}"
+        + " (plus fixed after "
+        + fixed_loan_end.strftime("%d/%m/%Y")
+        + ")]"
     )
 
     if repayment_cycle == "fortnightly":
         st.write(
             ":orange[Base repayment (monthly): "
-            + f"${(repayment_variable / 14 * (365 / 12)):,.0f}]"
+            + f"${(repayment_variable / 14 * (365 / 12)):,.0f}"
+            + " (plus fixed after "
+            + fixed_loan_end.strftime("%d/%m/%Y")
+            + ")]"
         )
 
     st.write("Offset: " + f"${balance_offset:,.0f}")
@@ -807,7 +816,9 @@ with col2:
     st.write("##### Schedule")
 
     extra_slider_variable = st.slider(
-        ":green[Extra repayment (monthly)]",
+        ":green[Extra repayment (monthly, plus fixed after "
+        + fixed_loan_end.strftime("%d/%m/%Y")
+        + ")]",
         0,
         20000,
         default_extrarepayment_variable,
@@ -820,7 +831,10 @@ with col2:
         repayment_extra_variable = repayment_extra_variable / (365 / 12) * 14
         st.write(
             ":green[Extra repayment (fortnightly): "
-            + f"${repayment_extra_variable:,.0f}]"
+            + f"${repayment_extra_variable:,.0f}"
+            + " (plus fixed after "
+            + fixed_loan_end.strftime("%d/%m/%Y")
+            + ")]"
         )
 
     repayment_total_variable = repayment_variable + repayment_extra_variable
@@ -829,13 +843,19 @@ with col2:
         ":blue[Total repayment ("
         + repayment_cycle
         + "): "
-        + f"${repayment_total_variable:,.0f}]"
+        + f"${repayment_total_variable:,.0f}"
+        + " (plus fixed after "
+        + fixed_loan_end.strftime("%d/%m/%Y")
+        + ")]"
     )
 
     if repayment_cycle == "fortnightly":
         st.write(
             ":blue[Total repayment (monthly): "
-            + f"${(repayment_total_variable / 14 * (365 / 12)):,.0f}]"
+            + f"${(repayment_total_variable / 14 * (365 / 12)):,.0f}"
+            + " (plus fixed after "
+            + fixed_loan_end.strftime("%d/%m/%Y")
+            + ")]"
         )
 
     df_schedule_variable = home_loan_simulator.simulate(
@@ -846,6 +866,10 @@ with col2:
         repayment_total_variable,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance,
+        leftover_repayment=repayment_total_fixed,
     )
 
     df_schedule_variable_wo_extra = home_loan_simulator.simulate(
@@ -856,6 +880,10 @@ with col2:
         repayment_variable,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
         simulation_start,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance_wo_extra,
+        leftover_repayment=repayment_total_fixed,
     )
 
     with st.expander("View detailed schedule"):
@@ -866,8 +894,9 @@ with col2:
                     "Months": "{:,.2f}",
                     "Years": "{:,.2f}",
                     "Date": lambda x: x.strftime("%d/%m/%Y"),
-                    "Repayment": "${:,.0f}",
                     "Interest": "${:,.0f}",
+                    "Redraw": "${:,.0f}",
+                    "Repayment": "${:,.0f}",
                     "Principal": "${:,.0f}",
                 }
             )
@@ -907,30 +936,38 @@ with col2:
         + f"${total_repayments_so_far_variable + total_repayments_variable:,.0f}]"
     )
 
-    end_of_fixed_loan_balance = df_schedule_variable[
-        df_schedule_variable["Date"] >= fixed_loan_end
+    before_end_of_fixed_loan_balance = df_schedule_variable[
+        df_schedule_variable["Date"] <= fixed_loan_end
     ]
 
-    if len(end_of_fixed_loan_balance) > 0:
-        end_of_fixed_loan_balance = end_of_fixed_loan_balance.iloc[0]["Principal"]
-        st.write(
-            "Variable loan balance at end of fixed loan term ("
-            + fixed_loan_end.strftime("%d/%m/%Y")
-            + "): "
-            + f"${end_of_fixed_loan_balance:,.0f}"
-        )
-    else:
-        st.write("Principal reached zero before end of fixed loan.")
+    before_end_of_fixed_loan_balance = before_end_of_fixed_loan_balance.iloc[-2][
+        "Principal"
+    ]
+    st.write(
+        "Variable loan balance shortly before end of fixed loan term ("
+        + fixed_loan_end.strftime("%d/%m/%Y")
+        + "): "
+        + f"${before_end_of_fixed_loan_balance:,.0f}"
+    )
 
     principal_smaller_offset = df_schedule_variable[
         df_schedule_variable["Principal"] <= balance_offset
     ]
 
     if len(principal_smaller_offset) > 0:
-        principal_smaller_offset = principal_smaller_offset.iloc[0]
+        principal_smaller_offset_first_date = principal_smaller_offset.iloc[0]["Date"]
         st.write(
             "Date when principal smaller than offset for the first time: "
-            + principal_smaller_offset["Date"].strftime("%d/%m/%Y")
+            + principal_smaller_offset_first_date.strftime("%d/%m/%Y")
+        )
+
+        principal_smaller_offset_second_date = df_schedule_variable[
+            (df_schedule_variable["Principal"] <= balance_offset)
+            & (df_schedule_variable["Date"] > fixed_loan_end)
+        ].iloc[0]["Date"]
+        st.write(
+            "Date when principal smaller than offset for the second time: "
+            + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
         )
 
     df_schedule_variable["Schedule"] = "Fast"
@@ -952,12 +989,14 @@ with col2:
 
     interest_plot_variable = pd.DataFrame(df_schedule_variable)
     interest_plot_variable = interest_plot_variable[
-        interest_plot_variable["Interest"] > 0
+        (interest_plot_variable["Interest"] >= 0)
+        & (interest_plot_variable["Date"] > simulation_start)
     ]
 
     interest_plot_variable_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
     interest_plot_variable_wo_extra = interest_plot_variable_wo_extra[
-        interest_plot_variable_wo_extra["Interest"] > 0
+        (interest_plot_variable_wo_extra["Interest"] >= 0)
+        & (interest_plot_variable_wo_extra["Date"] > simulation_start)
     ]
 
     interest_plot_variable["Schedule"] = "Fast"
