@@ -1,4 +1,5 @@
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 import pandas as pd
 import numpy as np
 
@@ -31,6 +32,7 @@ def simulate(
         (
             0,
             0,
+            relativedelta(curr_date, schedule_start),
             curr_date,
             0,
             0,
@@ -113,6 +115,7 @@ def simulate(
                 (
                     (curr_date - schedule_start).days / (365 / 12),
                     (curr_date - schedule_start).days / 365,
+                    relativedelta(curr_date, schedule_start),
                     curr_date,
                     curr_interest,
                     curr_redraw,
@@ -126,6 +129,8 @@ def simulate(
         if maturity_is_today:
             break
 
+        # safety check
+
         if curr_date - schedule_start > timedelta(days=100 * 365):
             raise RuntimeError("Repayments did not finish within 100 years")
 
@@ -136,6 +141,7 @@ def simulate(
         columns=[
             "Months",
             "Years",
+            "Duration",
             "Date",
             "Interest",
             "Redraw",

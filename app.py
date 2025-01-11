@@ -626,6 +626,9 @@ with col1:
                     "Months": "{:,.2f}",
                     "Years": "{:,.2f}",
                     "Date": lambda x: x.strftime("%d/%m/%Y"),
+                    "Duration": lambda x: (
+                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
+                    ),
                     "Interest": "${:,.0f}",
                     "Redraw": "${:,.0f}",
                     "Repayment": "${:,.0f}",
@@ -961,6 +964,9 @@ with col2:
                     "Months": "{:,.2f}",
                     "Years": "{:,.2f}",
                     "Date": lambda x: x.strftime("%d/%m/%Y"),
+                    "Duration": lambda x: (
+                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
+                    ),
                     "Interest": "${:,.0f}",
                     "Redraw": "${:,.0f}",
                     "Repayment": "${:,.0f}",
