@@ -54,6 +54,8 @@ simulation_start = df_in[
     & ((df_in["Label"] == "Interest") | (df_in["Label"] == "Repayment"))
 ]["DateSeries"].iloc[-1]
 
+years_so_far = (simulation_start - loan_start).days / 365
+
 # Retrospective
 
 st.write("## Retrospective")
@@ -470,6 +472,10 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
+    st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
+    st.write("Start of schedule:", simulation_start.strftime("%d/%m/%Y"))
+    st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
+
     with st.expander("Overide interest and repayment cycle"):
 
         interest_cycle_sel = st.selectbox(
@@ -655,7 +661,11 @@ with col1:
         + "/h]"
     )
 
+    st.write("Time so far: " + f"{years_so_far:.2f} yrs")
     st.write("Time to go: " + f"{total_years_fixed:.2f} yrs")
+    st.write(
+        "Time so far and to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
+    )
 
     st.divider()
     st.write("##### Sums")
@@ -999,7 +1009,11 @@ with col2:
         + "/h]"
     )
 
+    st.write("Time so far: " + f"{years_so_far:.2f} yrs")
     st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
+    st.write(
+        "Time so far and to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
+    )
 
     st.divider()
     st.write("##### Sums")
@@ -1173,7 +1187,11 @@ with col2:
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
     st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
 
+    st.write("Time so far: " + f"{years_so_far:.2f} yrs")
     st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
+    st.write(
+        "Time so far and to go: " + f"{years_so_far + total_years_variable:.2f} yrs"
+    )
 
     interest_per_month = interest_per_month_fixed + interest_per_month_variable
 
