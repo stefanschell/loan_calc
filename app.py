@@ -48,13 +48,13 @@ else:
 df_in = account_reader.get_dataframe(data_folder, date_from=loan_start)
 df_in = account_interpreter.add_interest_information(df_in)
 
-# assuming that the last interest or repayment event is the start of the simulation
-simulation_start = df_in[
+# assuming that the last interest or repayment event is the start of the schedule
+schedule_start = df_in[
     ((df_in["AccountName"] == "Fixed") | (df_in["AccountName"] == "Variable"))
     & ((df_in["Label"] == "Interest") | (df_in["Label"] == "Repayment"))
 ]["DateSeries"].iloc[-1]
 
-years_so_far = (simulation_start - loan_start).days / 365
+years_so_far = (schedule_start - loan_start).days / 365
 
 # Retrospective
 
@@ -445,7 +445,7 @@ st.write(
     "Data shown in this section uses the account statements to extract balances, base repayments, extra repayments and interest rates. It then projects the accounts into the future. For this extra repayments can be adjusted by the user."
 )
 
-balance_fixed = account_interpreter.find_balance(df_balance_fixed, simulation_start)
+balance_fixed = account_interpreter.find_balance(df_balance_fixed, schedule_start)
 repayment_fixed = df_in[
     (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Repayment")
 ].iloc[-1]["Credit"]
@@ -453,9 +453,7 @@ interest_fixed = df_in[
     (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Interest")
 ].iloc[-1]["ApproxInterest"]
 
-balance_variable = account_interpreter.find_balance(
-    df_balance_variable, simulation_start
-)
+balance_variable = account_interpreter.find_balance(df_balance_variable, schedule_start)
 repayment_variable = df_in[
     (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Repayment")
 ].iloc[-1]["Credit"]
@@ -463,7 +461,7 @@ interest_variable = df_in[
     (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Interest")
 ].iloc[-1]["ApproxInterest"]
 
-balance_offset = account_interpreter.find_balance(df_balance_offset, simulation_start)
+balance_offset = account_interpreter.find_balance(df_balance_offset, schedule_start)
 
 repayment_cycle = "fortnightly"
 interest_cycle = "monthly"
@@ -473,7 +471,7 @@ _, col2, _ = st.columns(3)
 with col2:
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
-    st.write("Start of schedule:", simulation_start.strftime("%d/%m/%Y"))
+    st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
     with st.expander("Overide interest and repayment cycle"):
@@ -609,7 +607,7 @@ with col1:
         14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_total_fixed,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
-        simulation_start,
+        schedule_start,
         fixed_loan_end,
     )
 
@@ -620,7 +618,7 @@ with col1:
         14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_fixed,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
-        simulation_start,
+        schedule_start,
         fixed_loan_end,
     )
 
@@ -728,13 +726,13 @@ with col1:
     interest_plot_fixed = pd.DataFrame(df_schedule_fixed)
     interest_plot_fixed = interest_plot_fixed[
         (interest_plot_fixed["Interest"] >= 0)
-        & (interest_plot_fixed["Date"] > simulation_start)
+        & (interest_plot_fixed["Date"] > schedule_start)
     ]
 
     interest_plot_fixed_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
     interest_plot_fixed_wo_extra = interest_plot_fixed_wo_extra[
         (interest_plot_fixed_wo_extra["Interest"] >= 0)
-        & (interest_plot_fixed_wo_extra["Date"] > simulation_start)
+        & (interest_plot_fixed_wo_extra["Date"] > schedule_start)
     ]
 
     interest_plot_fixed["Schedule"] = "Fast"
@@ -758,13 +756,13 @@ with col1:
     repayment_plot_fixed = pd.DataFrame(df_schedule_fixed)
     repayment_plot_fixed = repayment_plot_fixed[
         (repayment_plot_fixed["Repayment"] >= 0)
-        & (repayment_plot_fixed["Date"] > simulation_start)
+        & (repayment_plot_fixed["Date"] > schedule_start)
     ]
 
     repayment_plot_fixed_wo_extra = pd.DataFrame(df_schedule_fixed_wo_extra)
     repayment_plot_fixed_wo_extra = repayment_plot_fixed_wo_extra[
         (repayment_plot_fixed_wo_extra["Repayment"] >= 0)
-        & (repayment_plot_fixed_wo_extra["Date"] > simulation_start)
+        & (repayment_plot_fixed_wo_extra["Date"] > schedule_start)
     ]
 
     repayment_plot_fixed["Schedule"] = "Fast"
@@ -931,7 +929,7 @@ with col2:
         14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_total_variable,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
-        simulation_start,
+        schedule_start,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -945,7 +943,7 @@ with col2:
         14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_variable,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
-        simulation_start,
+        schedule_start,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance_wo_extra,
@@ -959,7 +957,7 @@ with col2:
         14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment_total_variable,
         14 if repayment_cycle == "fortnightly" else (365 / 12),
-        simulation_start,
+        schedule_start,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -1099,13 +1097,13 @@ with col2:
     interest_plot_variable = pd.DataFrame(df_schedule_variable)
     interest_plot_variable = interest_plot_variable[
         (interest_plot_variable["Interest"] >= 0)
-        & (interest_plot_variable["Date"] > simulation_start)
+        & (interest_plot_variable["Date"] > schedule_start)
     ]
 
     interest_plot_variable_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
     interest_plot_variable_wo_extra = interest_plot_variable_wo_extra[
         (interest_plot_variable_wo_extra["Interest"] >= 0)
-        & (interest_plot_variable_wo_extra["Date"] > simulation_start)
+        & (interest_plot_variable_wo_extra["Date"] > schedule_start)
     ]
 
     interest_plot_variable["Schedule"] = "Fast"
@@ -1129,13 +1127,13 @@ with col2:
     repayment_plot_variable = pd.DataFrame(df_schedule_variable)
     repayment_plot_variable = repayment_plot_variable[
         (repayment_plot_variable["Repayment"] >= 0)
-        & (repayment_plot_variable["Date"] > simulation_start)
+        & (repayment_plot_variable["Date"] > schedule_start)
     ]
 
     repayment_plot_variable_wo_extra = pd.DataFrame(df_schedule_variable_wo_extra)
     repayment_plot_variable_wo_extra = repayment_plot_variable_wo_extra[
         (repayment_plot_variable_wo_extra["Repayment"] >= 0)
-        & (repayment_plot_variable_wo_extra["Date"] > simulation_start)
+        & (repayment_plot_variable_wo_extra["Date"] > schedule_start)
     ]
 
     repayment_plot_variable["Schedule"] = "Fast"
