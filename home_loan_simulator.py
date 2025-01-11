@@ -126,6 +126,11 @@ def simulate(
         if maturity_is_today:
             break
 
+        if curr_date - schedule_start > timedelta(days=100 * 365):
+            raise RuntimeError("Repayments did not finish within 100 years")
+
+    # return result
+
     return pd.DataFrame(
         schedule,
         columns=[
