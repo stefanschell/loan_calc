@@ -939,6 +939,20 @@ with col2:
         leftover_repayment=repayment_total_fixed,
     )
 
+    df_schedule_variable_plus1000 = home_loan_simulator.simulate(
+        balance_variable + 1000,
+        balance_offset,
+        interest_variable,
+        14 if interest_cycle == "fortnightly" else (365 / 12),
+        repayment_total_variable,
+        14 if repayment_cycle == "fortnightly" else (365 / 12),
+        simulation_start,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance,
+        leftover_repayment=repayment_total_fixed,
+    )
+
     with st.expander("View detailed schedule"):
 
         st.write(
@@ -958,6 +972,10 @@ with col2:
     total_years_variable = df_schedule_variable.iloc[-1]["Years"]
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
+
+    total_repayments_variable_plus1000 = df_schedule_variable_plus1000[
+        "Repayment"
+    ].sum()
 
     interest_per_month_variable = (
         (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
@@ -1193,6 +1211,10 @@ with col2:
     st.write(
         ":blue[Total repayment to go: "
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
+    )
+    st.write(
+        ":blue[Repayment for each additional \\$1,000: "
+        + f"${(total_repayments_variable_plus1000 - total_repayments_variable):,.0f}]"
     )
     st.write(
         ":blue[Total repayment so far and to go: "
