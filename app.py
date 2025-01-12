@@ -954,7 +954,7 @@ with col2:
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance_wo_extra,
-        leftover_repayment=repayment_total_fixed,
+        leftover_repayment=repayment_fixed,
     )
 
     df_schedule_variable_plus1000 = home_loan_simulator.simulate(
