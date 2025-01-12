@@ -5,13 +5,15 @@ import numpy as np
 
 
 def simulate(
+    *,
     principal,
     offset,
     interest_rate,
+    prev_interest_date,
     interest_cycle_days,
     repayment,
+    prev_repayment_date,
     repayment_cycle_days,
-    schedule_start,
     schedule_end=None,
     leftover_incoming=None,
     leftover_amount=None,
@@ -20,8 +22,7 @@ def simulate(
     interest_cycle_days = timedelta(days=interest_cycle_days)
     repayment_cycle_days = timedelta(days=repayment_cycle_days)
 
-    prev_interest_date = schedule_start
-    prev_repayment_date = schedule_start
+    schedule_start = min(prev_interest_date, prev_repayment_date)
 
     curr_date = schedule_start
 

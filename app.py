@@ -56,6 +56,9 @@ schedule_start = df_in[
 
 years_so_far = (schedule_start - loan_start).days / 365
 
+prev_interest_date = schedule_start
+prev_repayment_date = schedule_start
+
 # Retrospective
 
 st.write("## Retrospective")
@@ -601,25 +604,27 @@ with col1:
         )
 
     df_schedule_fixed = home_loan_simulator.simulate(
-        balance_fixed,
-        0,
-        interest_fixed,
-        14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_total_fixed,
-        14 if repayment_cycle == "fortnightly" else (365 / 12),
-        schedule_start,
-        fixed_loan_end,
+        principal=balance_fixed,
+        offset=0,
+        interest_rate=interest_fixed,
+        prev_interest_date=prev_interest_date,
+        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        repayment=repayment_total_fixed,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        schedule_end=fixed_loan_end,
     )
 
     df_schedule_fixed_wo_extra = home_loan_simulator.simulate(
-        balance_fixed,
-        0,
-        interest_fixed,
-        14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_fixed,
-        14 if repayment_cycle == "fortnightly" else (365 / 12),
-        schedule_start,
-        fixed_loan_end,
+        principal=balance_fixed,
+        offset=0,
+        interest_rate=interest_fixed,
+        prev_interest_date=prev_interest_date,
+        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        repayment=repayment_fixed,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        schedule_end=fixed_loan_end,
     )
 
     with st.expander("View detailed schedule"):
@@ -923,13 +928,14 @@ with col2:
         )
 
     df_schedule_variable = home_loan_simulator.simulate(
-        balance_variable,
-        balance_offset,
-        interest_variable,
-        14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_total_variable,
-        14 if repayment_cycle == "fortnightly" else (365 / 12),
-        schedule_start,
+        principal=balance_variable,
+        offset=balance_offset,
+        interest_rate=interest_variable,
+        prev_interest_date=prev_interest_date,
+        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        repayment=repayment_total_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -937,13 +943,14 @@ with col2:
     )
 
     df_schedule_variable_wo_extra = home_loan_simulator.simulate(
-        balance_variable,
-        balance_offset,
-        interest_variable,
-        14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_variable,
-        14 if repayment_cycle == "fortnightly" else (365 / 12),
-        schedule_start,
+        principal=balance_variable,
+        offset=balance_offset,
+        interest_rate=interest_variable,
+        prev_interest_date=prev_interest_date,
+        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        repayment=repayment_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle_days=4 if repayment_cycle == "fortnightly" else (365 / 12),
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance_wo_extra,
@@ -951,13 +958,14 @@ with col2:
     )
 
     df_schedule_variable_plus1000 = home_loan_simulator.simulate(
-        balance_variable + 1000,
-        balance_offset,
-        interest_variable,
-        14 if interest_cycle == "fortnightly" else (365 / 12),
-        repayment_total_variable,
-        14 if repayment_cycle == "fortnightly" else (365 / 12),
-        schedule_start,
+        principal=balance_variable + 1000,
+        offset=balance_offset,
+        interest_rate=interest_variable,
+        prev_interest_date=prev_interest_date,
+        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        repayment=repayment_total_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
