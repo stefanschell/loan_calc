@@ -7,18 +7,31 @@ import numpy as np
 
 class Cycle(Enum):
     FORTNIGHTLY = "fortnightly"
-    MONTHLY_AVERAGE = "monthly (average)"
+    MONTHLY_AVERAGE = "monthly (every 365/12 days)"
+    MONTHLY_1ST_OF_MONTH = "monthly (1st of every month)"
+    MONTHLY_END_OF_MONTH = "monthly (end of every month)"
 
     def __str__(self):
         return str(self.value)
 
 
-def increment_date(prev_date, cycle: Cycle):
+def increment_date(date, cycle: Cycle):
     if cycle == Cycle.FORTNIGHTLY:
-        return prev_date + timedelta(days=14)
+        date = date + timedelta(days=14)
     elif cycle == Cycle.MONTHLY_AVERAGE:
-        return prev_date + timedelta(days=365 / 12)
-    raise ValueError("Invalid cycle")
+        date = date + timedelta(days=365 / 12)
+    elif cycle == Cycle.MONTHLY_1ST_OF_MONTH:
+        date = date.replace(day=1)  # first of current month
+        date = (date + timedelta(days=31)).replace(day=1)  # first of next month
+        return date
+    elif cycle == Cycle.MONTHLY_END_OF_MONTH:
+        date = date.replace(day=1)  # first of current month
+        date = (date + timedelta(days=31)).replace(day=1)  # first of next month
+        date = (date + timedelta(days=31)).replace(day=1)  # first of month after next
+        date = date - timedelta(days=1)  # end of next month
+    else:
+        raise ValueError("Invalid cycle")
+    return date
 
 
 def simulate(

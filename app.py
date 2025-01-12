@@ -462,7 +462,7 @@ interest_variable = df_in[
 balance_offset = account_interpreter.find_balance(df_balance_offset, schedule_start)
 
 repayment_cycle = home_loan_simulator.Cycle.FORTNIGHTLY
-interest_cycle = home_loan_simulator.Cycle.MONTHLY_AVERAGE
+interest_cycle = home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH
 
 _, col2, _ = st.columns(3)
 
@@ -479,7 +479,7 @@ with col2:
         interest_cycle_sel = st.selectbox(
             "Interest cycle override",
             (item for item in home_loan_simulator.Cycle),
-            index=1,
+            index=3,
         )
         if interest_cycle_sel is not None:
             interest_cycle = interest_cycle_sel
