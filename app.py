@@ -548,7 +548,7 @@ with col1:
 
     st.write("Offset: None")
 
-    with st.expander("Theoretical plan (for information only, not used)"):
+    with st.expander("Theoretical schedule (for information only, not used)"):
         years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
 
         planner_fixed = home_loan_planner.HomeLoanPlanner(
@@ -867,7 +867,7 @@ with col2:
 
     st.write("Offset: " + f"${balance_offset:,.0f}")
 
-    with st.expander("Theoretical plan (for information only, not used)"):
+    with st.expander("Theoretical schedule (for information only, not used)"):
         years_planner_variable = st.number_input("Years", 1, 40, 25, 1, key="k2i")
 
         planner_variable = home_loan_planner.HomeLoanPlanner(
@@ -1070,9 +1070,7 @@ with col2:
         "Principal"
     ]
     st.write(
-        "Variable loan balance shortly before end of fixed loan term ("
-        + fixed_loan_end.strftime("%d/%m/%Y")
-        + "): "
+        "Variable loan balance shortly before end of fixed loan term: "
         + f"${before_end_of_fixed_loan_balance:,.0f}"
     )
 
