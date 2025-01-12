@@ -113,13 +113,13 @@ def simulate(
                 else curr_date
             )
 
-            curr_interest_cycle_days = curr_interest_date - prev_interest_date
+            curr_interest_length = curr_interest_date - prev_interest_date
 
             curr_interest = (
                 np.mean(owing_daily_hist)
                 * (
-                    (curr_interest_cycle_days.days / float(365))
-                    + (curr_interest_cycle_days.seconds / float(60 * 60 * 24 * 365))
+                    (curr_interest_length.days / float(365))
+                    + (curr_interest_length.seconds / float(60 * 60 * 24 * 365))
                 )
                 * (interest_rate / 100)
             )
