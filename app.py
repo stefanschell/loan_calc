@@ -474,7 +474,7 @@ with col2:
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
-    with st.expander("Overide interest and repayment cycle"):
+    with st.expander("Override interest and repayment cycle"):
 
         interest_cycle_sel = st.selectbox(
             "Interest cycle override", ("fortnightly", "monthly"), index=1
@@ -839,7 +839,7 @@ with col2:
 
         if toggle_offset:
             balance_offset = st.number_input(
-                "Offset overide ($)", 0, 300000, 100000, 1000, key="k2h"
+                "Offset override ($)", 0, 300000, 100000, 1000, key="k2h"
             )
 
     st.write("Balance: " + f"${balance_variable:,.0f}")
