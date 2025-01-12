@@ -7,12 +7,28 @@ import numpy as np
 
 class Cycle(Enum):
     FORTNIGHTLY = "fortnightly"
-    MONTHLY_AVERAGE = "monthly (every 365/12 days)"
-    MONTHLY_1ST_OF_MONTH = "monthly (1st of every month)"
-    MONTHLY_END_OF_MONTH = "monthly (end of every month)"
+    MONTHLY_AVERAGE = "monthly, every 365/12 days"
+    MONTHLY_1ST_OF_MONTH = "monthly, 1st of every month"
+    MONTHLY_END_OF_MONTH = "monthly, end of every month"
 
-    def __str__(self):
+    def complex_str(self):
         return str(self.value)
+
+    def simple_str(self):
+        if "," in self.value:
+            return self.value.split(",")[0]
+        else:
+            return self.value
+
+    def is_fortnightly(self):
+        return self in [Cycle.FORTNIGHTLY]
+
+    def is_monthly(self):
+        return self in [
+            Cycle.MONTHLY_AVERAGE,
+            Cycle.MONTHLY_1ST_OF_MONTH,
+            Cycle.MONTHLY_END_OF_MONTH,
+        ]
 
 
 def increment_date(date, cycle: Cycle):
