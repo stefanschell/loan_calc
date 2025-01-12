@@ -6,6 +6,7 @@ import numpy as np
 
 def simulate(
     *,
+    loan_start,
     principal,
     offset,
     schedule_start,
@@ -30,10 +31,11 @@ def simulate(
 
     schedule.append(
         (
-            0,
-            0,
-            relativedelta(curr_date, schedule_start),
             curr_date,
+            (curr_date - loan_start).days / 365,
+            relativedelta(curr_date, loan_start),
+            (curr_date - schedule_start).days / 365,
+            relativedelta(curr_date, schedule_start),
             0,
             0,
             0,
@@ -113,10 +115,11 @@ def simulate(
         ):
             schedule.append(
                 (
-                    (curr_date - schedule_start).days / (365 / 12),
+                    curr_date,
+                    (curr_date - loan_start).days / 365,
+                    relativedelta(curr_date, loan_start),
                     (curr_date - schedule_start).days / 365,
                     relativedelta(curr_date, schedule_start),
-                    curr_date,
                     curr_interest,
                     curr_redraw,
                     curr_repayment,
@@ -139,10 +142,11 @@ def simulate(
     return pd.DataFrame(
         schedule,
         columns=[
-            "Months",
-            "Years",
-            "Duration",
             "Date",
+            "LoanYears",
+            "LoanDuration",
+            "ScheduleYears",
+            "ScheduleDuration",
             "Interest",
             "Redraw",
             "Repayment",

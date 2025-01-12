@@ -601,6 +601,7 @@ with col1:
         )
 
     df_schedule_fixed = home_loan_simulator.simulate(
+        loan_start=loan_start,
         principal=balance_fixed,
         offset=0,
         schedule_start=schedule_start,
@@ -614,6 +615,7 @@ with col1:
     )
 
     df_schedule_fixed_wo_extra = home_loan_simulator.simulate(
+        loan_start=loan_start,
         principal=balance_fixed,
         offset=0,
         schedule_start=schedule_start,
@@ -631,10 +633,13 @@ with col1:
         st.write(
             df_schedule_fixed.style.format(
                 {
-                    "Months": "{:,.2f}",
-                    "Years": "{:,.2f}",
                     "Date": lambda x: x.strftime("%d/%m/%Y"),
-                    "Duration": lambda x: (
+                    "LoanYears": "{:,.2f}",
+                    "LoanDuration": lambda x: (
+                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
+                    ),
+                    "ScheduleYears": "{:,.2f}",
+                    "ScheduleDuration": lambda x: (
                         str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
                     ),
                     "Interest": "${:,.0f}",
@@ -645,7 +650,7 @@ with col1:
             )
         )
 
-    total_years_fixed = df_schedule_fixed.iloc[-1]["Years"]
+    total_years_fixed = df_schedule_fixed.iloc[-1]["ScheduleYears"]
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
 
@@ -746,13 +751,13 @@ with col1:
     )
 
     fig2 = px.scatter(
-        interest_plot_fixed_merged, x="Years", y="Interest", color="Schedule"
+        interest_plot_fixed_merged, x="ScheduleYears", y="Interest", color="Schedule"
     )
     fig2.update_layout(
         title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
     )
     fig2.update_traces(marker=dict(size=3))
-    fig2.update_xaxes(title_text="Years")
+    fig2.update_xaxes(title_text="ScheduleYears")
     fig2.update_yaxes(title_text="Interest ($, monthly)")
 
     st.plotly_chart(fig2)
@@ -781,13 +786,13 @@ with col1:
         )
 
     fig3 = px.scatter(
-        repayment_plot_fixed_merged, x="Years", y="Repayment", color="Schedule"
+        repayment_plot_fixed_merged, x="ScheduleYears", y="Repayment", color="Schedule"
     )
     fig3.update_layout(
         title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
     )
     fig3.update_traces(marker=dict(size=3))
-    fig3.update_xaxes(title_text="Years")
+    fig3.update_xaxes(title_text="ScheduleYears")
     fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
 
     st.plotly_chart(fig3)
@@ -927,6 +932,7 @@ with col2:
         )
 
     df_schedule_variable = home_loan_simulator.simulate(
+        loan_start=loan_start,
         principal=balance_variable,
         offset=balance_offset,
         schedule_start=schedule_start,
@@ -943,6 +949,7 @@ with col2:
     )
 
     df_schedule_variable_wo_extra = home_loan_simulator.simulate(
+        loan_start=loan_start,
         principal=balance_variable,
         offset=balance_offset,
         schedule_start=schedule_start,
@@ -959,6 +966,7 @@ with col2:
     )
 
     df_schedule_variable_plus1000 = home_loan_simulator.simulate(
+        loan_start=loan_start,
         principal=balance_variable + 1000,
         offset=balance_offset,
         schedule_start=schedule_start,
@@ -979,10 +987,13 @@ with col2:
         st.write(
             df_schedule_variable.style.format(
                 {
-                    "Months": "{:,.2f}",
-                    "Years": "{:,.2f}",
                     "Date": lambda x: x.strftime("%d/%m/%Y"),
-                    "Duration": lambda x: (
+                    "LoanYears": "{:,.2f}",
+                    "LoanDuration": lambda x: (
+                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
+                    ),
+                    "ScheduleYears": "{:,.2f}",
+                    "ScheduleDuration": lambda x: (
                         str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
                     ),
                     "Interest": "${:,.0f}",
@@ -993,7 +1004,7 @@ with col2:
             )
         )
 
-    total_years_variable = df_schedule_variable.iloc[-1]["Years"]
+    total_years_variable = df_schedule_variable.iloc[-1]["ScheduleYears"]
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
@@ -1123,13 +1134,13 @@ with col2:
     )
 
     fig2 = px.scatter(
-        interest_plot_variable_merged, x="Years", y="Interest", color="Schedule"
+        interest_plot_variable_merged, x="ScheduleYears", y="Interest", color="Schedule"
     )
     fig2.update_layout(
         title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
     )
     fig2.update_traces(marker=dict(size=3))
-    fig2.update_xaxes(title_text="Years")
+    fig2.update_xaxes(title_text="ScheduleYears")
     fig2.update_yaxes(title_text="Interest ($, monthly)")
 
     st.plotly_chart(fig2)
@@ -1158,13 +1169,16 @@ with col2:
         )
 
     fig3 = px.scatter(
-        repayment_plot_variable_merged, x="Years", y="Repayment", color="Schedule"
+        repayment_plot_variable_merged,
+        x="ScheduleYears",
+        y="Repayment",
+        color="Schedule",
     )
     fig3.update_layout(
         title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
     )
     fig3.update_traces(marker=dict(size=3))
-    fig3.update_xaxes(title_text="Years")
+    fig3.update_xaxes(title_text="ScheduleYears")
     fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
 
     st.plotly_chart(fig3)
