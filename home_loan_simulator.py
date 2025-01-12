@@ -8,6 +8,7 @@ def simulate(
     *,
     principal,
     offset,
+    schedule_start,
     interest_rate,
     prev_interest_date,
     interest_cycle_days,
@@ -21,8 +22,6 @@ def simulate(
 ):
     interest_cycle_days = timedelta(days=interest_cycle_days)
     repayment_cycle_days = timedelta(days=repayment_cycle_days)
-
-    schedule_start = min(prev_interest_date, prev_repayment_date)
 
     curr_date = schedule_start
 

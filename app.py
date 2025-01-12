@@ -48,17 +48,6 @@ else:
 df_in = account_reader.get_dataframe(data_folder, date_from=loan_start)
 df_in = account_interpreter.add_interest_information(df_in)
 
-# assuming that the last interest or repayment event is the start of the schedule
-schedule_start = df_in[
-    ((df_in["AccountName"] == "Fixed") | (df_in["AccountName"] == "Variable"))
-    & ((df_in["Label"] == "Interest") | (df_in["Label"] == "Repayment"))
-]["DateSeries"].iloc[-1]
-
-years_so_far = (schedule_start - loan_start).days / 365
-
-prev_interest_date = schedule_start
-prev_repayment_date = schedule_start
-
 # Retrospective
 
 st.write("## Retrospective")
@@ -448,6 +437,12 @@ st.write(
     "Data shown in this section uses the account statements to extract balances, base repayments, extra repayments and interest rates. It then projects the accounts into the future. For this extra repayments can be adjusted by the user."
 )
 
+prev_interest_date = df_in[df_in["Label"] == "Interest"]["DateSeries"].iloc[-1]
+prev_repayment_date = df_in[df_in["Label"] == "Repayment"]["DateSeries"].iloc[-1]
+schedule_start = max(prev_interest_date, prev_repayment_date)
+
+years_so_far = (schedule_start - loan_start).days / 365
+
 balance_fixed = account_interpreter.find_balance(df_balance_fixed, schedule_start)
 repayment_fixed = df_in[
     (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Repayment")
@@ -474,6 +469,8 @@ _, col2, _ = st.columns(3)
 with col2:
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
+    st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
+    st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
@@ -606,6 +603,7 @@ with col1:
     df_schedule_fixed = home_loan_simulator.simulate(
         principal=balance_fixed,
         offset=0,
+        schedule_start=schedule_start,
         interest_rate=interest_fixed,
         prev_interest_date=prev_interest_date,
         interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
@@ -618,6 +616,7 @@ with col1:
     df_schedule_fixed_wo_extra = home_loan_simulator.simulate(
         principal=balance_fixed,
         offset=0,
+        schedule_start=schedule_start,
         interest_rate=interest_fixed,
         prev_interest_date=prev_interest_date,
         interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
@@ -930,6 +929,7 @@ with col2:
     df_schedule_variable = home_loan_simulator.simulate(
         principal=balance_variable,
         offset=balance_offset,
+        schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
         interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
@@ -945,6 +945,7 @@ with col2:
     df_schedule_variable_wo_extra = home_loan_simulator.simulate(
         principal=balance_variable,
         offset=balance_offset,
+        schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
         interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
@@ -960,6 +961,7 @@ with col2:
     df_schedule_variable_plus1000 = home_loan_simulator.simulate(
         principal=balance_variable + 1000,
         offset=balance_offset,
+        schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
         interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
