@@ -6,8 +6,11 @@ import numpy as np
 
 
 class Cycle(Enum):
-    FORTNIGHTLY = 1
-    MONTHLY_AVERAGE = 2
+    FORTNIGHTLY = "fortnightly"
+    MONTHLY_AVERAGE = "monthly (average)"
+
+    def __str__(self):
+        return str(self.value)
 
 
 def increment_date(prev_date, cycle: Cycle):
