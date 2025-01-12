@@ -1,7 +1,21 @@
+from enum import Enum
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import numpy as np
+
+
+class Cycle(Enum):
+    FORTNIGHTLY = 1
+    MONTHLY_AVERAGE = 2
+
+
+def increment_date(prev_date, cycle: Cycle):
+    if cycle == Cycle.FORTNIGHTLY:
+        return prev_date + timedelta(days=14)
+    elif cycle == Cycle.MONTHLY_AVERAGE:
+        return prev_date + timedelta(days=365 / 12)
+    raise ValueError("Invalid cycle")
 
 
 def simulate(
@@ -12,18 +26,15 @@ def simulate(
     schedule_start,
     interest_rate,
     prev_interest_date,
-    interest_cycle_days,
+    interest_cycle: Cycle,
     repayment,
     prev_repayment_date,
-    repayment_cycle_days,
+    repayment_cycle: Cycle,
     schedule_end=None,
     leftover_incoming=None,
     leftover_amount=None,
     leftover_repayment=None,
 ):
-    interest_cycle_days = timedelta(days=interest_cycle_days)
-    repayment_cycle_days = timedelta(days=repayment_cycle_days)
-
     curr_date = schedule_start
 
     schedule = []
@@ -60,9 +71,12 @@ def simulate(
 
         owing_daily_hist.append(max(0, principal - offset))
 
-        if curr_date >= prev_interest_date + interest_cycle_days or maturity_is_today:
+        if (
+            curr_date >= increment_date(prev_interest_date, interest_cycle)
+            or maturity_is_today
+        ):
             curr_interest_date = (
-                prev_interest_date + interest_cycle_days
+                increment_date(prev_interest_date, interest_cycle)
                 if not maturity_is_today
                 else curr_date
             )
@@ -99,11 +113,11 @@ def simulate(
             if curr_date >= leftover_incoming:
                 actual_repayment = actual_repayment + leftover_repayment
 
-        if curr_date >= prev_repayment_date + repayment_cycle_days:
+        if curr_date >= increment_date(prev_repayment_date, repayment_cycle):
             curr_repayment = min(principal, actual_repayment)
 
             principal = principal - curr_repayment
-            prev_repayment_date = prev_repayment_date + repayment_cycle_days
+            prev_repayment_date = increment_date(prev_repayment_date, repayment_cycle)
 
         # data collection
 

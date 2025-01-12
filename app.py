@@ -461,8 +461,8 @@ interest_variable = df_in[
 
 balance_offset = account_interpreter.find_balance(df_balance_offset, schedule_start)
 
-repayment_cycle = "fortnightly"
-interest_cycle = "monthly"
+repayment_cycle = home_loan_simulator.Cycle.FORTNIGHTLY
+interest_cycle = home_loan_simulator.Cycle.MONTHLY_AVERAGE
 
 _, col2, _ = st.columns(3)
 
@@ -477,19 +477,23 @@ with col2:
     with st.expander("Override interest and repayment cycle"):
 
         interest_cycle_sel = st.selectbox(
-            "Interest cycle override", ("fortnightly", "monthly"), index=1
+            "Interest cycle override",
+            (item for item in home_loan_simulator.Cycle),
+            index=1,
         )
         if interest_cycle_sel is not None:
             interest_cycle = interest_cycle_sel
 
         repayment_cycle_sel = st.selectbox(
-            "Repayment cycle override", ("fortnightly", "monthly"), index=0
+            "Repayment cycle override",
+            (item for item in home_loan_simulator.Cycle),
+            index=0,
         )
         if repayment_cycle_sel is not None:
             repayment_cycle = repayment_cycle_sel
 
-    st.write("Interest cycle: " + interest_cycle)
-    st.write("Repayment cycle: " + repayment_cycle)
+    st.write("Interest cycle: " + str(interest_cycle))
+    st.write("Repayment cycle: " + str(repayment_cycle))
 
 col1, col2 = st.columns(2)
 
@@ -535,12 +539,12 @@ with col1:
 
     st.write(
         ":orange[Base repayment ("
-        + repayment_cycle
+        + str(repayment_cycle)
         + "): "
         + f"${repayment_fixed:,.0f}]"
     )
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         st.write(
             ":orange[Base repayment (monthly): "
             + f"${(repayment_fixed / 14 * (365 / 12)):,.0f}]"
@@ -554,14 +558,18 @@ with col1:
         planner_fixed = home_loan_planner.HomeLoanPlanner(
             "Fixed",
             N=years_planner_fixed,
-            k=(365 / 14) if repayment_cycle == "fortnightly" else 12,
+            k=(
+                (365 / 14)
+                if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY
+                else 12
+            ),
             P=balance_fixed,
             R0=interest_fixed / 100,
         )
 
         st.write(
             "Repayment ("
-            + repayment_cycle
+            + str(repayment_cycle)
             + "), for identical repayment and interest cycles: "
             + f"${planner_fixed.c0:,.0f}"
         )
@@ -579,7 +587,7 @@ with col1:
     )
 
     repayment_extra_fixed = extra_slider_fixed
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         repayment_extra_fixed = repayment_extra_fixed / (365 / 12) * 14
         st.write(
             ":green[Extra repayment (fortnightly): " + f"${repayment_extra_fixed:,.0f}]"
@@ -589,12 +597,12 @@ with col1:
 
     st.write(
         ":blue[Total repayment ("
-        + repayment_cycle
+        + str(repayment_cycle)
         + "): "
         + f"${repayment_total_fixed:,.0f}]"
     )
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         st.write(
             ":blue[Total repayment (monthly): "
             + f"${(repayment_total_fixed / 14 * (365 / 12)):,.0f}]"
@@ -607,10 +615,10 @@ with col1:
         schedule_start=schedule_start,
         interest_rate=interest_fixed,
         prev_interest_date=prev_interest_date,
-        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        interest_cycle=interest_cycle,
         repayment=repayment_total_fixed,
         prev_repayment_date=prev_repayment_date,
-        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        repayment_cycle=repayment_cycle,
         schedule_end=fixed_loan_end,
     )
 
@@ -621,10 +629,10 @@ with col1:
         schedule_start=schedule_start,
         interest_rate=interest_fixed,
         prev_interest_date=prev_interest_date,
-        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        interest_cycle=interest_cycle,
         repayment=repayment_fixed,
         prev_repayment_date=prev_repayment_date,
-        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        repayment_cycle=repayment_cycle,
         schedule_end=fixed_loan_end,
     )
 
@@ -780,7 +788,7 @@ with col1:
         [repayment_plot_fixed, repayment_plot_fixed_wo_extra]
     )
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         repayment_plot_fixed_merged["Repayment"] = (
             repayment_plot_fixed_merged["Repayment"] / 14 * (365 / 12)
         )
@@ -848,7 +856,7 @@ with col2:
 
     st.write(
         ":orange[Base repayment ("
-        + repayment_cycle
+        + str(repayment_cycle)
         + "): "
         + f"${repayment_variable:,.0f}"
         + " (plus fixed after "
@@ -856,7 +864,7 @@ with col2:
         + ")]"
     )
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         st.write(
             ":orange[Base repayment (monthly): "
             + f"${(repayment_variable / 14 * (365 / 12)):,.0f}"
@@ -873,14 +881,18 @@ with col2:
         planner_variable = home_loan_planner.HomeLoanPlanner(
             "Fixed",
             N=years_planner_variable,
-            k=(365 / 14) if repayment_cycle == "fortnightly" else 12,
+            k=(
+                (365 / 14)
+                if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY
+                else 12
+            ),
             P=balance_variable - balance_offset,
             R0=interest_variable / 100,
         )
 
         st.write(
             "Repayment ("
-            + repayment_cycle
+            + str(repayment_cycle)
             + "), for identical repayment and interest cycles: "
             + f"${planner_variable.c0:,.0f}"
         )
@@ -900,7 +912,7 @@ with col2:
     )
 
     repayment_extra_variable = extra_slider_variable
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         repayment_extra_variable = repayment_extra_variable / (365 / 12) * 14
         st.write(
             ":green[Extra repayment (fortnightly): "
@@ -914,7 +926,7 @@ with col2:
 
     st.write(
         ":blue[Total repayment ("
-        + repayment_cycle
+        + str(repayment_cycle)
         + "): "
         + f"${repayment_total_variable:,.0f}"
         + " (plus fixed after "
@@ -922,7 +934,7 @@ with col2:
         + ")]"
     )
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         st.write(
             ":blue[Total repayment (monthly): "
             + f"${(repayment_total_variable / 14 * (365 / 12)):,.0f}"
@@ -938,10 +950,10 @@ with col2:
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
-        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        interest_cycle=interest_cycle,
         repayment=repayment_total_variable,
         prev_repayment_date=prev_repayment_date,
-        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        repayment_cycle=repayment_cycle,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -955,10 +967,10 @@ with col2:
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
-        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        interest_cycle=interest_cycle,
         repayment=repayment_variable,
         prev_repayment_date=prev_repayment_date,
-        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        repayment_cycle=repayment_cycle,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance_wo_extra,
@@ -972,10 +984,10 @@ with col2:
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
-        interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
+        interest_cycle=interest_cycle,
         repayment=repayment_total_variable,
         prev_repayment_date=prev_repayment_date,
-        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
+        repayment_cycle=repayment_cycle,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -1161,7 +1173,7 @@ with col2:
         [repayment_plot_variable, repayment_plot_variable_wo_extra]
     )
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         repayment_plot_variable_merged["Repayment"] = (
             repayment_plot_variable_merged["Repayment"] / 14 * (365 / 12)
         )
@@ -1192,7 +1204,7 @@ with col2:
     total_wo_extra = repayment_fixed + repayment_variable
     total_extra = repayment_extra_fixed + repayment_extra_variable
 
-    if repayment_cycle == "fortnightly":
+    if repayment_cycle == home_loan_simulator.Cycle.FORTNIGHTLY:
         total_wo_extra = total_wo_extra / 14 * (365 / 12)
         total_extra = total_extra / 14 * (365 / 12)
 
