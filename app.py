@@ -950,7 +950,7 @@ with col2:
         interest_cycle_days=14 if interest_cycle == "fortnightly" else (365 / 12),
         repayment=repayment_variable,
         prev_repayment_date=prev_repayment_date,
-        repayment_cycle_days=4 if repayment_cycle == "fortnightly" else (365 / 12),
+        repayment_cycle_days=14 if repayment_cycle == "fortnightly" else (365 / 12),
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance_wo_extra,
