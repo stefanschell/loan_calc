@@ -196,104 +196,54 @@ df_change_variable = account_interpreter.add_interpolated_value(
     drop_original=False,
 )
 
-col1, col2 = st.columns(2)
 
-with col1:
-    if show_so_far_information:
-        st.write("#### Fixed")
+total_interest_so_far_fixed = df_change_fixed[
+    (df_change_fixed["Label"] == "Interest")
+    & (df_change_fixed["interpolated"] == False)
+]["Change"].sum()
 
-    total_interest_so_far_fixed = df_change_fixed[
-        (df_change_fixed["Label"] == "Interest")
-        & (df_change_fixed["interpolated"] == False)
-    ]["Change"].sum()
+base_repayment_so_far_fixed = df_change_fixed[
+    (df_change_fixed["Label"] == "Repayment")
+    & (df_change_fixed["interpolated"] == False)
+]["Change"].sum()
 
-    base_repayment_so_far_fixed = df_change_fixed[
-        (df_change_fixed["Label"] == "Repayment")
-        & (df_change_fixed["interpolated"] == False)
-    ]["Change"].sum()
+extra_repayment_so_far_fixed = df_change_fixed[
+    (df_change_fixed["Label"] == "Extrarepayment")
+    & (df_change_fixed["interpolated"] == False)
+]["Change"].sum()
 
-    extra_repayment_so_far_fixed = df_change_fixed[
-        (df_change_fixed["Label"] == "Extrarepayment")
-        & (df_change_fixed["interpolated"] == False)
-    ]["Change"].sum()
+total_repayments_so_far_fixed = (
+    base_repayment_so_far_fixed + extra_repayment_so_far_fixed
+)
 
-    total_repayments_so_far_fixed = (
-        base_repayment_so_far_fixed + extra_repayment_so_far_fixed
-    )
+total_interest_so_far_variable = df_change_variable[
+    (df_change_variable["Label"] == "Interest")
+    & (df_change_variable["interpolated"] == False)
+]["Change"].sum()
 
-    if show_so_far_information:
-        st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
-        st.write(
-            ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
-        )
-        st.write(
-            ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
-        )
-        st.write(
-            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
-        )
+base_repayment_so_far_variable = df_change_variable[
+    (df_change_variable["Label"] == "Repayment")
+    & (df_change_variable["interpolated"] == False)
+]["Change"].sum()
 
-with col2:
-    if show_so_far_information:
-        st.write("#### Variable")
+extra_repayment_so_far_variable = df_change_variable[
+    (df_change_variable["Label"] == "Extrarepayment")
+    & (df_change_variable["interpolated"] == False)
+]["Change"].sum()
 
-    total_interest_so_far_variable = df_change_variable[
-        (df_change_variable["Label"] == "Interest")
-        & (df_change_variable["interpolated"] == False)
-    ]["Change"].sum()
+total_repayments_so_far_variable = (
+    base_repayment_so_far_variable + extra_repayment_so_far_variable
+)
 
-    base_repayment_so_far_variable = df_change_variable[
-        (df_change_variable["Label"] == "Repayment")
-        & (df_change_variable["interpolated"] == False)
-    ]["Change"].sum()
+total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_variable
 
-    extra_repayment_so_far_variable = df_change_variable[
-        (df_change_variable["Label"] == "Extrarepayment")
-        & (df_change_variable["interpolated"] == False)
-    ]["Change"].sum()
+base_repayment_so_far = base_repayment_so_far_fixed + base_repayment_so_far_variable
 
-    total_repayments_so_far_variable = (
-        base_repayment_so_far_variable + extra_repayment_so_far_variable
-    )
+extra_repayment_so_far = extra_repayment_so_far_fixed + extra_repayment_so_far_variable
 
-    if show_so_far_information:
-        st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
-        st.write(
-            ":orange[Base repayment so far: "
-            + f"${base_repayment_so_far_variable:,.0f}]"
-        )
-        st.write(
-            ":green[Extra repayment so far: "
-            + f"${extra_repayment_so_far_variable:,.0f}]"
-        )
-        st.write(
-            ":blue[Total repayment so far: "
-            + f"${total_repayments_so_far_variable:,.0f}]"
-        )
-
-_, col2, _ = st.columns(3)
-
-with col2:
-    if show_so_far_information:
-        st.write("#### Fixed & Variable")
-
-    total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_variable
-
-    base_repayment_so_far = base_repayment_so_far_fixed + base_repayment_so_far_variable
-
-    extra_repayment_so_far = (
-        extra_repayment_so_far_fixed + extra_repayment_so_far_variable
-    )
-
-    total_repayments_so_far = (
-        total_repayments_so_far_fixed + total_repayments_so_far_variable
-    )
-
-    if show_so_far_information:
-        st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
-        st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
-        st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
-        st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
+total_repayments_so_far = (
+    total_repayments_so_far_fixed + total_repayments_so_far_variable
+)
 
 col1, col2 = st.columns(2)
 
@@ -335,8 +285,6 @@ with col1:
         fig.update_yaxes(title_text="Change ($)")
 
         st.plotly_chart(fig, key="p2")
-
-    st.write("Extra repayment data extracted from variable loan account only.")
 
 with col2:
     st.write("#### Variable")
@@ -382,6 +330,19 @@ with col2:
         & (df_change_variable["Label"] == "Extrarepayment")
     ].iloc[-1]["Change"]
 
+
+_, col2, _ = st.columns(3)
+
+with col2:
+
+    st.write("##### Evaluation")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.write("Extra repayment data extracted from variable loan account only.")
+
+with col2:
     st.write(
         "Latest extracted extra repayment (monthly): "
         + f"${prev_extrarepayment_interpolated:,.0f}"
@@ -399,7 +360,6 @@ with col2:
         prev_extrarepayment_interpolated - default_extrarepayment_fixed
     )
 
-
 col1, col2 = st.columns(2)
 
 with col1:
@@ -413,6 +373,52 @@ with col2:
         ":green[Variable loan extra repayment (monthly): "
         + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
     )
+
+if show_so_far_information:
+
+    _, col2, _ = st.columns(3)
+    with col2:
+        st.write("##### Sums")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
+        st.write(
+            ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
+        )
+        st.write(
+            ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
+        )
+        st.write(
+            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+        )
+
+    with col2:
+
+        st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
+        st.write(
+            ":orange[Base repayment so far: "
+            + f"${base_repayment_so_far_variable:,.0f}]"
+        )
+        st.write(
+            ":green[Extra repayment so far: "
+            + f"${extra_repayment_so_far_variable:,.0f}]"
+        )
+        st.write(
+            ":blue[Total repayment so far: "
+            + f"${total_repayments_so_far_variable:,.0f}]"
+        )
+
+    _, col2, _ = st.columns(3)
+
+    with col2:
+        st.write("#### Fixed & Variable")
+        st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
+        st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
+        st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
+        st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
 # Prospective
 
