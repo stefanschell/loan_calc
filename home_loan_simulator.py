@@ -10,6 +10,7 @@ class Cycle(Enum):
     MONTHLY_AVERAGE = "monthly, every 365/12 days"
     MONTHLY_1ST_OF_MONTH = "monthly, 1st of every month"
     MONTHLY_END_OF_MONTH = "monthly, end of every month"
+    YEARLY = "yearly, every 365 days"
 
     def complex_str(self):
         return str(self.value)
@@ -30,6 +31,9 @@ class Cycle(Enum):
             Cycle.MONTHLY_END_OF_MONTH,
         ]
 
+    def is_yearly(self):
+        return self in [Cycle.YEARLY]
+
 
 def increment_date(date: pd.Timestamp, cycle: Cycle) -> pd.Timestamp:
     if cycle == Cycle.FORTNIGHTLY:
@@ -45,6 +49,8 @@ def increment_date(date: pd.Timestamp, cycle: Cycle) -> pd.Timestamp:
         date = (date + timedelta(days=31)).replace(day=1)  # first of next month
         date = (date + timedelta(days=31)).replace(day=1)  # first of month after next
         date = date - timedelta(days=1)  # end of next month
+    elif cycle == Cycle.YEARLY:
+        date = date + timedelta(days=365)
     else:
         raise ValueError("Invalid cycle")
     return date

@@ -468,7 +468,7 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
-    st.write("#### Loan")
+    st.write("#### Dates")
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
     st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
@@ -480,23 +480,25 @@ with col2:
 
     with st.expander("Override interest and repayment cycle"):
 
-        interest_cycle_sel = st.selectbox(
+        allowed_cycles = [
+            item
+            for item in home_loan_simulator.Cycle
+            if item != home_loan_simulator.Cycle.YEARLY
+        ]
+
+        interest_cycle = st.selectbox(
             "Interest cycle override",
-            (item for item in home_loan_simulator.Cycle),
+            allowed_cycles,
             index=3,
             format_func=home_loan_simulator.Cycle.complex_str,
         )
-        if interest_cycle_sel is not None:
-            interest_cycle = interest_cycle_sel
 
-        repayment_cycle_sel = st.selectbox(
+        repayment_cycle = st.selectbox(
             "Repayment cycle override",
-            (item for item in home_loan_simulator.Cycle),
+            allowed_cycles,
             index=0,
             format_func=home_loan_simulator.Cycle.complex_str,
         )
-        if repayment_cycle_sel is not None:
-            repayment_cycle = repayment_cycle_sel
 
     st.write("Interest cycle: " + interest_cycle.complex_str())
     st.write("Repayment cycle: " + repayment_cycle.complex_str())
@@ -541,7 +543,7 @@ with col2:
 
         invest_now_win_cycle = st.selectbox(
             "Invest now win cycle override",
-            (item for item in home_loan_simulator.Cycle),
+            home_loan_simulator.Cycle,
             index=1,
             format_func=home_loan_simulator.Cycle.complex_str,
         )
