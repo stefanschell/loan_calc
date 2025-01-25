@@ -13,7 +13,9 @@ import shutil
 # config
 
 loan_start = pd.to_datetime("2024-10-16")
-fixed_loan_end = loan_start + timedelta(days=365 * 5)
+fixed_loan_length = timedelta(days=365 * 5)
+
+fixed_loan_end = loan_start + fixed_loan_length
 
 # setup
 
@@ -444,30 +446,27 @@ interest_cycle = home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH
 _, col2, _ = st.columns(3)
 
 with col2:
+    st.write("##### Dates")
 
-    st.write("##### Config")
+    keep_loan_dates = st.toggle("Keep loan dates (instead of restarting today)", True)
 
-    if not st.toggle(
-        "Continue interest and repayment cycle from retrospective (instead of aligning it with the start of the schedule)",
-        True,
-    ):
+    if not keep_loan_dates:
+        loan_start = pd.to_datetime("today")
+        fixed_loan_end = loan_start + fixed_loan_length
+        schedule_start = loan_start
         prev_interest_date = schedule_start
         prev_repayment_date = schedule_start
-
-    show_save_spend_invest_information = st.toggle(
-        "Show 'save now', 'spend now', 'invest now' information", True
-    )
-
-    show_so_far_information = st.toggle("Show 'so far' information", True)
-
-    st.divider()
-    st.write("##### Dates")
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
     st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
     st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
+
+    if keep_loan_dates:
+        show_so_far_information = st.toggle("Show 'so far' information", True)
+    else:
+        show_so_far_information = False
 
     st.divider()
     st.write("##### Interest and repayment cycle")
@@ -496,10 +495,14 @@ with col2:
     st.write("Interest cycle: " + interest_cycle.complex_str())
     st.write("Repayment cycle: " + repayment_cycle.complex_str())
 
-    if show_save_spend_invest_information:
-        st.divider()
-        st.write("##### Save now, spend now and invest now")
+    st.divider()
+    st.write("##### Save now, spend now and invest now")
 
+    show_save_spend_invest_information = st.toggle(
+        "Show 'save now', 'spend now', 'invest now' information", True
+    )
+
+    if show_save_spend_invest_information:
         with st.expander("Override variables"):
 
             st.write("Save now: one time saving of an additional amount of money")
