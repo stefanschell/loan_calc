@@ -31,7 +31,7 @@ class Cycle(Enum):
         ]
 
 
-def increment_date(date, cycle: Cycle):
+def increment_date(date: pd.Timestamp, cycle: Cycle) -> pd.Timestamp:
     if cycle == Cycle.FORTNIGHTLY:
         date = date + timedelta(days=14)
     elif cycle == Cycle.MONTHLY_AVERAGE:
@@ -52,22 +52,32 @@ def increment_date(date, cycle: Cycle):
 
 def simulate(
     *,
-    loan_start,
+    loan_start: pd.Timestamp,
     principal,
     offset,
-    schedule_start,
+    schedule_start: pd.Timestamp,
     interest_rate,
-    prev_interest_date,
+    prev_interest_date: pd.Timestamp,
     interest_cycle: Cycle,
     repayment,
-    prev_repayment_date,
+    prev_repayment_date: pd.Timestamp,
     repayment_cycle: Cycle,
-    schedule_end=None,
-    leftover_incoming=None,
+    schedule_end: pd.Timestamp = None,
+    leftover_incoming: pd.Timestamp = None,
     leftover_amount=None,
     leftover_repayment=None,
-):
+    extra_cost_now=None,
+    extra_saving_amount=None,
+    extra_saving_cycle: Cycle = None,
+) -> pd.DataFrame:
     curr_date = schedule_start
+
+    if extra_cost_now is not None:
+        principal = principal + extra_cost_now
+
+    next_extra_saving = None
+    if extra_saving_cycle is not None:
+        next_extra_saving = increment_date(curr_date, extra_saving_cycle)
 
     schedule = []
     owing_daily_hist = []
@@ -80,7 +90,7 @@ def simulate(
             (curr_date - schedule_start).days / 365,
             relativedelta(curr_date, schedule_start),
             0,
-            0,
+            extra_cost_now if extra_cost_now is not None else 0,
             0,
             principal,
         )
@@ -150,6 +160,13 @@ def simulate(
 
             principal = principal - curr_repayment
             prev_repayment_date = increment_date(prev_repayment_date, repayment_cycle)
+
+        # extra saving
+
+        if next_extra_saving is not None and extra_saving_amount is not None:
+            if curr_date >= next_extra_saving:
+                principal = principal - extra_saving_amount
+                next_extra_saving = increment_date(curr_date, extra_saving_cycle)
 
         # data collection
 
