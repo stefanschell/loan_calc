@@ -56,8 +56,6 @@ st.write(
     "Data shown in this section uses the account statements and displays information about the past only."
 )
 
-show_so_far_information = st.toggle("Show 'so far' information", True)
-
 with st.expander("Transactions"):
 
     col1, col2, col3 = st.columns(3)
@@ -330,12 +328,7 @@ with col2:
         & (df_change_variable["Label"] == "Extrarepayment")
     ].iloc[-1]["Change"]
 
-
-_, col2, _ = st.columns(3)
-
-with col2:
-
-    st.write("##### Evaluation")
+st.divider()
 
 col1, col2 = st.columns(2)
 
@@ -374,51 +367,44 @@ with col2:
         + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
     )
 
-if show_so_far_information:
+st.divider()
 
-    _, col2, _ = st.columns(3)
-    with col2:
-        st.write("##### Sums")
+col1, col2 = st.columns(2)
 
-    col1, col2 = st.columns(2)
+with col1:
 
-    with col1:
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
+    st.write(
+        ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
+    )
+    st.write(
+        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
+    )
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+    )
 
-        st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
-        st.write(
-            ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
-        )
-        st.write(
-            ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
-        )
-        st.write(
-            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
-        )
+with col2:
 
-    with col2:
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
+    st.write(
+        ":orange[Base repayment so far: " + f"${base_repayment_so_far_variable:,.0f}]"
+    )
+    st.write(
+        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_variable:,.0f}]"
+    )
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
+    )
 
-        st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
-        st.write(
-            ":orange[Base repayment so far: "
-            + f"${base_repayment_so_far_variable:,.0f}]"
-        )
-        st.write(
-            ":green[Extra repayment so far: "
-            + f"${extra_repayment_so_far_variable:,.0f}]"
-        )
-        st.write(
-            ":blue[Total repayment so far: "
-            + f"${total_repayments_so_far_variable:,.0f}]"
-        )
+_, col2, _ = st.columns(3)
 
-    _, col2, _ = st.columns(3)
-
-    with col2:
-        st.write("#### Fixed & Variable")
-        st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
-        st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
-        st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
-        st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
+with col2:
+    st.write("#### Fixed & Variable")
+    st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
+    st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
+    st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
+    st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
 # Prospective
 
@@ -459,6 +445,22 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
+    st.write("##### Config")
+
+    if not st.toggle(
+        "Continue interest and repayment cycle from retrospective (instead of aligning it with the start of the schedule)",
+        True,
+    ):
+        prev_interest_date = schedule_start
+        prev_repayment_date = schedule_start
+
+    show_save_spend_invest_information = st.toggle(
+        "Show 'save now', 'spend now', 'invest now' information", True
+    )
+
+    show_so_far_information = st.toggle("Show 'so far' information", True)
+
+    st.divider()
     st.write("##### Dates")
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
@@ -467,17 +469,10 @@ with col2:
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
+    st.divider()
     st.write("##### Interest and repayment cycle")
 
     with st.expander("Override variables"):
-
-        if st.toggle(
-            "Begin interest and repayment cycles at start of schedule (instead of continuation of retrospective)",
-            False,
-        ):
-            prev_interest_date = schedule_start
-            prev_repayment_date = schedule_start
-
         allowed_cycles = [
             item
             for item in home_loan_simulator.Cycle
@@ -501,56 +496,64 @@ with col2:
     st.write("Interest cycle: " + interest_cycle.complex_str())
     st.write("Repayment cycle: " + repayment_cycle.complex_str())
 
-    st.write("##### Save now, spend now and invest now")
+    if show_save_spend_invest_information:
+        st.divider()
+        st.write("##### Save now, spend now and invest now")
 
-    with st.expander("Override variables"):
+        with st.expander("Override variables"):
 
-        st.write("Save now: one time saving of an additional amount of money")
-        st.write("Spend now: one time spending of an additional amount of money")
-        st.write(
-            "Invest now: one time investment of a certain amount of money, then regular gain of money"
-        )
+            st.write("Save now: one time saving of an additional amount of money")
+            st.write("Spend now: one time spending of an additional amount of money")
+            st.write(
+                "Invest now: one time investment of a certain amount of money, then regular gain of money"
+            )
 
-        save_now_amount = st.number_input(
-            "Save now amount override ($)",
-            0,
-            1000000,
-            3000,
-        )
+            save_now_amount = st.number_input(
+                "Save now amount override ($)",
+                0,
+                1000000,
+                3000,
+            )
 
-        spend_now_amount = st.number_input(
-            "Spend now amount override ($)",
-            0,
-            1000000,
-            10000,
-        )
+            spend_now_amount = st.number_input(
+                "Spend now amount override ($)",
+                0,
+                1000000,
+                10000,
+            )
 
-        invest_now_cost_amount = st.number_input(
-            "Invest now cost amount override ($)",
-            0,
-            1000000,
-            5000,
-        )
+            invest_now_cost_amount = st.number_input(
+                "Invest now cost amount override ($)",
+                0,
+                1000000,
+                5000,
+            )
 
-        invest_now_win_amount = st.number_input(
-            "Invest now win amount override ($)",
-            0,
-            1000000,
-            75,
-        )
+            invest_now_win_amount = st.number_input(
+                "Invest now win amount override ($)",
+                0,
+                1000000,
+                75,
+            )
 
-        invest_now_win_cycle = st.selectbox(
-            "Invest now win cycle override",
-            home_loan_simulator.Cycle,
-            index=1,
-            format_func=home_loan_simulator.Cycle.complex_str,
-        )
+            invest_now_win_cycle = st.selectbox(
+                "Invest now win cycle override",
+                home_loan_simulator.Cycle,
+                index=1,
+                format_func=home_loan_simulator.Cycle.complex_str,
+            )
 
-    st.write("Save now amount: " + f"${save_now_amount:,.0f}")
-    st.write("Spend now amount: " + f"${spend_now_amount:,.0f}")
-    st.write("Invest now cost amount: " + f"${invest_now_cost_amount:,.0f}")
-    st.write("Invest now win amount: " + f"${invest_now_win_amount:,.0f}")
-    st.write("Invest now win cycle: " + invest_now_win_cycle.complex_str())
+        st.write("Save now amount: " + f"${save_now_amount:,.0f}")
+        st.write("Spend now amount: " + f"${spend_now_amount:,.0f}")
+        st.write("Invest now cost amount: " + f"${invest_now_cost_amount:,.0f}")
+        st.write("Invest now win amount: " + f"${invest_now_win_amount:,.0f}")
+        st.write("Invest now win cycle: " + invest_now_win_cycle.complex_str())
+    else:
+        save_now_amount = 0
+        spend_now_amount = 0
+        invest_now_cost_amount = None
+        invest_now_win_amount = None
+        invest_now_win_cycle = None
 
 col1, col2 = st.columns(2)
 
@@ -1335,6 +1338,7 @@ with col2:
 
     st.write(":orange[Base repayment (monthly): " + f"${total_wo_extra:,.0f}]")
 
+    st.divider()
     st.write("##### Schedule")
 
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
@@ -1360,6 +1364,7 @@ with col2:
         + "/h]"
     )
 
+    st.divider()
     st.write("##### Sums")
 
     effective_loan_amount = (
@@ -1393,28 +1398,29 @@ with col2:
         ":blue[Total repayment to go: "
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
     )
-    st.write(
-        "... save "
-        + f"\\${save_now_amount:,.0f}"
-        + " now: "
-        + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}"
-    )
-    st.write(
-        "... spend "
-        + f"\\${spend_now_amount:,.0f}"
-        + " now: "
-        + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}"
-    )
-    st.write(
-        "... invest "
-        + f"\\${invest_now_cost_amount:,.0f}"
-        + " now, gain "
-        + f"\\${invest_now_win_amount:,.0f}"
-        + " "
-        + invest_now_win_cycle.simple_str()
-        + ": "
-        + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}"
-    )
+    if show_save_spend_invest_information:
+        st.write(
+            "... save "
+            + f"\\${save_now_amount:,.0f}"
+            + " now: "
+            + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}"
+        )
+        st.write(
+            "... spend "
+            + f"\\${spend_now_amount:,.0f}"
+            + " now: "
+            + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}"
+        )
+        st.write(
+            "... invest "
+            + f"\\${invest_now_cost_amount:,.0f}"
+            + " now, gain "
+            + f"\\${invest_now_win_amount:,.0f}"
+            + " "
+            + invest_now_win_cycle.simple_str()
+            + ": "
+            + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}"
+        )
     if show_so_far_information:
         st.write(
             ":blue[Total repayment so far & to go: "
