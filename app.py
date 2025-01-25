@@ -483,6 +483,8 @@ with col2:
     if restart_loan_today:
         show_so_far_information = False
 
+    show_slow_schedule = not st.toggle("Hide slow schedule", False)
+
     st.divider()
     st.write("##### Interest and repayment cycle")
 
@@ -741,10 +743,11 @@ with col1:
             "Time so far & to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
         )
 
-    with st.expander(
-        "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
-    ):
-        st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
+    if show_slow_schedule:
+        with st.expander(
+            "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
+        ):
+            st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
@@ -1142,10 +1145,11 @@ with col2:
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
 
-    with st.expander(
-        "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
-    ):
-        st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
+    if show_slow_schedule:
+        with st.expander(
+            "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
+        ):
+            st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
