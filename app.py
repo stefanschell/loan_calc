@@ -466,6 +466,8 @@ with col2:
     show_so_far_information = not st.toggle(
         "Hide 'so far' information", False, disabled=restart_loan_today
     )
+    if restart_loan_today:
+        show_so_far_information = False
 
     st.divider()
     st.write("##### Interest and repayment cycle")
