@@ -56,17 +56,9 @@ st.write(
     "Data shown in this section uses the account statements and displays information about the past only."
 )
 
-show_so_far_information = st.toggle("Show 'so far' information numbers", True)
+show_so_far_information = st.toggle("Show 'so far' information", True)
 
-# - Transactions
-
-st.write("### Transactions")
-
-st.write(
-    "Transactions in accounts (Fixed, Variable, Offset) from beginng of the loan till now."
-)
-
-with st.expander("View transactions"):
+with st.expander("Transactions"):
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -101,14 +93,6 @@ with st.expander("View transactions"):
         )
     )
 
-# - Balance over time
-
-st.write("### Balance over time")
-
-st.write(
-    "Accounts from beginning of loan till now. Shows end of day balances only, thus excludes transactions on day of settlement."
-)
-
 df_balance_fixed = account_interpreter.get_balance_over_time(
     df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
 )
@@ -125,24 +109,28 @@ df_balance_total = account_interpreter.get_total_balance_over_time(
 
 df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
 
-df_plot = pd.concat(
-    [
-        df_balance_fixed,
-        df_balance_variable,
-        df_balance_offset,
-        df_balance_total,
-        df_balance_total_fitted,
-    ]
-)
+with st.expander("Balance over time"):
 
-fig = px.line(
-    df_plot, x="DateSeries", y="Balance", color="AccountName", symbol="AccountName"
-)
-fig.update_layout(title={"text": "Balance over time", "x": 0.5, "xanchor": "center"})
-fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-fig.update_yaxes(title_text="Balance ($)")
+    df_plot = pd.concat(
+        [
+            df_balance_fixed,
+            df_balance_variable,
+            df_balance_offset,
+            df_balance_total,
+            df_balance_total_fitted,
+        ]
+    )
 
-st.plotly_chart(fig)
+    fig = px.line(
+        df_plot, x="DateSeries", y="Balance", color="AccountName", symbol="AccountName"
+    )
+    fig.update_layout(
+        title={"text": "Balance over time", "x": 0.5, "xanchor": "center"}
+    )
+    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+    fig.update_yaxes(title_text="Balance ($)")
+
+    st.plotly_chart(fig)
 
 df_change_fixed = account_interpreter.get_change_over_time(
     df_in,
@@ -307,91 +295,87 @@ with col2:
         st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
         st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
-# - Change of balance over time
-
-st.write("### Change of balance over time")
-
-st.write(
-    "Accounts from beginning of loan till now. Excludes transactions on day of settlement."
-)
-
 col1, col2 = st.columns(2)
 
 with col1:
     st.write("#### Fixed")
 
-    fig = px.line(
-        df_change_fixed[df_change_fixed["interpolated"] == False],
-        x="DateSeries",
-        y=["Change"],
-        color="Label",
-        symbol="Label",
-    )
-    fig.update_layout(
-        title={"text": "Raw change / Fixed", "x": 0.5, "xanchor": "center"}
-    )
-    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig.update_yaxes(title_text="Change ($)")
+    with st.expander("Change of balance over time"):
 
-    st.plotly_chart(fig, key="p1")
+        fig = px.line(
+            df_change_fixed[df_change_fixed["interpolated"] == False],
+            x="DateSeries",
+            y=["Change"],
+            color="Label",
+            symbol="Label",
+        )
+        fig.update_layout(
+            title={"text": "Raw change / Fixed", "x": 0.5, "xanchor": "center"}
+        )
+        fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig.update_yaxes(title_text="Change ($)")
 
-    fig = px.line(
-        df_change_fixed[df_change_fixed["interpolated"] == True],
-        x="DateSeries",
-        y=["Change"],
-        color="Label",
-        symbol="Label",
-    )
-    fig.update_layout(
-        title={
-            "text": "Interpolated change (monthly) / Fixed",
-            "x": 0.5,
-            "xanchor": "center",
-        }
-    )
-    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig.update_yaxes(title_text="Change ($)")
+        st.plotly_chart(fig, key="p1")
 
-    st.plotly_chart(fig, key="p2")
+        fig = px.line(
+            df_change_fixed[df_change_fixed["interpolated"] == True],
+            x="DateSeries",
+            y=["Change"],
+            color="Label",
+            symbol="Label",
+        )
+        fig.update_layout(
+            title={
+                "text": "Interpolated change (monthly) / Fixed",
+                "x": 0.5,
+                "xanchor": "center",
+            }
+        )
+        fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig.update_yaxes(title_text="Change ($)")
+
+        st.plotly_chart(fig, key="p2")
 
     st.write("Extra repayment data extracted from variable loan account only.")
 
 with col2:
     st.write("#### Variable")
 
-    fig = px.line(
-        df_change_variable[df_change_variable["interpolated"] == False],
-        x="DateSeries",
-        y=["Change"],
-        color="Label",
-        symbol="Label",
-    )
-    fig.update_layout(
-        title={"text": "Raw change / Variable", "x": 0.5, "xanchor": "center"}
-    )
-    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig.update_yaxes(title_text="Change ($)")
+    with st.expander("Change of balance over time"):
 
-    st.plotly_chart(fig, key="p3")
+        fig = px.line(
+            df_change_variable[df_change_variable["interpolated"] == False],
+            x="DateSeries",
+            y=["Change"],
+            color="Label",
+            symbol="Label",
+        )
+        fig.update_layout(
+            title={"text": "Raw change / Variable", "x": 0.5, "xanchor": "center"}
+        )
+        fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig.update_yaxes(title_text="Change ($)")
 
-    fig = px.line(
-        df_change_variable[df_change_variable["interpolated"] == True],
-        x="DateSeries",
-        y=["Change"],
-        color="Label",
-        symbol="Label",
-    )
-    fig.update_layout(
-        title={
-            "text": "Interpolated change (monthly) / Variable",
-            "x": 0.5,
-            "xanchor": "center",
-        }
-    )
-    fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig.update_yaxes(title_text="Change ($)")
+        st.plotly_chart(fig, key="p3")
 
-    st.plotly_chart(fig, key="p4")
+        fig = px.line(
+            df_change_variable[df_change_variable["interpolated"] == True],
+            x="DateSeries",
+            y=["Change"],
+            color="Label",
+            symbol="Label",
+        )
+        fig.update_layout(
+            title={
+                "text": "Interpolated change (monthly) / Variable",
+                "x": 0.5,
+                "xanchor": "center",
+            }
+        )
+        fig.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig.update_yaxes(title_text="Change ($)")
+
+        st.plotly_chart(fig, key="p4")
 
     prev_extrarepayment_interpolated = df_change_variable[
         (df_change_variable["interpolated"] == True)
@@ -798,17 +782,19 @@ with col1:
         [df_schedule_fixed, df_schedule_fixed_wo_extra]
     )
 
-    fig1 = px.scatter(
-        df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule"
-    )
-    fig1.update_layout(
-        title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
-    )
-    fig1.update_traces(marker=dict(size=3))
-    fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig1.update_yaxes(title_text="Principal ($)")
+    with st.expander("Principal over time"):
 
-    st.plotly_chart(fig1)
+        fig1 = px.scatter(
+            df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule"
+        )
+        fig1.update_layout(
+            title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
+        )
+        fig1.update_traces(marker=dict(size=3))
+        fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig1.update_yaxes(title_text="Principal ($)")
+
+        st.plotly_chart(fig1)
 
     interest_plot_fixed = pd.DataFrame(df_schedule_fixed)
     interest_plot_fixed = interest_plot_fixed[
@@ -828,17 +814,21 @@ with col1:
         [interest_plot_fixed, interest_plot_fixed_wo_extra]
     )
 
-    fig2 = px.scatter(
-        interest_plot_fixed_merged, x="ScheduleYears", y="Interest", color="Schedule"
-    )
-    fig2.update_layout(
-        title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
-    )
-    fig2.update_traces(marker=dict(size=3))
-    fig2.update_xaxes(title_text="ScheduleYears")
-    fig2.update_yaxes(title_text="Interest ($, monthly)")
+    with st.expander("Interest over time"):
+        fig2 = px.scatter(
+            interest_plot_fixed_merged,
+            x="ScheduleYears",
+            y="Interest",
+            color="Schedule",
+        )
+        fig2.update_layout(
+            title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
+        )
+        fig2.update_traces(marker=dict(size=3))
+        fig2.update_xaxes(title_text="ScheduleYears")
+        fig2.update_yaxes(title_text="Interest ($, monthly)")
 
-    st.plotly_chart(fig2)
+        st.plotly_chart(fig2)
 
     repayment_plot_fixed = pd.DataFrame(df_schedule_fixed)
     repayment_plot_fixed = repayment_plot_fixed[
@@ -863,17 +853,22 @@ with col1:
             repayment_plot_fixed_merged["Repayment"] / 14 * (365 / 12)
         )
 
-    fig3 = px.scatter(
-        repayment_plot_fixed_merged, x="ScheduleYears", y="Repayment", color="Schedule"
-    )
-    fig3.update_layout(
-        title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
-    )
-    fig3.update_traces(marker=dict(size=3))
-    fig3.update_xaxes(title_text="ScheduleYears")
-    fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
+    with st.expander("Repayment over time"):
 
-    st.plotly_chart(fig3)
+        fig3 = px.scatter(
+            repayment_plot_fixed_merged,
+            x="ScheduleYears",
+            y="Repayment",
+            color="Schedule",
+        )
+        fig3.update_layout(
+            title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
+        )
+        fig3.update_traces(marker=dict(size=3))
+        fig3.update_xaxes(title_text="ScheduleYears")
+        fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
+
+        st.plotly_chart(fig3)
 
 with col2:
 
@@ -1224,17 +1219,19 @@ with col2:
         [df_schedule_variable, df_schedule_variable_wo_extra]
     )
 
-    fig1 = px.scatter(
-        df_schedule_variable_merged, x="Date", y="Principal", color="Schedule"
-    )
-    fig1.update_layout(
-        title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
-    )
-    fig1.update_traces(marker=dict(size=3))
-    fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-    fig1.update_yaxes(title_text="Principal ($)")
+    with st.expander("Principal over time"):
 
-    st.plotly_chart(fig1)
+        fig1 = px.scatter(
+            df_schedule_variable_merged, x="Date", y="Principal", color="Schedule"
+        )
+        fig1.update_layout(
+            title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
+        )
+        fig1.update_traces(marker=dict(size=3))
+        fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig1.update_yaxes(title_text="Principal ($)")
+
+        st.plotly_chart(fig1)
 
     interest_plot_variable = pd.DataFrame(df_schedule_variable)
     interest_plot_variable = interest_plot_variable[
@@ -1254,17 +1251,22 @@ with col2:
         [interest_plot_variable, interest_plot_variable_wo_extra]
     )
 
-    fig2 = px.scatter(
-        interest_plot_variable_merged, x="ScheduleYears", y="Interest", color="Schedule"
-    )
-    fig2.update_layout(
-        title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
-    )
-    fig2.update_traces(marker=dict(size=3))
-    fig2.update_xaxes(title_text="ScheduleYears")
-    fig2.update_yaxes(title_text="Interest ($, monthly)")
+    with st.expander("Interest over time"):
 
-    st.plotly_chart(fig2)
+        fig2 = px.scatter(
+            interest_plot_variable_merged,
+            x="ScheduleYears",
+            y="Interest",
+            color="Schedule",
+        )
+        fig2.update_layout(
+            title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
+        )
+        fig2.update_traces(marker=dict(size=3))
+        fig2.update_xaxes(title_text="ScheduleYears")
+        fig2.update_yaxes(title_text="Interest ($, monthly)")
+
+        st.plotly_chart(fig2)
 
     repayment_plot_variable = pd.DataFrame(df_schedule_variable)
     repayment_plot_variable = repayment_plot_variable[
@@ -1289,20 +1291,22 @@ with col2:
             repayment_plot_variable_merged["Repayment"] / 14 * (365 / 12)
         )
 
-    fig3 = px.scatter(
-        repayment_plot_variable_merged,
-        x="ScheduleYears",
-        y="Repayment",
-        color="Schedule",
-    )
-    fig3.update_layout(
-        title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
-    )
-    fig3.update_traces(marker=dict(size=3))
-    fig3.update_xaxes(title_text="ScheduleYears")
-    fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
+    with st.expander("Repayment over time"):
 
-    st.plotly_chart(fig3)
+        fig3 = px.scatter(
+            repayment_plot_variable_merged,
+            x="ScheduleYears",
+            y="Repayment",
+            color="Schedule",
+        )
+        fig3.update_layout(
+            title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
+        )
+        fig3.update_traces(marker=dict(size=3))
+        fig3.update_xaxes(title_text="ScheduleYears")
+        fig3.update_yaxes(title_text="Total Repayment ($, monthly)")
+
+        st.plotly_chart(fig3)
 
 # - Fixed & Variable
 
