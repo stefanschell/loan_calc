@@ -975,9 +975,9 @@ with col2:
         leftover_repayment=repayment_fixed,
     )
 
-    df_schedule_variable_plus1000 = home_loan_simulator.simulate(
+    df_schedule_variable_plus10k = home_loan_simulator.simulate(
         loan_start=loan_start,
-        principal=balance_variable + 1000,
+        principal=balance_variable + 10000,
         offset=balance_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
@@ -1018,9 +1018,7 @@ with col2:
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
-    total_repayments_variable_plus1000 = df_schedule_variable_plus1000[
-        "Repayment"
-    ].sum()
+    total_repayments_variable_plus10k = df_schedule_variable_plus10k["Repayment"].sum()
 
     interest_per_month_variable = (
         (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
@@ -1267,8 +1265,8 @@ with col2:
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
     )
     st.write(
-        ":blue[Repayment for each additional \\$1,000: "
-        + f"${(total_repayments_variable_plus1000 - total_repayments_variable):,.0f}]"
+        ":blue[Repayment for each additional \\$10,000: "
+        + f"${(total_repayments_variable_plus10k - total_repayments_variable):,.0f}]"
     )
     st.write(
         ":blue[Total repayment so far and to go: "
