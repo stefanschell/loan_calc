@@ -17,6 +17,35 @@ fixed_loan_length = timedelta(days=365 * 5)
 
 fixed_loan_end = loan_start + fixed_loan_length
 
+# helper
+
+transaction_format = {
+    "Credit": "${:,.0f}",
+    "Debit": "${:,.0f}",
+    "Balance": "${:,.0f}",
+    "ApproxInterest": "{:,.3f}%",
+    "InterestPeriod": lambda x: (
+        str(x.days + (x.seconds / (60 * 60 * 24))) + " days" if not pd.isnull(x) else ""
+    ),
+    "DateSeries": lambda x: x.strftime("%d/%m/%Y"),
+}
+
+schedule_format = {
+    "Date": lambda x: x.strftime("%d/%m/%Y"),
+    "LoanYears": "{:,.2f}",
+    "LoanDuration": lambda x: (
+        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
+    ),
+    "ScheduleYears": "{:,.2f}",
+    "ScheduleDuration": lambda x: (
+        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
+    ),
+    "Interest": "${:,.0f}",
+    "Redraw": "${:,.0f}",
+    "Repayment": "${:,.0f}",
+    "Principal": "${:,.0f}",
+}
+
 # setup
 
 st.set_page_config(layout="wide")
@@ -76,22 +105,7 @@ with st.expander("Transactions"):
     if not toggle_offset:
         df_table = df_table[df_table["AccountName"] != "Offset"]
 
-    st.dataframe(
-        df_table.style.format(
-            {
-                "Credit": "${:,.0f}",
-                "Debit": "${:,.0f}",
-                "Balance": "${:,.0f}",
-                "ApproxInterest": "{:,.3f}%",
-                "InterestPeriod": lambda x: (
-                    str(x.days + (x.seconds / (60 * 60 * 24))) + " days"
-                    if not pd.isnull(x)
-                    else ""
-                ),
-                "DateSeries": lambda x: x.strftime("%d/%m/%Y"),
-            }
-        )
-    )
+    st.dataframe(df_table.style.format(transaction_format))
 
 df_balance_fixed = account_interpreter.get_balance_over_time(
     df_in, "Fixed", add_col_with_account_name=True, return_positive_balance=True
@@ -699,26 +713,7 @@ with col1:
     )
 
     with st.expander("Detailed schedule"):
-
-        st.write(
-            df_schedule_fixed.style.format(
-                {
-                    "Date": lambda x: x.strftime("%d/%m/%Y"),
-                    "LoanYears": "{:,.2f}",
-                    "LoanDuration": lambda x: (
-                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
-                    ),
-                    "ScheduleYears": "{:,.2f}",
-                    "ScheduleDuration": lambda x: (
-                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
-                    ),
-                    "Interest": "${:,.0f}",
-                    "Redraw": "${:,.0f}",
-                    "Repayment": "${:,.0f}",
-                    "Principal": "${:,.0f}",
-                }
-            )
-        )
+        st.write(df_schedule_fixed.style.format(schedule_format))
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["ScheduleYears"]
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
@@ -1108,26 +1103,7 @@ with col2:
     )
 
     with st.expander("Detailed schedule"):
-
-        st.write(
-            df_schedule_variable.style.format(
-                {
-                    "Date": lambda x: x.strftime("%d/%m/%Y"),
-                    "LoanYears": "{:,.2f}",
-                    "LoanDuration": lambda x: (
-                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
-                    ),
-                    "ScheduleYears": "{:,.2f}",
-                    "ScheduleDuration": lambda x: (
-                        str(x.years) + "y-" + str(x.months) + "m-" + str(x.days) + "d"
-                    ),
-                    "Interest": "${:,.0f}",
-                    "Redraw": "${:,.0f}",
-                    "Repayment": "${:,.0f}",
-                    "Principal": "${:,.0f}",
-                }
-            )
-        )
+        st.write(df_schedule_variable.style.format(schedule_format))
 
     total_years_variable = df_schedule_variable.iloc[-1]["ScheduleYears"]
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
