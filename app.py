@@ -468,7 +468,7 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
-    st.write("#### Dates")
+    st.write("##### Dates")
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
     st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
@@ -476,7 +476,7 @@ with col2:
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
-    st.write("#### Interest and repayment cycle")
+    st.write("##### Interest and repayment cycle")
 
     with st.expander("Override interest and repayment cycle"):
 
@@ -503,7 +503,7 @@ with col2:
     st.write("Interest cycle: " + interest_cycle.complex_str())
     st.write("Repayment cycle: " + repayment_cycle.complex_str())
 
-    st.write("#### Save now, spend now and invest now")
+    st.write("##### Save now, spend now and invest now")
 
     with st.expander("Override save now, spend now and invest now"):
 
@@ -1361,26 +1361,26 @@ with col2:
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
     )
     st.write(
-        ":blue[... save "
+        "... save "
         + f"\\${save_now_amount:,.0f}"
         + " now: "
-        + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}]"
+        + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}"
     )
     st.write(
-        ":blue[... spend "
+        "... spend "
         + f"\\${spend_now_amount:,.0f}"
         + " now: "
-        + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}]"
+        + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}"
     )
     st.write(
-        ":blue[... invest "
+        "... invest "
         + f"\\${invest_now_cost_amount:,.0f}"
         + " now, gain "
         + f"\\${invest_now_win_amount:,.0f}"
         + " "
         + invest_now_win_cycle.simple_str()
         + ": "
-        + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}]"
+        + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}"
     )
     st.write(
         ":blue[Total repayment so far and to go: "
