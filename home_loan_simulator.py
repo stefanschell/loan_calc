@@ -73,17 +73,17 @@ def simulate(
     leftover_amount=None,
     leftover_repayment=None,
     extra_cost_now=None,
-    extra_saving_amount=None,
-    extra_saving_cycle: Cycle = None,
+    extra_win_amount=None,
+    extra_win_cycle: Cycle = None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
 
     if extra_cost_now is not None:
         principal = principal + extra_cost_now
 
-    next_extra_saving = None
-    if extra_saving_cycle is not None:
-        next_extra_saving = increment_date(curr_date, extra_saving_cycle)
+    next_extra_win = None
+    if extra_win_cycle is not None:
+        next_extra_win = increment_date(curr_date, extra_win_cycle)
 
     schedule = []
     owing_daily_hist = []
@@ -96,7 +96,7 @@ def simulate(
             (curr_date - schedule_start).days / 365,
             relativedelta(curr_date, schedule_start),
             0,
-            extra_cost_now if extra_cost_now is not None else 0,
+            0,
             0,
             principal,
         )
@@ -169,10 +169,10 @@ def simulate(
 
         # extra saving
 
-        if next_extra_saving is not None and extra_saving_amount is not None:
-            if curr_date >= next_extra_saving:
-                principal = principal - extra_saving_amount
-                next_extra_saving = increment_date(curr_date, extra_saving_cycle)
+        if next_extra_win is not None and extra_win_amount is not None:
+            if curr_date >= next_extra_win:
+                principal = principal - extra_win_amount
+                next_extra_win = increment_date(curr_date, extra_win_cycle)
 
         # data collection
 

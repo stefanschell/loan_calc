@@ -1103,8 +1103,8 @@ with col2:
         leftover_amount=end_of_fixed_loan_balance,
         leftover_repayment=repayment_total_fixed,
         extra_cost_now=invest_now_cost_amount,
-        extra_saving_amount=invest_now_win_amount,
-        extra_saving_cycle=invest_now_win_cycle,
+        extra_win_amount=invest_now_win_amount,
+        extra_win_cycle=invest_now_win_cycle,
     )
 
     with st.expander("Detailed schedule"):
