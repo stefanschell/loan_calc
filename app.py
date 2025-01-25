@@ -478,7 +478,7 @@ with col2:
 
     st.write("##### Interest and repayment cycle")
 
-    with st.expander("Override interest and repayment cycle"):
+    with st.expander("Override variables"):
 
         allowed_cycles = [
             item
@@ -505,7 +505,7 @@ with col2:
 
     st.write("##### Save now, spend now and invest now")
 
-    with st.expander("Override save now, spend now and invest now"):
+    with st.expander("Override variables"):
 
         st.write("Save now: one time saving of an additional amount of money")
         st.write("Spend now: one time spending of an additional amount of money")
@@ -693,7 +693,7 @@ with col1:
         schedule_end=fixed_loan_end,
     )
 
-    with st.expander("View detailed schedule"):
+    with st.expander("Detailed schedule"):
 
         st.write(
             df_schedule_fixed.style.format(
@@ -1086,7 +1086,7 @@ with col2:
         extra_saving_cycle=invest_now_win_cycle,
     )
 
-    with st.expander("View detailed schedule"):
+    with st.expander("Detailed schedule"):
 
         st.write(
             df_schedule_variable.style.format(
