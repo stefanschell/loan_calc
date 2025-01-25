@@ -148,11 +148,13 @@ st.plotly_chart(fig)
 
 # - Past interest, repayments, and extra repayments
 
-st.write("### Past interest, repayments, and extra repayments")
+if use_retrospective:
 
-st.write(
-    "Accounts from beginning of loan till now. Excludes transactions on day of settlement."
-)
+    st.write("### Past interest, repayments, and extra repayments")
+
+    st.write(
+        "Accounts from beginning of loan till now. Excludes transactions on day of settlement."
+    )
 
 df_change_fixed = account_interpreter.get_change_over_time(
     df_in,
@@ -221,7 +223,8 @@ df_change_variable = account_interpreter.add_interpolated_value(
 col1, col2 = st.columns(2)
 
 with col1:
-    st.write("#### Fixed")
+    if use_retrospective:
+        st.write("#### Fixed")
 
     total_interest_so_far_fixed = df_change_fixed[
         (df_change_fixed["Label"] == "Interest")
@@ -242,19 +245,21 @@ with col1:
         base_repayment_so_far_fixed + extra_repayment_so_far_fixed
     )
 
-    st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
-    st.write(
-        ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
-    )
-    st.write(
-        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
-    )
-    st.write(
-        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
-    )
+    if use_retrospective:
+        st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
+        st.write(
+            ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
+        )
+        st.write(
+            ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
+        )
+        st.write(
+            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+        )
 
 with col2:
-    st.write("#### Variable")
+    if use_retrospective:
+        st.write("#### Variable")
 
     total_interest_so_far_variable = df_change_variable[
         (df_change_variable["Label"] == "Interest")
@@ -275,21 +280,26 @@ with col2:
         base_repayment_so_far_variable + extra_repayment_so_far_variable
     )
 
-    st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
-    st.write(
-        ":orange[Base repayment so far: " + f"${base_repayment_so_far_variable:,.0f}]"
-    )
-    st.write(
-        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_variable:,.0f}]"
-    )
-    st.write(
-        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
-    )
+    if use_retrospective:
+        st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
+        st.write(
+            ":orange[Base repayment so far: "
+            + f"${base_repayment_so_far_variable:,.0f}]"
+        )
+        st.write(
+            ":green[Extra repayment so far: "
+            + f"${extra_repayment_so_far_variable:,.0f}]"
+        )
+        st.write(
+            ":blue[Total repayment so far: "
+            + f"${total_repayments_so_far_variable:,.0f}]"
+        )
 
 _, col2, _ = st.columns(3)
 
 with col2:
-    st.write("#### Fixed & Variable")
+    if use_retrospective:
+        st.write("#### Fixed & Variable")
 
     total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_variable
 
@@ -303,10 +313,11 @@ with col2:
         total_repayments_so_far_fixed + total_repayments_so_far_variable
     )
 
-    st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
-    st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
-    st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
-    st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
+    if use_retrospective:
+        st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
+        st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
+        st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
+        st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
 # - Change of balance over time
 
