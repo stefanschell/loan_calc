@@ -468,11 +468,15 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
+    st.write("#### Loan")
+
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
     st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
     st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
+
+    st.write("#### Interest and repayment cycle")
 
     with st.expander("Override interest and repayment cycle"):
 
@@ -496,6 +500,57 @@ with col2:
 
     st.write("Interest cycle: " + interest_cycle.complex_str())
     st.write("Repayment cycle: " + repayment_cycle.complex_str())
+
+    st.write("#### Save now, spend now and invest now")
+
+    with st.expander("Override save now, spend now and invest now"):
+
+        st.write("Save now: one time saving of an additional amount of money")
+        st.write("Spend now: one time spending of an additional amount of money")
+        st.write(
+            "Invest now: one time investment of a certain amount of money, then regular gain of money"
+        )
+
+        save_now_amount = st.number_input(
+            "Save now amount override ($)",
+            0,
+            1000000,
+            3000,
+        )
+
+        spend_now_amount = st.number_input(
+            "Spend now amount override ($)",
+            0,
+            1000000,
+            10000,
+        )
+
+        invest_now_cost_amount = st.number_input(
+            "Invest now cost amount override ($)",
+            0,
+            1000000,
+            5000,
+        )
+
+        invest_now_win_amount = st.number_input(
+            "Invest now win amount override ($)",
+            0,
+            1000000,
+            75,
+        )
+
+        invest_now_win_cycle = st.selectbox(
+            "Invest now win cycle override",
+            (item for item in home_loan_simulator.Cycle),
+            index=1,
+            format_func=home_loan_simulator.Cycle.complex_str,
+        )
+
+    st.write("Save now amount: " + f"${save_now_amount:,.0f}")
+    st.write("Spend now amount: " + f"${spend_now_amount:,.0f}")
+    st.write("Invest now cost amount: " + f"${invest_now_cost_amount:,.0f}")
+    st.write("Invest now win amount: " + f"${invest_now_win_amount:,.0f}")
+    st.write("Invest now win cycle: " + invest_now_win_cycle.complex_str())
 
 col1, col2 = st.columns(2)
 
@@ -975,9 +1030,9 @@ with col2:
         leftover_repayment=repayment_fixed,
     )
 
-    df_schedule_variable_plus10k = home_loan_simulator.simulate(
+    df_schedule_variable_save = home_loan_simulator.simulate(
         loan_start=loan_start,
-        principal=balance_variable + 10000,
+        principal=balance_variable - save_now_amount,
         offset=balance_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
@@ -990,6 +1045,43 @@ with col2:
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
         leftover_repayment=repayment_total_fixed,
+    )
+
+    df_schedule_variable_spend = home_loan_simulator.simulate(
+        loan_start=loan_start,
+        principal=balance_variable + spend_now_amount,
+        offset=balance_offset,
+        schedule_start=schedule_start,
+        interest_rate=interest_variable,
+        prev_interest_date=prev_interest_date,
+        interest_cycle=interest_cycle,
+        repayment=repayment_total_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle=repayment_cycle,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance,
+        leftover_repayment=repayment_total_fixed,
+    )
+
+    df_schedule_variable_invest = home_loan_simulator.simulate(
+        loan_start=loan_start,
+        principal=balance_variable,
+        offset=balance_offset,
+        schedule_start=schedule_start,
+        interest_rate=interest_variable,
+        prev_interest_date=prev_interest_date,
+        interest_cycle=interest_cycle,
+        repayment=repayment_total_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle=repayment_cycle,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance,
+        leftover_repayment=repayment_total_fixed,
+        extra_cost_now=invest_now_cost_amount,
+        extra_saving_amount=invest_now_win_amount,
+        extra_saving_cycle=invest_now_win_cycle,
     )
 
     with st.expander("View detailed schedule"):
@@ -1018,7 +1110,9 @@ with col2:
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
-    total_repayments_variable_plus10k = df_schedule_variable_plus10k["Repayment"].sum()
+    total_repayments_variable_save = df_schedule_variable_save["Repayment"].sum()
+    total_repayments_variable_spend = df_schedule_variable_spend["Repayment"].sum()
+    total_repayments_variable_invest = df_schedule_variable_invest["Repayment"].sum()
 
     interest_per_month_variable = (
         (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
@@ -1265,8 +1359,26 @@ with col2:
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
     )
     st.write(
-        ":blue[Repayment for each additional \\$10,000: "
-        + f"${(total_repayments_variable_plus10k - total_repayments_variable):,.0f}]"
+        ":blue[... save "
+        + f"\\${save_now_amount:,.0f}"
+        + " now: "
+        + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}]"
+    )
+    st.write(
+        ":blue[... spend "
+        + f"\\${spend_now_amount:,.0f}"
+        + " now: "
+        + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}]"
+    )
+    st.write(
+        ":blue[... invest "
+        + f"\\${invest_now_cost_amount:,.0f}"
+        + " now, gain "
+        + f"\\${invest_now_win_amount:,.0f}"
+        + " "
+        + invest_now_win_cycle.simple_str()
+        + ": "
+        + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}]"
     )
     st.write(
         ":blue[Total repayment so far and to go: "
