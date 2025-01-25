@@ -56,9 +56,7 @@ st.write(
     "Data shown in this section uses the account statements and displays information about the past only."
 )
 
-use_retrospective = st.toggle(
-    "Show 'so far' and 'so far & to go' in prosective section", True
-)
+show_so_far_information = st.toggle("Show 'so far' information numbers", True)
 
 # - Transactions
 
@@ -146,16 +144,6 @@ fig.update_yaxes(title_text="Balance ($)")
 
 st.plotly_chart(fig)
 
-# - Past interest, repayments, and extra repayments
-
-if use_retrospective:
-
-    st.write("### Past interest, repayments, and extra repayments")
-
-    st.write(
-        "Accounts from beginning of loan till now. Excludes transactions on day of settlement."
-    )
-
 df_change_fixed = account_interpreter.get_change_over_time(
     df_in,
     "Fixed",
@@ -223,7 +211,7 @@ df_change_variable = account_interpreter.add_interpolated_value(
 col1, col2 = st.columns(2)
 
 with col1:
-    if use_retrospective:
+    if show_so_far_information:
         st.write("#### Fixed")
 
     total_interest_so_far_fixed = df_change_fixed[
@@ -245,7 +233,7 @@ with col1:
         base_repayment_so_far_fixed + extra_repayment_so_far_fixed
     )
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
         st.write(
             ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
@@ -258,7 +246,7 @@ with col1:
         )
 
 with col2:
-    if use_retrospective:
+    if show_so_far_information:
         st.write("#### Variable")
 
     total_interest_so_far_variable = df_change_variable[
@@ -280,7 +268,7 @@ with col2:
         base_repayment_so_far_variable + extra_repayment_so_far_variable
     )
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
         st.write(
             ":orange[Base repayment so far: "
@@ -298,7 +286,7 @@ with col2:
 _, col2, _ = st.columns(3)
 
 with col2:
-    if use_retrospective:
+    if show_so_far_information:
         st.write("#### Fixed & Variable")
 
     total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_variable
@@ -313,7 +301,7 @@ with col2:
         total_repayments_so_far_fixed + total_repayments_so_far_variable
     )
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
         st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
         st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
@@ -753,10 +741,10 @@ with col1:
         + "/h]"
     )
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write("Time so far: " + f"{years_so_far:.2f} yrs")
     st.write("Time to go: " + f"{total_years_fixed:.2f} yrs")
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             "Time so far & to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
         )
@@ -764,7 +752,7 @@ with col1:
     st.divider()
     st.write("##### Sums")
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
     st.write(
         ":red[Interest to go: "
@@ -773,7 +761,7 @@ with col1:
         + f"{(100 * total_interest_fixed / total_repayments_fixed):.1f}%"
         + ")]"
     )
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":red[Interest so far & to go: "
             + f"${total_interest_so_far_fixed + total_interest_fixed:,.0f}"
@@ -785,7 +773,7 @@ with col1:
             ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
         )
     st.write(":blue[Total repayment to go: " + f"${total_repayments_fixed:,.0f}]")
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":blue[Total repayment so far & to go: "
             + f"${total_repayments_so_far_fixed + total_repayments_fixed:,.0f}]"
@@ -1157,10 +1145,10 @@ with col2:
         + "/h]"
     )
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write("Time so far: " + f"{years_so_far:.2f} yrs")
     st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
@@ -1168,7 +1156,7 @@ with col2:
     st.divider()
     st.write("##### Sums")
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
     st.write(
         ":red[Interest to go: "
@@ -1177,7 +1165,7 @@ with col2:
         + f"{(100 * total_interest_variable / total_repayments_variable):.1f}"
         + "%)]"
     )
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":red[Interest so far & to go: "
             + f"${total_interest_so_far_variable + total_interest_variable:,.0f}"
@@ -1191,7 +1179,7 @@ with col2:
             + f"${total_repayments_so_far_variable:,.0f}]"
         )
     st.write(":blue[Total repayment to go: " + f"${total_repayments_variable:,.0f}]")
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":blue[Total repayment so far & to go: "
             + f"${total_repayments_so_far_variable + total_repayments_variable:,.0f}]"
@@ -1342,10 +1330,10 @@ with col2:
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
     st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write("Time so far: " + f"{years_so_far:.2f} yrs")
     st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             "Time so far & to go: " + f"{years_so_far + total_years_variable:.2f} yrs"
         )
@@ -1370,7 +1358,7 @@ with col2:
 
     st.write("Effective loan amount: " + f"${effective_loan_amount:,.0f}")
 
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":red[Interest so far: "
             + f"${(total_interest_so_far_fixed + total_interest_so_far_variable):,.0f}]"
@@ -1379,7 +1367,7 @@ with col2:
         ":red[Interest to go: "
         + f"${(total_interest_fixed + total_interest_variable):,.0f}]"
     )
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":red[Interest so far & to go: "
             + f"${(
@@ -1417,7 +1405,7 @@ with col2:
         + ": "
         + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}"
     )
-    if use_retrospective:
+    if show_so_far_information:
         st.write(
             ":blue[Total repayment so far & to go: "
             + f"${(
