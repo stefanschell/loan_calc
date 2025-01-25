@@ -72,18 +72,18 @@ def simulate(
     leftover_incoming: pd.Timestamp = None,
     leftover_amount=None,
     leftover_repayment=None,
-    extra_cost_now=None,
+    extra_cost_amount=None,
     extra_win_amount=None,
     extra_win_cycle: Cycle = None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
 
-    if extra_cost_now is not None:
-        principal = principal + extra_cost_now
+    if extra_cost_amount is not None:
+        principal = principal + extra_cost_amount
 
-    next_extra_win = None
+    prev_extra_win_date = None
     if extra_win_cycle is not None:
-        next_extra_win = increment_date(curr_date, extra_win_cycle)
+        prev_extra_win_date = curr_date
 
     schedule = []
     owing_daily_hist = []
@@ -98,6 +98,7 @@ def simulate(
             0,
             0,
             0,
+            -extra_cost_amount if extra_cost_amount is not None else 0,
             principal,
         )
     )
@@ -112,6 +113,7 @@ def simulate(
         curr_interest = None
         curr_redraw = None
         curr_repayment = None
+        curr_extra_win = None
 
         # interest
         # note: we keep track of the amount owning on a daily basis,
@@ -167,12 +169,16 @@ def simulate(
             principal = principal - curr_repayment
             prev_repayment_date = increment_date(prev_repayment_date, repayment_cycle)
 
-        # extra saving
+        # extra win
 
-        if next_extra_win is not None and extra_win_amount is not None:
-            if curr_date >= next_extra_win:
-                principal = principal - extra_win_amount
-                next_extra_win = increment_date(curr_date, extra_win_cycle)
+        if prev_extra_win_date is not None and extra_win_amount is not None:
+            if curr_date >= increment_date(prev_extra_win_date, extra_win_cycle):
+                curr_extra_win = min(principal, extra_win_amount)
+
+                principal = principal - curr_extra_win
+                prev_extra_win_date = increment_date(
+                    prev_extra_win_date, extra_win_cycle
+                )
 
         # data collection
 
@@ -180,6 +186,7 @@ def simulate(
             curr_interest is not None
             or curr_redraw is not None
             or curr_repayment is not None
+            or curr_extra_win is not None
             or maturity_is_today is True
         ):
             schedule.append(
@@ -192,6 +199,7 @@ def simulate(
                     curr_interest,
                     curr_redraw,
                     curr_repayment,
+                    curr_extra_win,
                     principal,
                 )
             )
@@ -219,6 +227,7 @@ def simulate(
             "Interest",
             "Redraw",
             "Repayment",
+            "ExtraCostOrWin",
             "Principal",
         ],
     )

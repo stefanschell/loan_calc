@@ -43,6 +43,7 @@ schedule_format = {
     "Interest": "${:,.0f}",
     "Redraw": "${:,.0f}",
     "Repayment": "${:,.0f}",
+    "ExtraCostOrWin": "${:,.0f}",
     "Principal": "${:,.0f}",
 }
 
@@ -483,7 +484,10 @@ with col2:
     if restart_loan_today:
         show_so_far_information = False
 
-    show_slow_schedule = not st.toggle("Hide slow schedule", False)
+    show_slow_schedules = st.toggle("Show slow detailed schedules", False)
+    show_fast_alternative_schedules = st.toggle(
+        "Show fast alternative detailed schedules", False
+    )
 
     st.divider()
     st.write("##### Interest and repayment cycle")
@@ -743,7 +747,7 @@ with col1:
             "Time so far & to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
         )
 
-    if show_slow_schedule:
+    if show_slow_schedules:
         with st.expander(
             "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
         ):
@@ -1105,7 +1109,7 @@ with col2:
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
         leftover_repayment=repayment_total_fixed,
-        extra_cost_now=invest_now_cost_amount,
+        extra_cost_amount=invest_now_cost_amount,
         extra_win_amount=invest_now_win_amount,
         extra_win_cycle=invest_now_win_cycle,
     )
@@ -1145,11 +1149,21 @@ with col2:
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
 
-    if show_slow_schedule:
+    if show_slow_schedules:
         with st.expander(
             "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
         ):
             st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
+
+    if show_fast_alternative_schedules:
+        with st.expander("Detailed schedule: Fast, w/ extra repayment, save now"):
+            st.write(df_schedule_variable_save.style.format(schedule_format))
+
+        with st.expander("Detailed schedule: Fast, w/ extra repayment, spend now"):
+            st.write(df_schedule_variable_spend.style.format(schedule_format))
+
+        with st.expander("Detailed schedule: Fast, w/ extra repayment, invest now"):
+            st.write(df_schedule_variable_invest.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
