@@ -480,6 +480,13 @@ with col2:
 
     with st.expander("Override variables"):
 
+        if st.toggle(
+            "Begin interest and repayment cycles at start of schedule (instead of continuation of retrospective)",
+            False,
+        ):
+            prev_interest_date = schedule_start
+            prev_repayment_date = schedule_start
+
         allowed_cycles = [
             item
             for item in home_loan_simulator.Cycle
