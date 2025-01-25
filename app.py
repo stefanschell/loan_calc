@@ -712,7 +712,7 @@ with col1:
         schedule_end=fixed_loan_end,
     )
 
-    with st.expander("Detailed schedule"):
+    with st.expander("Detailed schedule: Fast, w/ extra repayment"):
         st.write(df_schedule_fixed.style.format(schedule_format))
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["ScheduleYears"]
@@ -740,6 +740,11 @@ with col1:
         st.write(
             "Time so far & to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
         )
+
+    with st.expander(
+        "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
+    ):
+        st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
@@ -1102,7 +1107,7 @@ with col2:
         extra_win_cycle=invest_now_win_cycle,
     )
 
-    with st.expander("Detailed schedule"):
+    with st.expander("Detailed schedule: Fast, w/ extra repayment"):
         st.write(df_schedule_variable.style.format(schedule_format))
 
     total_years_variable = df_schedule_variable.iloc[-1]["ScheduleYears"]
@@ -1136,6 +1141,11 @@ with col2:
         st.write(
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
+
+    with st.expander(
+        "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
+    ):
+        st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
