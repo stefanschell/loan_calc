@@ -448,9 +448,9 @@ _, col2, _ = st.columns(3)
 with col2:
     st.write("##### Dates")
 
-    keep_loan_dates = st.toggle("Keep loan dates (instead of restarting today)", True)
+    restart_loan_today = st.toggle("Restart loan today", False)
 
-    if not keep_loan_dates:
+    if restart_loan_today:
         loan_start = pd.to_datetime("today")
         fixed_loan_end = loan_start + fixed_loan_length
         schedule_start = loan_start
@@ -463,10 +463,9 @@ with col2:
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
-    if keep_loan_dates:
-        show_so_far_information = st.toggle("Show 'so far' information", True)
-    else:
-        show_so_far_information = False
+    show_so_far_information = not st.toggle(
+        "Hide 'so far' information", False, disabled=restart_loan_today
+    )
 
     st.divider()
     st.write("##### Interest and repayment cycle")
@@ -498,8 +497,8 @@ with col2:
     st.divider()
     st.write("##### Save now, spend now and invest now")
 
-    show_save_spend_invest_information = st.toggle(
-        "Show 'save now', 'spend now', 'invest now' information", True
+    show_save_spend_invest_information = not st.toggle(
+        "Hide 'save now', 'spend now', 'invest now' information", False
     )
 
     if show_save_spend_invest_information:
