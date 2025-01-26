@@ -461,33 +461,40 @@ interest_cycle = home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH
 _, col2, _ = st.columns(3)
 
 with col2:
+    st.write("##### Settings")
+
+    with st.expander("Override settings"):
+
+        restart_loan_today = st.toggle("Restart loan today", False)
+
+        if restart_loan_today:
+            loan_start = pd.to_datetime("today")
+            fixed_loan_end = loan_start + fixed_loan_length
+            schedule_start = loan_start
+            prev_interest_date = schedule_start
+            prev_repayment_date = schedule_start
+
+        show_so_far_information = not st.toggle(
+            "Hide 'so far' information", False, disabled=restart_loan_today
+        )
+
+        if restart_loan_today:
+            show_so_far_information = False
+
+        show_slow_schedules = st.toggle("Show 'slow' schedules", False)
+
+        show_fast_alternative_schedules = st.toggle(
+            "Show 'fast alternative' schedules", False
+        )
+
+    st.divider()
     st.write("##### Dates")
-
-    restart_loan_today = st.toggle("Restart loan today", False)
-
-    if restart_loan_today:
-        loan_start = pd.to_datetime("today")
-        fixed_loan_end = loan_start + fixed_loan_length
-        schedule_start = loan_start
-        prev_interest_date = schedule_start
-        prev_repayment_date = schedule_start
 
     st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
     st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
     st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
     st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
     st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
-
-    show_so_far_information = not st.toggle(
-        "Hide 'so far' information", False, disabled=restart_loan_today
-    )
-    if restart_loan_today:
-        show_so_far_information = False
-
-    show_slow_schedules = st.toggle("Show slow schedules", False)
-    show_fast_alternative_schedules = st.toggle(
-        "Show fast alternative schedules", False
-    )
 
     st.divider()
     st.write("##### Interest and repayment cycle")
@@ -657,7 +664,7 @@ with col1:
         )
 
     st.divider()
-    st.write("##### Schedule: Fast, w/ extra repayment")
+    st.write("##### Schedule")
 
     extra_slider_fixed = st.slider(
         ":green[Extra repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly]",
@@ -749,7 +756,7 @@ with col1:
 
     if show_slow_schedules:
         st.divider()
-        st.write("##### Schedule: Others")
+        st.write("##### Other schedules")
 
         with st.expander("Detailed schedule: Slow, w/o extra repayment"):
             st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
@@ -991,7 +998,7 @@ with col2:
         )
 
     st.divider()
-    st.write("##### Schedule: Fast, w/ extra repayment")
+    st.write("##### Schedule")
 
     extra_slider_variable = st.slider(
         ":green[Extra repayment (monthly, plus fixed after "
@@ -1161,7 +1168,7 @@ with col2:
 
     if show_slow_schedules or show_fast_alternative_schedules:
         st.divider()
-        st.write("##### Schedule: Others")
+        st.write("##### Other Schedules")
 
     if show_slow_schedules:
         with st.expander("Detailed schedule: Slow, w/o extra repayment"):
@@ -1368,7 +1375,7 @@ with col2:
     st.write(":orange[Base repayment (monthly): " + f"${total_wo_extra:,.0f}]")
 
     st.divider()
-    st.write("##### Schedule: Fast, w/ extra repayment")
+    st.write("##### Schedule")
 
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
     st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
