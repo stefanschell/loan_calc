@@ -657,7 +657,7 @@ with col1:
         )
 
     st.divider()
-    st.write("##### Schedule")
+    st.write("##### Schedule: Fast, w/ extra repayment")
 
     extra_slider_fixed = st.slider(
         ":green[Extra repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly]",
@@ -718,7 +718,7 @@ with col1:
         schedule_end=fixed_loan_end,
     )
 
-    with st.expander("Detailed schedule: Fast, w/ extra repayment"):
+    with st.expander("Detailed schedule"):
         st.write(df_schedule_fixed.style.format(schedule_format))
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["ScheduleYears"]
@@ -748,9 +748,10 @@ with col1:
         )
 
     if show_slow_schedules:
-        with st.expander(
-            "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
-        ):
+        st.divider()
+        st.write("##### Schedule: Others")
+
+        with st.expander("Detailed schedule: Slow, w/o extra repayment"):
             st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
 
     st.divider()
@@ -807,7 +808,10 @@ with col1:
     with st.expander("Principal over time"):
 
         fig1 = px.scatter(
-            df_schedule_fixed_merged, x="Date", y="Principal", color="Schedule"
+            df_schedule_fixed_merged,
+            x="Date",
+            y="Principal",
+            color="Schedule" if show_slow_schedules else None,
         )
         fig1.update_layout(
             title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
@@ -843,7 +847,7 @@ with col1:
             interest_plot_fixed_merged,
             x="ScheduleYears",
             y="Interest",
-            color="Schedule",
+            color="Schedule" if show_slow_schedules else None,
         )
         fig2.update_layout(
             title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
@@ -885,7 +889,7 @@ with col1:
             repayment_plot_fixed_merged,
             x="ScheduleYears",
             y="Repayment",
-            color="Schedule",
+            color="Schedule" if show_slow_schedules else None,
         )
         fig3.update_layout(
             title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
@@ -987,7 +991,7 @@ with col2:
         )
 
     st.divider()
-    st.write("##### Schedule")
+    st.write("##### Schedule: Fast, w/ extra repayment")
 
     extra_slider_variable = st.slider(
         ":green[Extra repayment (monthly, plus fixed after "
@@ -1120,7 +1124,7 @@ with col2:
         extra_win_cycle=invest_now_win_cycle,
     )
 
-    with st.expander("Detailed schedule: Fast, w/ extra repayment"):
+    with st.expander("Detailed schedule"):
         st.write(df_schedule_variable.style.format(schedule_format))
 
     total_years_variable = df_schedule_variable.iloc[-1]["ScheduleYears"]
@@ -1155,10 +1159,12 @@ with col2:
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
 
+    if show_slow_schedules or show_fast_alternative_schedules:
+        st.divider()
+        st.write("##### Schedule: Others")
+
     if show_slow_schedules:
-        with st.expander(
-            "Detailed schedule: Slow, w/o extra repayment (used for plots only)"
-        ):
+        with st.expander("Detailed schedule: Slow, w/o extra repayment"):
             st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
 
     if show_fast_alternative_schedules:
@@ -1247,7 +1253,10 @@ with col2:
     with st.expander("Principal over time"):
 
         fig1 = px.scatter(
-            df_schedule_variable_merged, x="Date", y="Principal", color="Schedule"
+            df_schedule_variable_merged,
+            x="Date",
+            y="Principal",
+            color="Schedule" if show_slow_schedules else None,
         )
         fig1.update_layout(
             title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
@@ -1284,7 +1293,7 @@ with col2:
             interest_plot_variable_merged,
             x="ScheduleYears",
             y="Interest",
-            color="Schedule",
+            color="Schedule" if show_slow_schedules else None,
         )
         fig2.update_layout(
             title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
@@ -1326,7 +1335,7 @@ with col2:
             repayment_plot_variable_merged,
             x="ScheduleYears",
             y="Repayment",
-            color="Schedule",
+            color="Schedule" if show_slow_schedules else None,
         )
         fig3.update_layout(
             title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
@@ -1359,7 +1368,7 @@ with col2:
     st.write(":orange[Base repayment (monthly): " + f"${total_wo_extra:,.0f}]")
 
     st.divider()
-    st.write("##### Schedule")
+    st.write("##### Schedule: Fast, w/ extra repayment")
 
     st.write(":green[Extra repayment (monthly): " + f"${total_extra:,.0f}]")
     st.write(":blue[Total repayment (monthly): " + f"${total:,.0f}]")
