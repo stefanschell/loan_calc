@@ -484,9 +484,9 @@ with col2:
     if restart_loan_today:
         show_so_far_information = False
 
-    show_slow_schedules = st.toggle("Show slow detailed schedules", False)
+    show_slow_schedules = st.toggle("Show slow schedules", False)
     show_fast_alternative_schedules = st.toggle(
-        "Show fast alternative detailed schedules", False
+        "Show fast alternative schedules", False
     )
 
     st.divider()
@@ -798,8 +798,10 @@ with col1:
 
     df_schedule_fixed["Schedule"] = "Fast"
     df_schedule_fixed_wo_extra["Schedule"] = "Slow"
-    df_schedule_fixed_merged = pd.concat(
-        [df_schedule_fixed, df_schedule_fixed_wo_extra]
+    df_schedule_fixed_merged = (
+        pd.concat([df_schedule_fixed, df_schedule_fixed_wo_extra])
+        if show_slow_schedules
+        else df_schedule_fixed
     )
 
     with st.expander("Principal over time"):
@@ -830,8 +832,10 @@ with col1:
 
     interest_plot_fixed["Schedule"] = "Fast"
     interest_plot_fixed_wo_extra["Schedule"] = "Slow"
-    interest_plot_fixed_merged = pd.concat(
-        [interest_plot_fixed, interest_plot_fixed_wo_extra]
+    interest_plot_fixed_merged = (
+        pd.concat([interest_plot_fixed, interest_plot_fixed_wo_extra])
+        if show_slow_schedules
+        else interest_plot_fixed
     )
 
     with st.expander("Interest over time"):
@@ -864,8 +868,10 @@ with col1:
 
     repayment_plot_fixed["Schedule"] = "Fast"
     repayment_plot_fixed_wo_extra["Schedule"] = "Slow"
-    repayment_plot_fixed_merged = pd.concat(
-        [repayment_plot_fixed, repayment_plot_fixed_wo_extra]
+    repayment_plot_fixed_merged = (
+        pd.concat([repayment_plot_fixed, repayment_plot_fixed_wo_extra])
+        if show_slow_schedules
+        else repayment_plot_fixed
     )
 
     if repayment_cycle.is_fortnightly():
@@ -1232,8 +1238,10 @@ with col2:
 
     df_schedule_variable["Schedule"] = "Fast"
     df_schedule_variable_wo_extra["Schedule"] = "Slow"
-    df_schedule_variable_merged = pd.concat(
-        [df_schedule_variable, df_schedule_variable_wo_extra]
+    df_schedule_variable_merged = (
+        pd.concat([df_schedule_variable, df_schedule_variable_wo_extra])
+        if show_slow_schedules
+        else df_schedule_variable
     )
 
     with st.expander("Principal over time"):
@@ -1264,8 +1272,10 @@ with col2:
 
     interest_plot_variable["Schedule"] = "Fast"
     interest_plot_variable_wo_extra["Schedule"] = "Slow"
-    interest_plot_variable_merged = pd.concat(
-        [interest_plot_variable, interest_plot_variable_wo_extra]
+    interest_plot_variable_merged = (
+        pd.concat([interest_plot_variable, interest_plot_variable_wo_extra])
+        if show_slow_schedules
+        else interest_plot_variable
     )
 
     with st.expander("Interest over time"):
@@ -1299,8 +1309,10 @@ with col2:
 
     repayment_plot_variable["Schedule"] = "Fast"
     repayment_plot_variable_wo_extra["Schedule"] = "Slow"
-    repayment_plot_variable_merged = pd.concat(
-        [repayment_plot_variable, repayment_plot_variable_wo_extra]
+    repayment_plot_variable_merged = (
+        pd.concat([repayment_plot_variable, repayment_plot_variable_wo_extra])
+        if show_slow_schedules
+        else repayment_plot_variable
     )
 
     if repayment_cycle.is_fortnightly():
