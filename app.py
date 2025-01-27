@@ -466,37 +466,6 @@ with col2:
 
     with st.expander("Override settings"):
 
-        restart_loan_today = st.toggle("Restart loan today", False)
-
-        if restart_loan_today:
-            loan_start = pd.to_datetime("today")
-            fixed_loan_end = loan_start + fixed_loan_length
-            schedule_start = loan_start
-            prev_interest_date = schedule_start
-            prev_repayment_date = schedule_start
-
-        show_so_far_information = not st.toggle(
-            "Hide 'so far' information", False, disabled=restart_loan_today
-        )
-
-        if restart_loan_today:
-            show_so_far_information = False
-
-        show_other_schedules = st.toggle("Show other schedules", False)
-
-    st.divider()
-    st.write("##### Dates")
-
-    st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
-    st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
-    st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
-    st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
-    st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
-
-    st.divider()
-    st.write("##### Interest and repayment cycle")
-
-    with st.expander("Override variables"):
         allowed_cycles = [
             item
             for item in home_loan_simulator.Cycle
@@ -517,17 +486,44 @@ with col2:
             format_func=home_loan_simulator.Cycle.complex_str,
         )
 
-    st.write("Interest cycle: " + interest_cycle.complex_str())
-    st.write("Repayment cycle: " + repayment_cycle.complex_str())
+        st.divider()
 
-    st.divider()
-    st.write("##### Save now, spend now and invest now")
+        restart_loan_today = st.toggle("Restart loan today", False)
 
-    show_save_spend_invest_information = st.toggle(
-        "Show 'save now', 'spend now', 'invest now' information", False
-    )
+        if restart_loan_today:
+            loan_start = pd.to_datetime("today")
+            fixed_loan_end = loan_start + fixed_loan_length
+            schedule_start = loan_start
+            prev_interest_date = schedule_start
+            prev_repayment_date = schedule_start
+
+        if restart_loan_today:
+            show_so_far_information = False
+
+        show_so_far_information = not st.toggle(
+            "Hide 'so far' and 'so far & to go' information",
+            False,
+            disabled=restart_loan_today,
+        )
+
+        show_save_spend_invest_information = not st.toggle(
+            "Hide save now, spend now, invest now information", False
+        )
+
+        show_other_schedules = st.toggle("Show other schedules", False)
+
+    st.write("##### Dates")
+
+    st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
+    st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
+    st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
+    st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
+    st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
     if show_save_spend_invest_information:
+        st.divider()
+        st.write("##### Save now, spend now and invest now")
+
         with st.expander("Override variables"):
 
             st.write("Save now: one time saving of an additional amount of money")
