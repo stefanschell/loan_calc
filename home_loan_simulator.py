@@ -98,7 +98,9 @@ def simulate(
             0,
             0,
             0,
-            -extra_cost_amount if extra_cost_amount is not None else 0,
+            extra_cost_amount if extra_cost_amount is not None else 0,
+            0,
+            0,
             principal,
         )
     )
@@ -113,7 +115,8 @@ def simulate(
         curr_interest = None
         curr_redraw = None
         curr_repayment = None
-        curr_extra_win = None
+        curr_extra_win_for_loan = None
+        curr_extra_win_for_us = None
 
         # interest
         # note: we keep track of the amount owning on a daily basis,
@@ -173,9 +176,10 @@ def simulate(
 
         if prev_extra_win_date is not None and extra_win_amount is not None:
             if curr_date >= increment_date(prev_extra_win_date, extra_win_cycle):
-                curr_extra_win = min(principal, extra_win_amount)
+                curr_extra_win_for_loan = min(principal, extra_win_amount)
+                curr_extra_win_for_us = extra_win_amount - curr_extra_win_for_loan
 
-                principal = principal - curr_extra_win
+                principal = principal - curr_extra_win_for_loan
                 prev_extra_win_date = increment_date(
                     prev_extra_win_date, extra_win_cycle
                 )
@@ -186,7 +190,8 @@ def simulate(
             curr_interest is not None
             or curr_redraw is not None
             or curr_repayment is not None
-            or curr_extra_win is not None
+            or curr_extra_win_for_loan is not None
+            or curr_extra_win_for_us is not None
             or maturity_is_today is True
         ):
             schedule.append(
@@ -199,7 +204,9 @@ def simulate(
                     curr_interest,
                     curr_redraw,
                     curr_repayment,
-                    curr_extra_win,
+                    0,
+                    curr_extra_win_for_loan,
+                    curr_extra_win_for_us,
                     principal,
                 )
             )
@@ -227,7 +234,9 @@ def simulate(
             "Interest",
             "Redraw",
             "Repayment",
-            "ExtraCostOrWin",
+            "ExtraCost",
+            "ExtraWinForLoan",
+            "ExtraWinForUs",
             "Principal",
         ],
     )

@@ -43,7 +43,9 @@ schedule_format = {
     "Interest": "${:,.0f}",
     "Redraw": "${:,.0f}",
     "Repayment": "${:,.0f}",
-    "ExtraCostOrWin": "${:,.0f}",
+    "ExtraCost": "${:,.0f}",
+    "ExtraWinForLoan": "${:,.0f}",
+    "ExtraWinForUs": "${:,.0f}",
     "Principal": "${:,.0f}",
 }
 
