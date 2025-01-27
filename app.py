@@ -497,14 +497,7 @@ with col2:
             prev_interest_date = schedule_start
             prev_repayment_date = schedule_start
 
-        show_so_far_information = not st.toggle(
-            "Hide 'so far' and 'so far & to go' information",
-            False,
-            disabled=restart_loan_today,
-        )
-
-        if restart_loan_today:
-            show_so_far_information = False
+        show_so_far_information = not restart_loan_today
 
         show_theoretical_schedule = st.toggle(
             "Show possibility to calculate theoretical schedule", False
