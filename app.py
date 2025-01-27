@@ -486,8 +486,6 @@ with col2:
             format_func=home_loan_simulator.Cycle.complex_str,
         )
 
-        st.divider()
-
         restart_loan_today = st.toggle("Restart loan today", False)
 
         if restart_loan_today:
@@ -499,26 +497,23 @@ with col2:
 
         show_so_far_information = not restart_loan_today
 
-        show_save_spend_invest_information = st.toggle(
-            "Show save now, spend now, invest now information", False
+        st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
+        st.write(
+            "Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y")
         )
+        st.write(
+            "Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y")
+        )
+        st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
+        st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
         show_other_schedules = st.toggle("Show other schedules", False)
 
-    st.write("##### Dates")
+        show_save_spend_invest_information = st.toggle(
+            "Show save now, spend now, invest now", False
+        )
 
-    st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
-    st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
-    st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
-    st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
-    st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
-
-    if show_save_spend_invest_information:
-        st.divider()
-        st.write("##### Save now, spend now and invest now")
-
-        with st.expander("Override variables"):
-
+        if show_save_spend_invest_information:
             st.write("Save now: one time saving of an additional amount of money")
             st.write("Spend now: one time spending of an additional amount of money")
             st.write(
@@ -566,13 +561,13 @@ with col2:
                     "Invest now win duration override (years)", 0, 99, 15
                 ),
             )
-    else:
-        save_now_amount = 0
-        spend_now_amount = 0
-        invest_now_cost_amount = 0
-        invest_now_win_amount = None
-        invest_now_win_cycle = None
-        invest_now_win_duration = None
+        else:
+            save_now_amount = 0
+            spend_now_amount = 0
+            invest_now_cost_amount = 0
+            invest_now_win_amount = None
+            invest_now_win_cycle = None
+            invest_now_win_duration = None
 
 col1, col2 = st.columns(2)
 
@@ -584,7 +579,7 @@ with col1:
 
     st.write("##### Config")
 
-    with st.expander("Override variables"):
+    with st.expander("Override config"):
 
         toggle_balance_fixed = st.toggle("Override balance", False, key="k1a")
 
@@ -904,7 +899,7 @@ with col2:
 
     st.write("##### Config")
 
-    with st.expander("Override variables"):
+    with st.expander("Override config"):
 
         toggle_balance_variable = st.toggle("Override balance", False, key="k2a")
 
@@ -1397,9 +1392,9 @@ with col2:
         df_balance_total.iloc[0]["Balance"] + df_balance_offset.iloc[0]["Balance"]
     )
 
-    st.write("Effective loan amount: " + f"${effective_loan_amount:,.0f}")
-
     if show_so_far_information:
+        st.write("Effective loan amount: " + f"${effective_loan_amount:,.0f}")
+
         st.write(
             ":red[Interest so far: "
             + f"${(total_interest_so_far_fixed + total_interest_so_far_variable):,.0f}]"
