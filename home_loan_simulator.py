@@ -72,15 +72,11 @@ def simulate(
     leftover_incoming: pd.Timestamp = None,
     leftover_amount=None,
     leftover_repayment=None,
-    extra_cost_amount=None,
     extra_win_amount=None,
     extra_win_cycle: Cycle = None,
     extra_win_duration=None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
-
-    if extra_cost_amount is not None:
-        principal = principal + extra_cost_amount
 
     if extra_win_duration is not None:
         extra_win_end = schedule_start + extra_win_duration
@@ -104,7 +100,6 @@ def simulate(
             0,
             0,
             0,
-            extra_cost_amount if extra_cost_amount is not None else 0,
             0,
             0,
             principal,
@@ -212,7 +207,6 @@ def simulate(
                     curr_interest,
                     curr_redraw,
                     curr_repayment,
-                    0,
                     curr_extra_win_for_loan,
                     curr_extra_win_for_us,
                     principal,
@@ -242,7 +236,6 @@ def simulate(
             "Interest",
             "Redraw",
             "Repayment",
-            "ExtraCost",
             "ExtraWinForLoan",
             "ExtraWinForUs",
             "Principal",

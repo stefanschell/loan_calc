@@ -43,7 +43,6 @@ schedule_format = {
     "Interest": "${:,.0f}",
     "Redraw": "${:,.0f}",
     "Repayment": "${:,.0f}",
-    "ExtraCost": "${:,.0f}",
     "ExtraWinForLoan": "${:,.0f}",
     "ExtraWinForUs": "${:,.0f}",
     "Principal": "${:,.0f}",
@@ -1113,7 +1112,7 @@ with col2:
 
     df_schedule_variable_invest = home_loan_simulator.simulate(
         loan_start=loan_start,
-        principal=balance_variable,
+        principal=balance_variable + invest_now_cost_amount,
         offset=balance_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
@@ -1126,7 +1125,6 @@ with col2:
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
         leftover_repayment=repayment_total_fixed,
-        extra_cost_amount=invest_now_cost_amount,
         extra_win_amount=invest_now_win_amount,
         extra_win_cycle=invest_now_win_cycle,
         extra_win_duration=invest_now_win_duration,
@@ -1142,6 +1140,7 @@ with col2:
     total_repayments_variable_save = df_schedule_variable_save["Repayment"].sum()
     total_repayments_variable_spend = df_schedule_variable_spend["Repayment"].sum()
     total_repayments_variable_invest = df_schedule_variable_invest["Repayment"].sum()
+    exta_win_for_us_invest = df_schedule_variable_invest["ExtraWinForUs"].sum()
 
     interest_per_month_variable = (
         (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
