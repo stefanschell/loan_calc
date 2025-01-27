@@ -506,6 +506,10 @@ with col2:
         if restart_loan_today:
             show_so_far_information = False
 
+        show_theoretical_schedule = st.toggle(
+            "Show possibility to calculate theoretical schedule", False
+        )
+
         show_save_spend_invest_information = st.toggle(
             "Show save now, spend now, invest now information", False
         )
@@ -535,28 +539,28 @@ with col2:
             save_now_amount = st.number_input(
                 "Save now amount override ($)",
                 0,
-                1000000,
+                100000,
                 3000,
             )
 
             spend_now_amount = st.number_input(
                 "Spend now amount override ($)",
                 0,
-                1000000,
+                100000,
                 10000,
             )
 
             invest_now_cost_amount = st.number_input(
                 "Invest now cost amount override ($)",
                 0,
-                1000000,
+                100000,
                 5000,
             )
 
             invest_now_win_amount = st.number_input(
                 "Invest now win amount override ($)",
                 0,
-                1000000,
+                10000,
                 75,
             )
 
@@ -570,7 +574,7 @@ with col2:
             invest_now_win_duration = timedelta(
                 days=365
                 * st.number_input(
-                    "Invest now win duration override (years)", 0, 50, 15
+                    "Invest now win duration override (years)", 0, 99, 15
                 ),
             )
     else:
@@ -640,23 +644,24 @@ with col1:
 
     st.write("Offset: None")
 
-    with st.expander("Theoretical schedule (for information only, not used)"):
-        years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
+    if show_theoretical_schedule:
+        with st.expander("Calculate theoretical schedule"):
+            years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
 
-        planner_fixed = home_loan_planner.HomeLoanPlanner(
-            "Fixed",
-            N=years_planner_fixed,
-            k=((365 / 14) if repayment_cycle.is_fortnightly() else 12),
-            P=balance_fixed,
-            R0=interest_fixed / 100,
-        )
+            planner_fixed = home_loan_planner.HomeLoanPlanner(
+                "Fixed",
+                N=years_planner_fixed,
+                k=((365 / 14) if repayment_cycle.is_fortnightly() else 12),
+                P=balance_fixed,
+                R0=interest_fixed / 100,
+            )
 
-        st.write(
-            "Repayment ("
-            + repayment_cycle.simple_str()
-            + "), for identical repayment and interest cycles: "
-            + f"${planner_fixed.c0:,.0f}"
-        )
+            st.write(
+                "Repayment ("
+                + repayment_cycle.simple_str()
+                + "), for identical repayment and interest cycles: "
+                + f"${planner_fixed.c0:,.0f}"
+            )
 
     st.divider()
     st.write("##### Schedule")
@@ -974,23 +979,24 @@ with col2:
 
     st.write("Offset: " + f"${balance_offset:,.0f}")
 
-    with st.expander("Theoretical schedule (for information only, not used)"):
-        years_planner_variable = st.number_input("Years", 1, 40, 25, 1, key="k2i")
+    if show_theoretical_schedule:
+        with st.expander("Calculate theoretical schedule"):
+            years_planner_variable = st.number_input("Years", 1, 99, 25, 1, key="k2i")
 
-        planner_variable = home_loan_planner.HomeLoanPlanner(
-            "Fixed",
-            N=years_planner_variable,
-            k=((365 / 14) if repayment_cycle.is_fortnightly() else 12),
-            P=balance_variable - balance_offset,
-            R0=interest_variable / 100,
-        )
+            planner_variable = home_loan_planner.HomeLoanPlanner(
+                "Fixed",
+                N=years_planner_variable,
+                k=((365 / 14) if repayment_cycle.is_fortnightly() else 12),
+                P=balance_variable - balance_offset,
+                R0=interest_variable / 100,
+            )
 
-        st.write(
-            "Repayment ("
-            + repayment_cycle.simple_str()
-            + "), for identical repayment and interest cycles: "
-            + f"${planner_variable.c0:,.0f}"
-        )
+            st.write(
+                "Repayment ("
+                + repayment_cycle.simple_str()
+                + "), for identical repayment and interest cycles: "
+                + f"${planner_variable.c0:,.0f}"
+            )
 
     st.divider()
     st.write("##### Schedule")
