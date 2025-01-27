@@ -1269,15 +1269,15 @@ with col2:
                 + principal_smaller_offset_first_date.strftime("%d/%m/%Y")
             )
 
-        if principal_smaller_offset_first_date < fixed_loan_end:
-            principal_smaller_offset_second_date = df_schedule_variable[
-                (df_schedule_variable["Principal"] <= balance_offset)
-                & (df_schedule_variable["Date"] > fixed_loan_end)
-            ].iloc[0]["Date"]
-            st.write(
-                "Date when principal smaller than offset for the second time: "
-                + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
-            )
+            if principal_smaller_offset_first_date < fixed_loan_end:
+                principal_smaller_offset_second_date = df_schedule_variable[
+                    (df_schedule_variable["Principal"] <= balance_offset)
+                    & (df_schedule_variable["Date"] > fixed_loan_end)
+                ].iloc[0]["Date"]
+                st.write(
+                    "Date when principal smaller than offset for the second time: "
+                    + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
+                )
 
     interest_plot_variable = pd.DataFrame(df_schedule_variable)
     interest_plot_variable = interest_plot_variable[
