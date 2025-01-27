@@ -1431,19 +1431,19 @@ with col2:
     )
     if show_save_spend_invest_information:
         st.write(
-            ":blue[--- save "
+            "--- save "
             + f"\\${save_now_amount:,.0f}"
             + " now -> "
-            + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}]"
+            + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}"
         )
         st.write(
-            ":blue[--- spend "
+            "--- spend "
             + f"\\${spend_now_amount:,.0f}"
             + " now -> "
-            + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}]"
+            + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}"
         )
         st.write(
-            ":blue[--- invest "
+            "--- invest "
             + f"\\${invest_now_cost_amount:,.0f}"
             + ", win "
             + f"\\${invest_now_win_amount:,.0f}"
@@ -1452,7 +1452,6 @@ with col2:
             + ", "
             + str(int(invest_now_win_duration.days / 365))
             + " yrs"
-            + ":]"
         )
         investment_result = (
             total_repayments_variable_invest
@@ -1460,9 +1459,9 @@ with col2:
             - extra_win_for_us_invest
         )
         st.write(
-            f":blue[... -> Δ=${(investment_result):,.0f} ("
+            f"... -> Δ=${(investment_result):,.0f} ("
             + ("profit" if investment_result < 0 else "loss")
-            + ")]"
+            + ")"
         )
     if show_so_far_information:
         st.write(
