@@ -339,7 +339,7 @@ with col2:
 
         st.plotly_chart(fig, key="p4")
 
-    prev_extrarepayment_interpolated = df_change_variable[
+    extracted_extra_repayment = df_change_variable[
         (df_change_variable["interpolated"] == True)
         & (df_change_variable["Label"] == "Extrarepayment")
     ].iloc[-1]["Change"]
@@ -383,28 +383,34 @@ with col2:
 
 st.divider()
 
-col1, col2 = st.columns(2)
+round_to_hundred = lambda x: int(round(x / 100) * 100)
 
-with col1:
-    st.write("Extra repayment data extracted from variable loan account only.")
-
-with col2:
-    st.write(
-        "Latest extracted extra repayment (monthly): "
-        + f"${prev_extrarepayment_interpolated:,.0f}"
-    )
+extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
 
 _, col2, _ = st.columns(3)
 
 with col2:
-
-    st.write("Thus, we assume the following default future extra repayments:")
-
-    round_to_hundred = lambda x: int(round(x / 100) * 100)
-    default_extrarepayment_fixed = round_to_hundred(800)
-    default_extrarepayment_variable = round_to_hundred(
-        prev_extrarepayment_interpolated - default_extrarepayment_fixed
+    st.write(
+        "Extracted extra repayment (monthly): " + f"\${extracted_extra_repayment:,.0f}"
     )
+
+    override_extra_repayment = st.toggle("Override extra repayment")
+
+    if override_extra_repayment:
+        extracted_extra_repayment = st.number_input(
+            "Extra repayment override (monthly, $)",
+            0,
+            20000,
+            5000,
+            100,
+        )
+
+    st.write("Thus, we assume the following extra repayment distribution:")
+
+default_extrarepayment_variable = max(0, extracted_extra_repayment - 800)
+default_extrarepayment_fixed = (
+    extracted_extra_repayment - default_extrarepayment_variable
+)
 
 col1, col2 = st.columns(2)
 
@@ -647,7 +653,7 @@ with col1:
     st.write("##### Schedule")
 
     extra_slider_fixed = st.slider(
-        ":green[Extra repayment (monthly), limited to \\$10000 yearly, i.e. \\$800 monthly]",
+        ":green[Extra repayment (monthly, \$, limited to \\$10000 yearly, i.e. \\$800 monthly)]",
         0,
         800,
         default_extrarepayment_fixed,
@@ -993,7 +999,7 @@ with col2:
     st.write("##### Schedule")
 
     extra_slider_variable = st.slider(
-        ":green[Extra repayment (monthly, plus fixed after "
+        ":green[Extra repayment (monthly, $, plus fixed after "
         + fixed_loan_end.strftime("%d/%m/%Y")
         + ")]",
         0,
