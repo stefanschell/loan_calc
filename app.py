@@ -499,10 +499,6 @@ with col2:
 
         show_so_far_information = not restart_loan_today
 
-        show_theoretical_schedule = st.toggle(
-            "Show possibility to calculate theoretical schedule", False
-        )
-
         show_save_spend_invest_information = st.toggle(
             "Show save now, spend now, invest now information", False
         )
@@ -637,7 +633,7 @@ with col1:
 
     st.write("Offset: None")
 
-    if show_theoretical_schedule:
+    if show_other_schedules:
         with st.expander("Calculate theoretical schedule"):
             years_planner_fixed = st.number_input("Years", 1, 40, 25, 1, key="k1g")
 
@@ -972,7 +968,7 @@ with col2:
 
     st.write("Offset: " + f"${balance_offset:,.0f}")
 
-    if show_theoretical_schedule:
+    if show_other_schedules:
         with st.expander("Calculate theoretical schedule"):
             years_planner_variable = st.number_input("Years", 1, 99, 25, 1, key="k2i")
 
