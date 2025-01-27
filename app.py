@@ -391,7 +391,7 @@ _, col2, _ = st.columns(3)
 
 with col2:
     st.write(
-        "Extracted extra repayment (monthly): " + f"\${extracted_extra_repayment:,.0f}"
+        "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
     )
 
     override_extra_repayment = st.toggle("Override extra repayment")
@@ -653,7 +653,7 @@ with col1:
     st.write("##### Schedule")
 
     extra_slider_fixed = st.slider(
-        ":green[Extra repayment (monthly, \$, limited to \\$10000 yearly, i.e. \\$800 monthly)]",
+        ":green[Extra repayment (monthly, \\$, limited to \\$10000 yearly, i.e. \\$800 monthly)]",
         0,
         800,
         default_extrarepayment_fixed,
