@@ -497,14 +497,14 @@ with col2:
             prev_interest_date = schedule_start
             prev_repayment_date = schedule_start
 
-        if restart_loan_today:
-            show_so_far_information = False
-
         show_so_far_information = not st.toggle(
             "Hide 'so far' and 'so far & to go' information",
             False,
             disabled=restart_loan_today,
         )
+
+        if restart_loan_today:
+            show_so_far_information = False
 
         show_save_spend_invest_information = st.toggle(
             "Show save now, spend now, invest now information", False
