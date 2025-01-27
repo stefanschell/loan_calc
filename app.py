@@ -485,10 +485,6 @@ with col2:
 
         show_schedules_wo_extra = st.toggle("Show schedules wo/ extra repayment", False)
 
-        show_alternative_scheduless = st.toggle(
-            "Show schedules for save now, spend now and invest now", False
-        )
-
     st.divider()
     st.write("##### Dates")
 
@@ -528,8 +524,8 @@ with col2:
     st.divider()
     st.write("##### Save now, spend now and invest now")
 
-    show_save_spend_invest_information = not st.toggle(
-        "Hide 'save now', 'spend now', 'invest now' information", False
+    show_save_spend_invest_information = st.toggle(
+        "Show 'save now', 'spend now', 'invest now' information", False
     )
 
     if show_save_spend_invest_information:
@@ -538,7 +534,7 @@ with col2:
             st.write("Save now: one time saving of an additional amount of money")
             st.write("Spend now: one time spending of an additional amount of money")
             st.write(
-                "Invest now: one time investment of a certain amount of money, then regular gain of money"
+                "Invest now: one time investment of a certain amount of money, then regular gain of money over the lifetime"
             )
 
             save_now_amount = st.number_input(
@@ -560,6 +556,13 @@ with col2:
                 0,
                 1000000,
                 5000,
+            )
+
+            invest_now_lifespan = st.number_input(
+                "Invest now lifespan override (years)",
+                0,
+                50,
+                15,
             )
 
             invest_now_win_amount = st.number_input(
@@ -1168,7 +1171,7 @@ with col2:
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
 
-    if show_schedules_wo_extra or show_alternative_scheduless:
+    if show_schedules_wo_extra or show_save_spend_invest_information:
         st.divider()
         st.write("##### Other Schedules")
 
@@ -1176,7 +1179,7 @@ with col2:
         with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
 
-    if show_alternative_scheduless:
+    if show_save_spend_invest_information:
         with st.expander("Detailed schedule: save now"):
             st.write(df_schedule_variable_save.style.format(schedule_format))
 
