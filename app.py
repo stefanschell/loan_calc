@@ -348,29 +348,33 @@ col1, col2 = st.columns(2)
 
 with col1:
 
-    st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
-    st.write(
-        ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
-    )
-    st.write(
-        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
-    )
-    st.write(
-        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
-    )
+    with st.expander("Interest, base, extra and total repayment so far"):
+        st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
+        st.write(
+            ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
+        )
+        st.write(
+            ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
+        )
+        st.write(
+            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+        )
 
 with col2:
-
-    st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
-    st.write(
-        ":orange[Base repayment so far: " + f"${base_repayment_so_far_variable:,.0f}]"
-    )
-    st.write(
-        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_variable:,.0f}]"
-    )
-    st.write(
-        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
-    )
+    with st.expander("Interest, base, extra and total repayment so far"):
+        st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
+        st.write(
+            ":orange[Base repayment so far: "
+            + f"${base_repayment_so_far_variable:,.0f}]"
+        )
+        st.write(
+            ":green[Extra repayment so far: "
+            + f"${extra_repayment_so_far_variable:,.0f}]"
+        )
+        st.write(
+            ":blue[Total repayment so far: "
+            + f"${total_repayments_so_far_variable:,.0f}]"
+        )
 
 _, col2, _ = st.columns(3)
 
