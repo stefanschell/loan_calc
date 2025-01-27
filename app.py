@@ -381,51 +381,6 @@ with col2:
     st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
     st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
-st.divider()
-
-round_to_hundred = lambda x: int(round(x / 100) * 100)
-
-extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
-
-_, col2, _ = st.columns(3)
-
-with col2:
-    st.write(
-        "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
-    )
-
-    override_extra_repayment = st.toggle("Override extra repayment")
-
-    if override_extra_repayment:
-        extracted_extra_repayment = st.number_input(
-            "Extra repayment override (monthly, $)",
-            0,
-            20800,
-            5000,
-            100,
-        )
-
-    st.write("Thus, we assume the following extra repayment distribution:")
-
-default_extrarepayment_variable = max(0, extracted_extra_repayment - 800)
-default_extrarepayment_fixed = (
-    extracted_extra_repayment - default_extrarepayment_variable
-)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.write(
-        ":green[Fixed loan extra repayment (monthly): "
-        + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
-    )
-
-with col2:
-    st.write(
-        ":green[Variable loan extra repayment (monthly): "
-        + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
-    )
-
 # Prospective
 
 st.write("# Prospective")
@@ -570,6 +525,51 @@ with col2:
             invest_now_win_amount = None
             invest_now_win_cycle = None
             invest_now_win_duration = None
+
+round_to_hundred = lambda x: int(round(x / 100) * 100)
+
+extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
+
+_, col2, _ = st.columns(3)
+
+with col2:
+
+    st.write("##### Quick config")
+
+    with st.expander("Override quick config"):
+
+        st.write(
+            "Extracted extra repayment (monthly): "
+            + f"\\${extracted_extra_repayment:,.0f}"
+        )
+
+        override_extra_repayment = st.toggle("Override extra repayment")
+
+        if override_extra_repayment:
+            extracted_extra_repayment = st.number_input(
+                "Extra repayment override (monthly, $)",
+                0,
+                20800,
+                5000,
+                100,
+            )
+
+        st.write("Thus, we assume the following extra repayment distribution:")
+
+        default_extrarepayment_variable = max(0, extracted_extra_repayment - 800)
+        default_extrarepayment_fixed = (
+            extracted_extra_repayment - default_extrarepayment_variable
+        )
+
+        st.write(
+            ":green[Fixed loan extra repayment (monthly): "
+            + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
+        )
+
+        st.write(
+            ":green[Variable loan extra repayment (monthly): "
+            + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
+        )
 
 col1, col2 = st.columns(2)
 
