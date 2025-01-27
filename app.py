@@ -506,8 +506,8 @@ with col2:
             disabled=restart_loan_today,
         )
 
-        show_save_spend_invest_information = not st.toggle(
-            "Hide save now, spend now, invest now information", False
+        show_save_spend_invest_information = st.toggle(
+            "Show save now, spend now, invest now information", False
         )
 
         show_other_schedules = st.toggle("Show other schedules", False)
