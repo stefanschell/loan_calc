@@ -1136,7 +1136,7 @@ with col2:
     total_repayments_variable_save = df_schedule_variable_save["Repayment"].sum()
     total_repayments_variable_spend = df_schedule_variable_spend["Repayment"].sum()
     total_repayments_variable_invest = df_schedule_variable_invest["Repayment"].sum()
-    exta_win_for_us_invest = df_schedule_variable_invest["ExtraWinForUs"].sum()
+    extra_win_for_us_invest = df_schedule_variable_invest["ExtraWinForUs"].sum()
 
     interest_per_month_variable = (
         (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
@@ -1454,8 +1454,15 @@ with col2:
             + " yrs"
             + ":]"
         )
+        investment_result = (
+            total_repayments_variable_invest
+            - total_repayments_variable
+            - extra_win_for_us_invest
+        )
         st.write(
-            f":blue[... -> Δ=${(total_repayments_variable_invest - total_repayments_variable - exta_win_for_us_invest):,.0f}]"
+            f":blue[... -> Δ=${(investment_result):,.0f} ("
+            + ("profit" if investment_result < 0 else "loss")
+            + ")]"
         )
     if show_so_far_information:
         st.write(
