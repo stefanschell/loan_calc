@@ -481,10 +481,10 @@ with col2:
         if restart_loan_today:
             show_so_far_information = False
 
-        show_slow_schedules = st.toggle("Show 'slow' schedules", False)
+        show_schedules_wo_extra = st.toggle("Show schedules wo/ extra repayment", False)
 
-        show_fast_alternative_schedules = st.toggle(
-            "Show 'fast alternative' schedules", False
+        show_alternative_scheduless = st.toggle(
+            "Show schedules for save now, spend now and invest now", False
         )
 
     st.divider()
@@ -754,11 +754,11 @@ with col1:
             "Time so far & to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
         )
 
-    if show_slow_schedules:
+    if show_schedules_wo_extra:
         st.divider()
         st.write("##### Other schedules")
 
-        with st.expander("Detailed schedule: Slow, w/o extra repayment"):
+        with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
 
     st.divider()
@@ -804,11 +804,11 @@ with col1:
 
     st.write("Afterwards the remaining balance is moved to the variable loan account.")
 
-    df_schedule_fixed["Schedule"] = "Fast"
-    df_schedule_fixed_wo_extra["Schedule"] = "Slow"
+    df_schedule_fixed["Schedule"] = "default"
+    df_schedule_fixed_wo_extra["Schedule"] = "wo/ extra repayment"
     df_schedule_fixed_merged = (
         pd.concat([df_schedule_fixed, df_schedule_fixed_wo_extra])
-        if show_slow_schedules
+        if show_schedules_wo_extra
         else df_schedule_fixed
     )
 
@@ -818,7 +818,7 @@ with col1:
             df_schedule_fixed_merged,
             x="Date",
             y="Principal",
-            color="Schedule" if show_slow_schedules else None,
+            color="Schedule" if show_schedules_wo_extra else None,
         )
         fig1.update_layout(
             title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
@@ -841,11 +841,11 @@ with col1:
         & (interest_plot_fixed_wo_extra["Date"] > schedule_start)
     ]
 
-    interest_plot_fixed["Schedule"] = "Fast"
-    interest_plot_fixed_wo_extra["Schedule"] = "Slow"
+    interest_plot_fixed["Schedule"] = "default"
+    interest_plot_fixed_wo_extra["Schedule"] = "wo/ extra repayment"
     interest_plot_fixed_merged = (
         pd.concat([interest_plot_fixed, interest_plot_fixed_wo_extra])
-        if show_slow_schedules
+        if show_schedules_wo_extra
         else interest_plot_fixed
     )
 
@@ -854,7 +854,7 @@ with col1:
             interest_plot_fixed_merged,
             x="ScheduleYears",
             y="Interest",
-            color="Schedule" if show_slow_schedules else None,
+            color="Schedule" if show_schedules_wo_extra else None,
         )
         fig2.update_layout(
             title={"text": "Interest / Fixed", "x": 0.5, "xanchor": "center"}
@@ -877,11 +877,11 @@ with col1:
         & (repayment_plot_fixed_wo_extra["Date"] > schedule_start)
     ]
 
-    repayment_plot_fixed["Schedule"] = "Fast"
-    repayment_plot_fixed_wo_extra["Schedule"] = "Slow"
+    repayment_plot_fixed["Schedule"] = "default"
+    repayment_plot_fixed_wo_extra["Schedule"] = "wo/ extra repayment"
     repayment_plot_fixed_merged = (
         pd.concat([repayment_plot_fixed, repayment_plot_fixed_wo_extra])
-        if show_slow_schedules
+        if show_schedules_wo_extra
         else repayment_plot_fixed
     )
 
@@ -896,7 +896,7 @@ with col1:
             repayment_plot_fixed_merged,
             x="ScheduleYears",
             y="Repayment",
-            color="Schedule" if show_slow_schedules else None,
+            color="Schedule" if show_schedules_wo_extra else None,
         )
         fig3.update_layout(
             title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
@@ -1166,22 +1166,22 @@ with col2:
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
         )
 
-    if show_slow_schedules or show_fast_alternative_schedules:
+    if show_schedules_wo_extra or show_alternative_scheduless:
         st.divider()
         st.write("##### Other Schedules")
 
-    if show_slow_schedules:
-        with st.expander("Detailed schedule: Slow, w/o extra repayment"):
+    if show_schedules_wo_extra:
+        with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
 
-    if show_fast_alternative_schedules:
-        with st.expander("Detailed schedule: Fast, w/ extra repayment, save now"):
+    if show_alternative_scheduless:
+        with st.expander("Detailed schedule: save now"):
             st.write(df_schedule_variable_save.style.format(schedule_format))
 
-        with st.expander("Detailed schedule: Fast, w/ extra repayment, spend now"):
+        with st.expander("Detailed schedule: spend now"):
             st.write(df_schedule_variable_spend.style.format(schedule_format))
 
-        with st.expander("Detailed schedule: Fast, w/ extra repayment, invest now"):
+        with st.expander("Detailed schedule: invest now"):
             st.write(df_schedule_variable_invest.style.format(schedule_format))
 
     st.divider()
@@ -1249,11 +1249,11 @@ with col2:
                 + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
             )
 
-    df_schedule_variable["Schedule"] = "Fast"
-    df_schedule_variable_wo_extra["Schedule"] = "Slow"
+    df_schedule_variable["Schedule"] = "default"
+    df_schedule_variable_wo_extra["Schedule"] = "wo/ extra repayment"
     df_schedule_variable_merged = (
         pd.concat([df_schedule_variable, df_schedule_variable_wo_extra])
-        if show_slow_schedules
+        if show_schedules_wo_extra
         else df_schedule_variable
     )
 
@@ -1263,7 +1263,7 @@ with col2:
             df_schedule_variable_merged,
             x="Date",
             y="Principal",
-            color="Schedule" if show_slow_schedules else None,
+            color="Schedule" if show_schedules_wo_extra else None,
         )
         fig1.update_layout(
             title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
@@ -1286,11 +1286,11 @@ with col2:
         & (interest_plot_variable_wo_extra["Date"] > schedule_start)
     ]
 
-    interest_plot_variable["Schedule"] = "Fast"
-    interest_plot_variable_wo_extra["Schedule"] = "Slow"
+    interest_plot_variable["Schedule"] = "default"
+    interest_plot_variable_wo_extra["Schedule"] = "wo/ extra repayment"
     interest_plot_variable_merged = (
         pd.concat([interest_plot_variable, interest_plot_variable_wo_extra])
-        if show_slow_schedules
+        if show_schedules_wo_extra
         else interest_plot_variable
     )
 
@@ -1300,7 +1300,7 @@ with col2:
             interest_plot_variable_merged,
             x="ScheduleYears",
             y="Interest",
-            color="Schedule" if show_slow_schedules else None,
+            color="Schedule" if show_schedules_wo_extra else None,
         )
         fig2.update_layout(
             title={"text": "Interest / Variable", "x": 0.5, "xanchor": "center"}
@@ -1323,11 +1323,11 @@ with col2:
         & (repayment_plot_variable_wo_extra["Date"] > schedule_start)
     ]
 
-    repayment_plot_variable["Schedule"] = "Fast"
-    repayment_plot_variable_wo_extra["Schedule"] = "Slow"
+    repayment_plot_variable["Schedule"] = "default"
+    repayment_plot_variable_wo_extra["Schedule"] = "wo/ extra repayment"
     repayment_plot_variable_merged = (
         pd.concat([repayment_plot_variable, repayment_plot_variable_wo_extra])
-        if show_slow_schedules
+        if show_schedules_wo_extra
         else repayment_plot_variable
     )
 
@@ -1342,7 +1342,7 @@ with col2:
             repayment_plot_variable_merged,
             x="ScheduleYears",
             y="Repayment",
-            color="Schedule" if show_slow_schedules else None,
+            color="Schedule" if show_schedules_wo_extra else None,
         )
         fig3.update_layout(
             title={"text": "Total Repayment / Variable", "x": 0.5, "xanchor": "center"}
