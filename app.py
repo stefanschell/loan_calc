@@ -732,6 +732,7 @@ with col1:
         "Time to go: "
         + f"{total_years_fixed:.2f} yrs, till "
         + fixed_loan_end.strftime("%d/%m/%Y")
+        + ", fixed loan term ends"
     )
     if show_so_far_information:
         st.write(
@@ -939,7 +940,12 @@ with col2:
                 "Offset override ($)", 0, 300000, 100000, 1000, key="k2h"
             )
 
-    st.write("Balance: " + f"${balance_variable:,.0f}")
+    st.write(
+        "Balance: "
+        + f"${balance_variable:,.0f} (plus fixed after "
+        + fixed_loan_end.strftime("%d/%m/%Y")
+        + ")"
+    )
 
     st.write(":red[Interest: " + f"{interest_variable:.3f}%]")
 
