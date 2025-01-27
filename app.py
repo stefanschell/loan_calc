@@ -400,7 +400,7 @@ with col2:
         extracted_extra_repayment = st.number_input(
             "Extra repayment override (monthly, $)",
             0,
-            20000,
+            20800,
             5000,
             100,
         )
