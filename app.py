@@ -796,10 +796,6 @@ with col1:
         + f"${end_of_fixed_loan_balance:,.0f}"
     )
 
-    st.write("...")
-
-    st.write("...")
-
     df_schedule_fixed["Schedule"] = "default"
     df_schedule_fixed_wo_extra["Schedule"] = "wo/ extra repayment"
     df_schedule_fixed_merged = (
@@ -1235,27 +1231,6 @@ with col2:
         + f"${before_end_of_fixed_loan_balance:,.0f}"
     )
 
-    principal_smaller_offset = df_schedule_variable[
-        df_schedule_variable["Principal"] <= balance_offset
-    ]
-
-    if len(principal_smaller_offset) > 0:
-        principal_smaller_offset_first_date = principal_smaller_offset.iloc[0]["Date"]
-        st.write(
-            "Date when principal smaller than offset for the first time: "
-            + principal_smaller_offset_first_date.strftime("%d/%m/%Y")
-        )
-
-        if principal_smaller_offset_first_date < fixed_loan_end:
-            principal_smaller_offset_second_date = df_schedule_variable[
-                (df_schedule_variable["Principal"] <= balance_offset)
-                & (df_schedule_variable["Date"] > fixed_loan_end)
-            ].iloc[0]["Date"]
-            st.write(
-                "Date when principal smaller than offset for the second time: "
-                + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
-            )
-
     df_schedule_variable["Schedule"] = "default"
     df_schedule_variable_wo_extra["Schedule"] = "wo/ extra repayment"
     df_schedule_variable_merged = (
@@ -1280,6 +1255,29 @@ with col2:
         fig1.update_yaxes(title_text="Principal ($)")
 
         st.plotly_chart(fig1)
+
+        principal_smaller_offset = df_schedule_variable[
+            df_schedule_variable["Principal"] <= balance_offset
+        ]
+
+        if len(principal_smaller_offset) > 0:
+            principal_smaller_offset_first_date = principal_smaller_offset.iloc[0][
+                "Date"
+            ]
+            st.write(
+                "Date when principal smaller than offset for the first time: "
+                + principal_smaller_offset_first_date.strftime("%d/%m/%Y")
+            )
+
+        if principal_smaller_offset_first_date < fixed_loan_end:
+            principal_smaller_offset_second_date = df_schedule_variable[
+                (df_schedule_variable["Principal"] <= balance_offset)
+                & (df_schedule_variable["Date"] > fixed_loan_end)
+            ].iloc[0]["Date"]
+            st.write(
+                "Date when principal smaller than offset for the second time: "
+                + principal_smaller_offset_second_date.strftime("%d/%m/%Y")
+            )
 
     interest_plot_variable = pd.DataFrame(df_schedule_variable)
     interest_plot_variable = interest_plot_variable[
