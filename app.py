@@ -580,7 +580,7 @@ with col2:
     else:
         save_now_amount = 0
         spend_now_amount = 0
-        invest_now_cost_amount = None
+        invest_now_cost_amount = 0
         invest_now_win_amount = None
         invest_now_win_cycle = None
         invest_now_win_duration = None
@@ -1455,7 +1455,7 @@ with col2:
             + " "
             + invest_now_win_cycle.simple_str()
             + ": "
-            + f"Δ=${(total_repayments_variable_invest - total_repayments_variable):,.0f}]"
+            + f"Δ=${(total_repayments_variable_invest - total_repayments_variable - exta_win_for_us_invest):,.0f}]"
         )
     if show_so_far_information:
         st.write(

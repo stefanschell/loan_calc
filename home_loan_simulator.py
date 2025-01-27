@@ -178,7 +178,9 @@ def simulate(
         # extra win
 
         if prev_extra_win_date is not None and extra_win_amount is not None:
-            if curr_date >= increment_date(prev_extra_win_date, extra_win_cycle):
+            if curr_date >= increment_date(prev_extra_win_date, extra_win_cycle) and (
+                extra_win_end is None or curr_date <= extra_win_end
+            ):
                 curr_extra_win_for_loan = min(principal, extra_win_amount)
                 curr_extra_win_for_us = extra_win_amount - curr_extra_win_for_loan
 
