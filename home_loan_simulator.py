@@ -75,11 +75,17 @@ def simulate(
     extra_cost_amount=None,
     extra_win_amount=None,
     extra_win_cycle: Cycle = None,
+    extra_win_duration=None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
 
     if extra_cost_amount is not None:
         principal = principal + extra_cost_amount
+
+    if extra_win_duration is not None:
+        extra_win_end = schedule_start + extra_win_duration
+    else:
+        extra_win_end = None
 
     prev_extra_win_date = None
     if extra_win_cycle is not None:
@@ -105,8 +111,10 @@ def simulate(
         )
     )
 
-    while principal > 0 or (
-        leftover_incoming is not None and curr_date <= leftover_incoming
+    while (
+        principal > 0
+        or (leftover_incoming is not None and curr_date <= leftover_incoming)
+        or (extra_win_end is not None and curr_date <= extra_win_end)
     ):
         curr_date = curr_date + timedelta(days=1)
 

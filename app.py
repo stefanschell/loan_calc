@@ -534,7 +534,7 @@ with col2:
             st.write("Save now: one time saving of an additional amount of money")
             st.write("Spend now: one time spending of an additional amount of money")
             st.write(
-                "Invest now: one time investment of a certain amount of money, then regular gain of money over the lifetime"
+                "Invest now: one time investment of a certain amount of money, then regular gain of money over a certain duration"
             )
 
             save_now_amount = st.number_input(
@@ -558,13 +558,6 @@ with col2:
                 5000,
             )
 
-            invest_now_lifespan = st.number_input(
-                "Invest now lifespan override (years)",
-                0,
-                50,
-                15,
-            )
-
             invest_now_win_amount = st.number_input(
                 "Invest now win amount override ($)",
                 0,
@@ -579,17 +572,19 @@ with col2:
                 format_func=home_loan_simulator.Cycle.complex_str,
             )
 
-        st.write("Save now amount: " + f"${save_now_amount:,.0f}")
-        st.write("Spend now amount: " + f"${spend_now_amount:,.0f}")
-        st.write("Invest now cost amount: " + f"${invest_now_cost_amount:,.0f}")
-        st.write("Invest now win amount: " + f"${invest_now_win_amount:,.0f}")
-        st.write("Invest now win cycle: " + invest_now_win_cycle.complex_str())
+            invest_now_win_duration = timedelta(
+                days=365
+                * st.number_input(
+                    "Invest now win duration override (years)", 0, 50, 15
+                ),
+            )
     else:
         save_now_amount = 0
         spend_now_amount = 0
         invest_now_cost_amount = None
         invest_now_win_amount = None
         invest_now_win_cycle = None
+        invest_now_win_duration = None
 
 col1, col2 = st.columns(2)
 
@@ -1134,6 +1129,7 @@ with col2:
         extra_cost_amount=invest_now_cost_amount,
         extra_win_amount=invest_now_win_amount,
         extra_win_cycle=invest_now_win_cycle,
+        extra_win_duration=invest_now_win_duration,
     )
 
     with st.expander("Detailed schedule"):
