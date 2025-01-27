@@ -55,8 +55,6 @@ st.title("Home Loan")
 
 # load files
 
-st.write("## Data")
-
 browser_file = st.file_uploader("Upload account statements")
 
 if browser_file is not None:
@@ -83,7 +81,7 @@ df_in = account_interpreter.add_interest_information(df_in)
 
 # Retrospective
 
-st.write("## Retrospective")
+st.write("# Retrospective")
 
 st.write(
     "Data shown in this section uses the account statements and displays information about the past only."
@@ -424,7 +422,7 @@ with col2:
 
 # Prospective
 
-st.write("## Prospective")
+st.write("# Prospective")
 
 st.write(
     "Data shown in this section uses the account statements to extract balances, base repayments, extra repayments and interest rates. It then projects the accounts into the future. For this extra repayments can be adjusted by the user."
@@ -730,7 +728,11 @@ with col1:
 
     if show_so_far_information:
         st.write("Time so far: " + f"{years_so_far:.2f} yrs")
-    st.write("Time to go: " + f"{total_years_fixed:.2f} yrs")
+    st.write(
+        "Time to go: "
+        + f"{total_years_fixed:.2f} yrs, till "
+        + fixed_loan_end.strftime("%d/%m/%Y")
+    )
     if show_so_far_information:
         st.write(
             "Time so far & to go: " + f"{(years_so_far + total_years_fixed):.2f} yrs"
@@ -778,13 +780,14 @@ with col1:
         "Principal"
     ]
 
-    st.write("End of fixed loan term: " + fixed_loan_end.strftime("%d/%m/%Y"))
-
     st.write(
-        "Balance at the end of fixed loan term: " + f"${end_of_fixed_loan_balance:,.0f}"
+        "Fixed loan balance at the end of fixed loan term: "
+        + f"${end_of_fixed_loan_balance:,.0f}"
     )
 
-    st.write("Afterwards the remaining balance is moved to the variable loan account.")
+    st.write("...")
+
+    st.write("...")
 
     df_schedule_fixed["Schedule"] = "default"
     df_schedule_fixed_wo_extra["Schedule"] = "wo/ extra repayment"
@@ -1118,6 +1121,7 @@ with col2:
         st.write(df_schedule_variable.style.format(schedule_format))
 
     total_years_variable = df_schedule_variable.iloc[-1]["ScheduleYears"]
+    variable_loan_end = df_schedule_variable.iloc[-1]["Date"]
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
@@ -1144,7 +1148,11 @@ with col2:
 
     if show_so_far_information:
         st.write("Time so far: " + f"{years_so_far:.2f} yrs")
-    st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
+    st.write(
+        "Time to go: "
+        + f"{total_years_variable:.2f} yrs, till "
+        + variable_loan_end.strftime("%d/%m/%Y")
+    )
     if show_so_far_information:
         st.write(
             "Time so far & to go: " + f"{(years_so_far + total_years_variable):.2f} yrs"
@@ -1365,7 +1373,11 @@ with col2:
 
     if show_so_far_information:
         st.write("Time so far: " + f"{years_so_far:.2f} yrs")
-    st.write("Time to go: " + f"{total_years_variable:.2f} yrs")
+    st.write(
+        "Time to go: "
+        + f"{total_years_variable:.2f} yrs, till "
+        + variable_loan_end.strftime("%d/%m/%Y")
+    )
     if show_so_far_information:
         st.write(
             "Time so far & to go: " + f"{years_so_far + total_years_variable:.2f} yrs"
