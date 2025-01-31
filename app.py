@@ -501,7 +501,7 @@ with col2:
                 "Invest now win amount override ($)",
                 0,
                 10000,
-                75,
+                50,
             )
 
             invest_now_win_cycle = st.selectbox(
@@ -514,7 +514,7 @@ with col2:
             invest_now_win_duration = timedelta(
                 days=365
                 * st.number_input(
-                    "Invest now win duration override (years)", 0, 99, 15
+                    "Invest now win duration override (years)", 0, 99, 10
                 ),
             )
         else:
