@@ -339,11 +339,6 @@ with col2:
 
         st.plotly_chart(fig, key="p4")
 
-    extracted_extra_repayment = df_change_variable[
-        (df_change_variable["interpolated"] == True)
-        & (df_change_variable["Label"] == "Extrarepayment")
-    ].iloc[-1]["Change"]
-
 col1, col2 = st.columns(2)
 
 with col1:
@@ -530,10 +525,6 @@ with col2:
             invest_now_win_cycle = None
             invest_now_win_duration = None
 
-round_to_hundred = lambda x: int(round(x / 100) * 100)
-
-extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
-
 _, col2, _ = st.columns(3)
 
 with col2:
@@ -541,6 +532,27 @@ with col2:
     st.write("##### Quick config")
 
     with st.expander("Override quick config"):
+
+        extracted_extra_repayment_history = df_change_variable[
+            (df_change_variable["interpolated"] == True)
+            & (df_change_variable["Label"] == "Extrarepayment")
+        ]["Change"].dropna()
+
+        extracted_extra_repayment_num_months = st.number_input(
+            "Number of previous months used for extraction of mean extra repayment:",
+            1,
+            len(extracted_extra_repayment_history),
+            len(extracted_extra_repayment_history),
+            1,
+        )
+
+        extracted_extra_repayment = extracted_extra_repayment_history.iloc[
+            -extracted_extra_repayment_num_months:
+        ].mean()
+
+        round_to_hundred = lambda x: int(round(x / 100) * 100)
+
+        extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
 
         st.write(
             "Extracted extra repayment (monthly): "
