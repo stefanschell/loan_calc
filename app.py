@@ -7,9 +7,9 @@ import account_interpreter
 import home_loan_simulator
 import home_loan_planner
 from datetime import timedelta
-import zipfile
 import os
 import shutil
+import zipfile
 
 # config
 
@@ -54,20 +54,24 @@ schedule_format = {
 st.set_page_config(layout="wide")
 st.title("Home Loan")
 
-# load files
-
-browser_file = st.file_uploader("Upload account statements")
+# aquire data
 
 data_folder = None
 
-if browser_file is not None:
-    data_folder = "external_data"
-    if os.path.isdir(data_folder):
-        shutil.rmtree(data_folder)
-    with zipfile.ZipFile(browser_file, "r") as zip_file:
-        zip_file.extractall(data_folder)
-    st.write("Uploaded account statements available.")
+# option 1: using uploaded/external data
+browser_file = st.file_uploader("Upload account statements")
 
+if browser_file is not None:
+    data_folder_test = "external_data"
+    if os.path.isdir(data_folder_test):
+        shutil.rmtree(data_folder_test)
+    with zipfile.ZipFile(browser_file, "r") as zip_file:
+        zip_file.extractall(data_folder_test)
+    if os.path.isdir(data_folder_test) and len(os.listdir(data_folder_test)) > 0:
+        st.write("Uploaded account statements available.")
+        data_folder = data_folder_test
+
+# option 2: using internal data
 else:
     data_folder_test = "internal_data"
     if not os.path.isdir(data_folder_test):
@@ -78,9 +82,11 @@ else:
         st.write("Internal account statements available.")
         data_folder = data_folder_test
 
+# option 3: using demo data
 create_demo_data = st.toggle(
-    "Create demo data instead of using uploaded or internal account statements",
-    data_folder is None,
+    "Create demo data",
+    value=data_folder is None,
+    disabled=data_folder is None,
 )
 
 # get data
