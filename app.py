@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import account_demo
 import account_reader
 import account_interpreter
 import home_loan_simulator
@@ -57,26 +58,39 @@ st.title("Home Loan")
 
 browser_file = st.file_uploader("Upload account statements")
 
+data_folder = None
+
 if browser_file is not None:
     data_folder = "external_data"
     if os.path.isdir(data_folder):
         shutil.rmtree(data_folder)
     with zipfile.ZipFile(browser_file, "r") as zip_file:
         zip_file.extractall(data_folder)
-    st.write("Using uploaded account statements.")
+    st.write("Uploaded account statements available.")
+
 else:
-    data_folder = "internal_data"
-    if not os.path.isdir(data_folder):
+    data_folder_test = "internal_data"
+    if not os.path.isdir(data_folder_test):
         st.write(
-            "No internal account statements available, please upload account statements instead."
+            "Internal account statements not available, please upload account statements."
         )
-        st.stop()
     else:
-        st.write("Using internal account statements because none were uploaded.")
+        st.write("Internal account statements available.")
+        data_folder = data_folder_test
+
+create_demo_data = st.toggle(
+    "Create demo data instead of using uploaded or internal account statements",
+    data_folder is None,
+)
 
 # get data
 
-df_in = account_reader.get_dataframe(data_folder, date_from=loan_start)
+df_in = (
+    account_reader.get_dataframe(data_folder, date_from=loan_start)
+    if not create_demo_data
+    else account_demo.create_demo_account(loan_start)
+)
+
 df_in = account_interpreter.add_interest_information(df_in)
 
 # Retrospective
