@@ -50,23 +50,28 @@ def increment_date(date: pd.Timestamp, cycle: Cycle) -> pd.Timestamp:
         return date
 
     if cycle == Cycle.MONTHLY_END_OF_MONTH:
-        date_is_last_day_of_month = (date + timedelta(days=1)).month != date.month
+        one_month = timedelta(days=31)
+        one_day = timedelta(days=1)
 
-        # normal behavior: we are calling this method with date being at the end of the month,
-        #                  thus, we want the end of next month
-        date = date.replace(day=1)  # first of current month
-        date = (date + timedelta(days=31)).replace(day=1)  # first of next month
-        date = (date + timedelta(days=31)).replace(day=1)  # first of month after next
-        date = date - timedelta(days=1)  # end of next month
+        date_is_last_day_of_month = (date + one_day).month != date.month
+
         if date_is_last_day_of_month:
-            return date
+            # normal behavior: we are calling this method with date being at the end of the month,
+            #                  thus, we want the end of next month
+            date = date.replace(day=1)  # first of current month
+            date = (date + one_month).replace(day=1)  # first of next month
+            date = (date + one_month).replace(day=1)  # first of month after next
+            date = date - one_day  # end of next month
+            if date_is_last_day_of_month:
+                return date
 
-        # special behavior: we are calling this method with date not being at the end of the month,
-        #                   thus, we want the end of this month
-        date = date.replace(day=1)  # first of current month
-        date = (date + timedelta(days=31)).replace(day=1)  # first of next month
-        date = date - timedelta(days=1)  # end of this month
-        return date
+        else:
+            # special behavior: we are calling this method with date not being at the end of the month,
+            #                   thus, we want the end of this month
+            date = date.replace(day=1)  # first of current month
+            date = (date + one_month).replace(day=1)  # first of next month
+            date = date - one_day  # end of this month
+            return date
 
     if cycle == Cycle.YEARLY:
         date = date + timedelta(days=365)
