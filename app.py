@@ -586,8 +586,8 @@ with col2:
             & (df_change_variable["Label"] == "Extrarepayment")
         ]["Change"].dropna()
 
-        extracted_extra_repayment_num_months = st.number_input(
-            "Number of previous months used for extraction of mean extra repayment:",
+        extracted_extra_repayment_num_events = st.number_input(
+            "Number of previous events used for extraction of mean extra repayment:",
             1,
             len(extracted_extra_repayment_history),
             len(extracted_extra_repayment_history),
@@ -595,7 +595,7 @@ with col2:
         )
 
         extracted_extra_repayment = extracted_extra_repayment_history.iloc[
-            -extracted_extra_repayment_num_months:
+            -extracted_extra_repayment_num_events:
         ].mean()
 
         round_to_hundred = lambda x: int(round(x / 100) * 100)
