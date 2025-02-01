@@ -38,22 +38,41 @@ class Cycle(Enum):
 def increment_date(date: pd.Timestamp, cycle: Cycle) -> pd.Timestamp:
     if cycle == Cycle.FORTNIGHTLY:
         date = date + timedelta(days=14)
-    elif cycle == Cycle.MONTHLY_AVERAGE:
+        return date
+
+    if cycle == Cycle.MONTHLY_AVERAGE:
         date = date + timedelta(days=365 / 12)
-    elif cycle == Cycle.MONTHLY_1ST_OF_MONTH:
+        return date
+
+    if cycle == Cycle.MONTHLY_1ST_OF_MONTH:
         date = date.replace(day=1)  # first of current month
         date = (date + timedelta(days=31)).replace(day=1)  # first of next month
         return date
-    elif cycle == Cycle.MONTHLY_END_OF_MONTH:
+
+    if cycle == Cycle.MONTHLY_END_OF_MONTH:
+        date_is_last_day_of_month = (date + timedelta(days=1)).month != date.month
+
+        # normal behavior: we are calling this method with date being at the end of the month,
+        #                  thus, we want the end of next month
         date = date.replace(day=1)  # first of current month
         date = (date + timedelta(days=31)).replace(day=1)  # first of next month
         date = (date + timedelta(days=31)).replace(day=1)  # first of month after next
         date = date - timedelta(days=1)  # end of next month
-    elif cycle == Cycle.YEARLY:
+        if date_is_last_day_of_month:
+            return date
+
+        # special behavior: we are calling this method with date not being at the end of the month,
+        #                   thus, we want the end of this month
+        date = date.replace(day=1)  # first of current month
+        date = (date + timedelta(days=31)).replace(day=1)  # first of next month
+        date = date - timedelta(days=1)  # end of this month
+        return date
+
+    if cycle == Cycle.YEARLY:
         date = date + timedelta(days=365)
-    else:
-        raise ValueError("Invalid cycle")
-    return date
+        return date
+
+    raise ValueError("Invalid cycle")
 
 
 def simulate(
