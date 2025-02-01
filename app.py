@@ -1,14 +1,15 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import account_demo
 import account_reader
 import account_interpreter
 import home_loan_simulator
 import home_loan_planner
 from datetime import timedelta
-import zipfile
 import os
 import shutil
+import zipfile
 
 # config
 
@@ -53,30 +54,51 @@ schedule_format = {
 st.set_page_config(layout="wide")
 st.title("Home Loan")
 
-# load files
+# aquire data
 
+data_folder = None
+
+# option 1: using uploaded/external data
 browser_file = st.file_uploader("Upload account statements")
 
 if browser_file is not None:
-    data_folder = "external_data"
-    if os.path.isdir(data_folder):
-        shutil.rmtree(data_folder)
+    data_folder_test = "external_data"
+    if os.path.isdir(data_folder_test):
+        shutil.rmtree(data_folder_test)
     with zipfile.ZipFile(browser_file, "r") as zip_file:
-        zip_file.extractall(data_folder)
-    st.write("Using uploaded account statements.")
+        zip_file.extractall(data_folder_test)
+    if os.path.isdir(data_folder_test) and len(os.listdir(data_folder_test)) > 0:
+        st.write("Uploaded account statements available.")
+        data_folder = data_folder_test
+
+# option 2: using internal data
 else:
-    data_folder = "internal_data"
-    if not os.path.isdir(data_folder):
+    data_folder_test = "internal_data"
+    if not os.path.isdir(data_folder_test):
         st.write(
-            "No internal account statements available, please upload account statements instead."
+            "Internal account statements not available, please upload account statements."
         )
-        st.stop()
     else:
-        st.write("Using internal account statements because none were uploaded.")
+        st.write("Internal account statements available.")
+        data_folder = data_folder_test
+
+# option 3: using demo data
+create_demo_data = st.toggle(
+    "Create demo data",
+    value=data_folder is None,
+    disabled=data_folder is None,
+)
 
 # get data
 
-df_in = account_reader.get_dataframe(data_folder, date_from=loan_start)
+df_in = (
+    account_reader.get_dataframe(data_folder, date_from=loan_start)
+    if not create_demo_data
+    else account_demo.create_demo_account(
+        demo_start=loan_start, demo_end=pd.to_datetime("today")
+    )
+)
+
 df_in = account_interpreter.add_interest_information(df_in)
 
 # Retrospective
@@ -121,7 +143,10 @@ df_balance_total = account_interpreter.get_total_balance_over_time(
     df_in, add_col_with_account_name=True, return_positive_balance=True
 )
 
-df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
+try:
+    df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
+except RuntimeError:
+    df_balance_total_fitted = None
 
 with st.expander("Balance over time"):
 
@@ -134,6 +159,14 @@ with st.expander("Balance over time"):
             df_balance_total_fitted,
         ]
     )
+
+    if df_balance_total_fitted is not None:
+        df_plot = pd.concat(
+            [
+                df_plot,
+                df_balance_total_fitted,
+            ]
+        )
 
     fig = px.line(
         df_plot, x="DateSeries", y="Balance", color="AccountName", symbol="AccountName"
