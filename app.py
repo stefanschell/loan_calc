@@ -57,6 +57,8 @@ st.title("Home Loan")
 # aquire data
 
 data_folder = None
+data_text = None
+data_color = None
 
 # option 1: using uploaded/external data
 browser_file = st.file_uploader("Upload account statements")
@@ -68,28 +70,41 @@ if browser_file is not None:
     with zipfile.ZipFile(browser_file, "r") as zip_file:
         zip_file.extractall(data_folder_test)
     if os.path.isdir(data_folder_test) and len(os.listdir(data_folder_test)) > 0:
-        st.write("Uploaded account statements available.")
         data_folder = data_folder_test
+        data_text = "Using uploaded data."
+        data_color = "green"
 
 # option 2: using internal data
 else:
     data_folder_test = "internal_data"
-    if not os.path.isdir(data_folder_test):
-        st.write(
-            "Internal account statements not available, please upload account statements."
-        )
-    else:
-        st.write("Internal account statements available.")
+    if os.path.isdir(data_folder_test):
         data_folder = data_folder_test
+        data_text = "Using internal data."
+        data_color = "yellow"
 
 # option 3: using demo data
 create_demo_data = st.toggle(
-    "Create demo data",
+    "Use demo data",
     value=data_folder is None,
     disabled=data_folder is None,
 )
 
+if create_demo_data:
+    data_text = "Using demo data."
+    data_color = "purple"
+
 # get data
+
+st.markdown(
+    "<h3 style='text-align: center; color: "
+    + data_color
+    + "; border: 5px solid "
+    + data_color
+    + "; padding: 10px; margin: 20px; border-radius: 100px;'>"
+    + data_text
+    + "</div>",
+    unsafe_allow_html=True,
+)
 
 df_in = (
     account_reader.get_dataframe(data_folder, date_from=loan_start)
