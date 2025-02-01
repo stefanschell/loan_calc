@@ -44,9 +44,11 @@ schedule_format = {
     "Interest": "${:,.0f}",
     "Redraw": "${:,.0f}",
     "Repayment": "${:,.0f}",
+    "Stashed": "${:,.0f}",
     "ExtraWinForLoan": "${:,.0f}",
     "ExtraWinForUs": "${:,.0f}",
     "Principal": "${:,.0f}",
+    "Stash": "${:,.0f}",
 }
 
 # setup
@@ -490,6 +492,10 @@ with col2:
             format_func=home_loan_simulator.Cycle.complex_str,
         )
 
+        repayment_use_stash = not st.toggle(
+            "Do not use stashed money for repayment", False
+        )
+
         restart_loan_today = st.toggle("Restart loan today", False)
 
         if restart_loan_today:
@@ -758,6 +764,7 @@ with col1:
         repayment=repayment_total_fixed,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=fixed_loan_end,
     )
 
@@ -772,6 +779,7 @@ with col1:
         repayment=repayment_fixed,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=fixed_loan_end,
     )
 
@@ -1112,6 +1120,7 @@ with col2:
         repayment=repayment_total_variable,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -1129,6 +1138,7 @@ with col2:
         repayment=repayment_variable,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance_wo_extra,
@@ -1146,6 +1156,7 @@ with col2:
         repayment=repayment_total_variable,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -1163,6 +1174,7 @@ with col2:
         repayment=repayment_total_variable,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -1180,6 +1192,7 @@ with col2:
         repayment=repayment_total_variable,
         prev_repayment_date=prev_repayment_date,
         repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
         leftover_amount=end_of_fixed_loan_balance,
@@ -1304,7 +1317,7 @@ with col2:
         fig1 = px.scatter(
             df_schedule_variable_merged,
             x="Date",
-            y="Principal",
+            y="Principal" if show_other_schedules else ["Principal", "Stash"],
             color="Schedule" if show_other_schedules else None,
         )
         fig1.update_layout(

@@ -92,6 +92,7 @@ def simulate(
     repayment,
     prev_repayment_date: pd.Timestamp,
     repayment_cycle: Cycle,
+    repayment_use_stash,
     schedule_end: pd.Timestamp = None,
     leftover_incoming: pd.Timestamp = None,
     leftover_amount=None,
@@ -101,6 +102,8 @@ def simulate(
     extra_win_duration=None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
+
+    stash = 0
 
     if extra_win_duration is not None:
         extra_win_end = schedule_start + extra_win_duration
@@ -126,7 +129,9 @@ def simulate(
             0,
             0,
             0,
+            0,
             principal,
+            stash,
         )
     )
 
@@ -142,6 +147,7 @@ def simulate(
         curr_interest = None
         curr_redraw = None
         curr_repayment = None
+        curr_stashed = None
         curr_extra_win_for_loan = None
         curr_extra_win_for_us = None
 
@@ -187,14 +193,21 @@ def simulate(
 
         # repayment
 
-        actual_repayment = repayment
-
-        if leftover_incoming is not None and leftover_repayment is not None:
-            if curr_date >= leftover_incoming:
-                actual_repayment = actual_repayment + leftover_repayment
-
         if curr_date >= increment_date(prev_repayment_date, repayment_cycle):
+            actual_repayment = repayment
+
+            if leftover_incoming is not None and leftover_repayment is not None:
+                if curr_date >= leftover_incoming:
+                    actual_repayment = actual_repayment + leftover_repayment
+
+            if repayment_use_stash:
+                actual_repayment = actual_repayment + stash
+
             curr_repayment = min(principal, actual_repayment)
+
+            prev_stash = stash
+            stash = actual_repayment - curr_repayment
+            curr_stashed = stash - prev_stash
 
             principal = principal - curr_repayment
             prev_repayment_date = increment_date(prev_repayment_date, repayment_cycle)
@@ -219,6 +232,7 @@ def simulate(
             curr_interest is not None
             or curr_redraw is not None
             or curr_repayment is not None
+            or curr_stashed is not None
             or curr_extra_win_for_loan is not None
             or curr_extra_win_for_us is not None
             or maturity_is_today is True
@@ -233,9 +247,11 @@ def simulate(
                     curr_interest,
                     curr_redraw,
                     curr_repayment,
+                    curr_stashed,
                     curr_extra_win_for_loan,
                     curr_extra_win_for_us,
                     principal,
+                    stash,
                 )
             )
 
@@ -262,8 +278,10 @@ def simulate(
             "Interest",
             "Redraw",
             "Repayment",
+            "Stashed",
             "ExtraWinForLoan",
             "ExtraWinForUs",
             "Principal",
+            "Stash",
         ],
     )
