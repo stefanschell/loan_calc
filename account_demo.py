@@ -132,6 +132,7 @@ def create_demo_account(
         repayment=repayment_fixed_planned,
         prev_repayment_date=schedule_start,
         repayment_cycle=home_loan_simulator.Cycle.FORTNIGHTLY,
+        repayment_use_stash=False,
         schedule_end=schedule_end,
     )
 
@@ -146,6 +147,7 @@ def create_demo_account(
         repayment=repayment_variable_planned + extrarepayment_variable_planned,
         prev_repayment_date=schedule_start,
         repayment_cycle=home_loan_simulator.Cycle.FORTNIGHTLY,
+        repayment_use_stash=False,
         schedule_end=schedule_end,
     )
 
