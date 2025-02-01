@@ -860,7 +860,7 @@ with col1:
     ]
 
     st.write(
-        "Fixed loan balance at the end of fixed loan term: "
+        "Principal at the end of fixed loan term: "
         + f"${end_of_fixed_loan_balance:,.0f}"
     )
 
@@ -1307,16 +1307,21 @@ with col2:
             + f"${total_repayments_so_far_variable + total_repayments_variable:,.0f}]"
         )
 
-    before_end_of_fixed_loan_balance = df_schedule_variable[
+    df_schedule_variable_before_end_of_fixed_loan = df_schedule_variable[
         df_schedule_variable["Date"] <= fixed_loan_end
     ]
 
-    before_end_of_fixed_loan_balance = before_end_of_fixed_loan_balance.iloc[-2][
-        "Principal"
-    ]
+    before_end_of_fixed_loan_balance = (
+        df_schedule_variable_before_end_of_fixed_loan.iloc[-2]["Principal"]
+    )
+    before_end_of_fixed_loan_stash = df_schedule_variable_before_end_of_fixed_loan.iloc[
+        -2
+    ]["Stash"]
     st.write(
-        "Variable loan balance shortly before end of fixed loan term: "
-        + f"${before_end_of_fixed_loan_balance:,.0f}"
+        "Principal & Stash at end of fixed loan term: "
+        + f"\\${before_end_of_fixed_loan_balance:,.0f}"
+        + " & "
+        + f"\\${before_end_of_fixed_loan_stash:,.0f}"
     )
 
     df_schedule_variable["Schedule"] = "default"
