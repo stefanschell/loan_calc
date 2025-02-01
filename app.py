@@ -872,22 +872,37 @@ with col1:
         else df_schedule_fixed
     )
 
-    with st.expander("Principal over time"):
+    with st.expander("Principal and Stash over time"):
 
-        fig1 = px.scatter(
+        fig1a = px.scatter(
             df_schedule_fixed_merged,
             x="Date",
             y="Principal",
             color="Schedule" if show_other_schedules else None,
         )
-        fig1.update_layout(
+        fig1a.update_layout(
             title={"text": "Principal / Fixed", "x": 0.5, "xanchor": "center"}
         )
-        fig1.update_traces(marker=dict(size=3))
-        fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-        fig1.update_yaxes(title_text="Principal ($)")
+        fig1a.update_traces(marker=dict(size=3))
+        fig1a.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig1a.update_yaxes(title_text="Principal ($)")
 
-        st.plotly_chart(fig1)
+        st.plotly_chart(fig1a, key="1af")
+
+        fig1b = px.scatter(
+            df_schedule_fixed_merged,
+            x="Date",
+            y="Stash",
+            color="Schedule" if show_other_schedules else None,
+        )
+        fig1b.update_layout(
+            title={"text": "Stash / Fixed", "x": 0.5, "xanchor": "center"}
+        )
+        fig1b.update_traces(marker=dict(size=3))
+        fig1b.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig1b.update_yaxes(title_text="Principal ($)")
+
+        st.plotly_chart(fig1b, key="1bf")
 
     interest_plot_fixed = pd.DataFrame(df_schedule_fixed)
     interest_plot_fixed = interest_plot_fixed[
@@ -1312,26 +1327,41 @@ with col2:
         else df_schedule_variable
     )
 
-    with st.expander("Principal over time"):
+    with st.expander("Principal and Stash over time"):
 
-        fig1 = px.scatter(
+        fig1a = px.scatter(
             df_schedule_variable_merged,
             x="Date",
-            y="Principal" if show_other_schedules else ["Principal", "Stash"],
+            y="Principal",
             color="Schedule" if show_other_schedules else None,
         )
-        fig1.update_layout(
+        fig1a.update_layout(
             title={"text": "Principal / Variable", "x": 0.5, "xanchor": "center"}
         )
-        fig1.update_traces(marker=dict(size=3))
-        fig1.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
-        fig1.update_yaxes(title_text="Principal ($)")
+        fig1a.update_traces(marker=dict(size=3))
+        fig1a.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig1a.update_yaxes(title_text="Principal ($)")
 
-        st.plotly_chart(fig1)
+        st.plotly_chart(fig1a, key="1av")
 
         principal_smaller_offset = df_schedule_variable[
             df_schedule_variable["Principal"] <= balance_offset
         ]
+
+        fig1b = px.scatter(
+            df_schedule_variable_merged,
+            x="Date",
+            y="Stash",
+            color="Schedule" if show_other_schedules else None,
+        )
+        fig1b.update_layout(
+            title={"text": "Stash / Variable", "x": 0.5, "xanchor": "center"}
+        )
+        fig1b.update_traces(marker=dict(size=3))
+        fig1b.update_xaxes(title_text="Date", tickformat="%Y-%m-%d")
+        fig1b.update_yaxes(title_text="Stash ($)")
+
+        st.plotly_chart(fig1b, key="1bv")
 
         if len(principal_smaller_offset) > 0:
             principal_smaller_offset_first_date = principal_smaller_offset.iloc[0][
