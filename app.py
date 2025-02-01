@@ -135,7 +135,10 @@ df_balance_total = account_interpreter.get_total_balance_over_time(
     df_in, add_col_with_account_name=True, return_positive_balance=True
 )
 
-df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
+try:
+    df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
+except RuntimeError:
+    df_balance_total_fitted = None
 
 with st.expander("Balance over time"):
 
@@ -148,6 +151,14 @@ with st.expander("Balance over time"):
             df_balance_total_fitted,
         ]
     )
+
+    if df_balance_total_fitted is not None:
+        df_plot = pd.concat(
+            [
+                df_plot,
+                df_balance_total_fitted,
+            ]
+        )
 
     fig = px.line(
         df_plot, x="DateSeries", y="Balance", color="AccountName", symbol="AccountName"
