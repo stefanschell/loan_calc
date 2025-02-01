@@ -125,7 +125,7 @@ def simulate(
             (curr_date - schedule_start).days / 365,
             relativedelta(curr_date, schedule_start),
             0,
-            0,
+            principal,
             0,
             0,
             principal,
