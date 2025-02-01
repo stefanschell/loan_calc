@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import home_loan_planner
 import home_loan_simulator
 
@@ -82,19 +81,19 @@ def simulated_to_demo(
     return df_demo
 
 
-def create_demo_account(loan_start: pd.Timestamp) -> pd.DataFrame:
+def create_demo_account(
+    demo_start: pd.Timestamp, demo_end: pd.Timestamp
+) -> pd.DataFrame:
 
     interest_fixed = 5.5
     interest_variable = 6.5
     loan_amount = 1000000
     loan_amount_fixed_fraction = 0.4
-    length_of_term = 25
-    length_of_simulation = 1
-    extrarepayment_fraction_variable = 0.2
+    length_of_term = 15
+    extrarepayment_fraction_variable = 0.3
 
     loan_amount_fixed = loan_amount_fixed_fraction * loan_amount
     loan_amount_variable = loan_amount - loan_amount_fixed
-    simulation_end = loan_start + pd.Timedelta(length_of_simulation * 365, unit="days")
 
     repayment_fixed_planned = home_loan_planner.HomeLoanPlanner(
         "Demo",
@@ -119,47 +118,48 @@ def create_demo_account(loan_start: pd.Timestamp) -> pd.DataFrame:
         repayment_variable_planned - extrarepayment_variable_planned
     )
 
-    schedule_end = simulation_end + pd.Timedelta(31 * 365, unit="days")
+    schedule_start = demo_start
+    schedule_end = demo_end + pd.Timedelta(31 * 365, unit="days")
 
     df_simulated_fixed = home_loan_simulator.simulate(
-        loan_start=loan_start,
+        loan_start=schedule_start,
         principal=loan_amount_fixed,
         offset=0,
-        schedule_start=loan_start,
+        schedule_start=schedule_start,
         interest_rate=interest_fixed,
-        prev_interest_date=loan_start,
+        prev_interest_date=schedule_start,
         interest_cycle=home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH,
         repayment=repayment_fixed_planned,
-        prev_repayment_date=loan_start,
+        prev_repayment_date=schedule_start,
         repayment_cycle=home_loan_simulator.Cycle.FORTNIGHTLY,
         schedule_end=schedule_end,
     )
 
     df_simulated_variable = home_loan_simulator.simulate(
-        loan_start=loan_start,
+        loan_start=schedule_start,
         principal=loan_amount_variable,
         offset=0,
-        schedule_start=loan_start,
+        schedule_start=schedule_start,
         interest_rate=interest_variable,
-        prev_interest_date=loan_start,
+        prev_interest_date=schedule_start,
         interest_cycle=home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH,
         repayment=repayment_variable_planned + extrarepayment_variable_planned,
-        prev_repayment_date=loan_start,
+        prev_repayment_date=schedule_start,
         repayment_cycle=home_loan_simulator.Cycle.FORTNIGHTLY,
         schedule_end=schedule_end,
     )
 
-    df_demo_fixed = simulated_to_demo(df_simulated_fixed, 0, simulation_end, "Fixed")
+    df_demo_fixed = simulated_to_demo(df_simulated_fixed, 0, demo_end, "Fixed")
 
     df_demo_variable = simulated_to_demo(
         df_simulated_variable,
         extrarepayment_variable_planned,
-        simulation_end,
+        demo_end,
         "Variable",
     )
 
     df_demo_offset = pd.DataFrame(
-        data=[("no offset", 0, 0, 0, loan_start, "OffsetUp", "Offset")],
+        data=[("no offset", 0, 0, 0, demo_start, "OffsetUp", "Offset")],
         columns=[
             "Description",
             "Credit",

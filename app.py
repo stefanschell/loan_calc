@@ -88,7 +88,9 @@ create_demo_data = st.toggle(
 df_in = (
     account_reader.get_dataframe(data_folder, date_from=loan_start)
     if not create_demo_data
-    else account_demo.create_demo_account(loan_start)
+    else account_demo.create_demo_account(
+        demo_start=loan_start, demo_end=pd.to_datetime("today")
+    )
 )
 
 df_in = account_interpreter.add_interest_information(df_in)
