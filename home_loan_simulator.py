@@ -128,10 +128,10 @@ def simulate(
             0,
             0,
             0,
-            0,
-            0,
             principal,
             stash,
+            0,
+            0,
         )
     )
 
@@ -200,18 +200,15 @@ def simulate(
                 if curr_date >= leftover_incoming:
                     actual_repayment = actual_repayment + leftover_repayment
 
+            prev_stash = stash
             if repayment_use_stash:
                 actual_repayment = actual_repayment + stash
+                stash = 0
 
             curr_repayment = min(principal, actual_repayment)
 
-            if repayment_use_stash:
-                prev_stash = stash
-                stash = actual_repayment - curr_repayment
-                curr_stashed = stash - prev_stash
-            else:
-                curr_stashed = actual_repayment - curr_repayment
-                stash = stash + curr_stashed
+            stash = stash + actual_repayment - curr_repayment
+            curr_stashed = stash - prev_stash
 
             principal = principal - curr_repayment
             prev_repayment_date = increment_date(prev_repayment_date, repayment_cycle)
@@ -252,10 +249,10 @@ def simulate(
                     curr_redraw,
                     curr_repayment,
                     curr_stashed,
-                    curr_extra_win_for_loan,
-                    curr_extra_win_for_us,
                     principal,
                     stash,
+                    curr_extra_win_for_loan,
+                    curr_extra_win_for_us,
                 )
             )
 
@@ -283,9 +280,9 @@ def simulate(
             "Redraw",
             "Repayment",
             "Stashed",
-            "ExtraWinForLoan",
-            "ExtraWinForUs",
             "Principal",
             "Stash",
+            "ExtraWinForLoan",
+            "ExtraWinForUs",
         ],
     )
