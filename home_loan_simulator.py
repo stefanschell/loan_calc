@@ -205,9 +205,13 @@ def simulate(
 
             curr_repayment = min(principal, actual_repayment)
 
-            prev_stash = stash
-            stash = actual_repayment - curr_repayment
-            curr_stashed = stash - prev_stash
+            if repayment_use_stash:
+                prev_stash = stash
+                stash = actual_repayment - curr_repayment
+                curr_stashed = stash - prev_stash
+            else:
+                curr_stashed = actual_repayment - curr_repayment
+                stash = stash + curr_stashed
 
             principal = principal - curr_repayment
             prev_repayment_date = increment_date(prev_repayment_date, repayment_cycle)
