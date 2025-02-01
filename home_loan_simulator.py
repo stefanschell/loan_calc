@@ -200,14 +200,13 @@ def simulate(
                 if curr_date >= leftover_incoming:
                     actual_repayment = actual_repayment + leftover_repayment
 
-            prev_stash = stash
-
             if repayment_use_stash:
                 actual_repayment = actual_repayment + stash
 
             curr_repayment = min(principal, actual_repayment)
 
             if repayment_use_stash:
+                prev_stash = stash
                 stash = actual_repayment - curr_repayment
                 curr_stashed = stash - prev_stash
             else:
