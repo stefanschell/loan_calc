@@ -27,13 +27,7 @@ def test_planner(N, k, P, R0, c0):
 @pytest.mark.parametrize(
     "N, cycle, P, R0, c0",
     [
-        (
-            15,
-            hls.Cycle.FORTNIGHTLY,
-            500000,
-            5.0 / 100,
-            1819,
-        ),
+        (15, hls.Cycle.FORTNIGHTLY, 500000, 5.0 / 100, 1819),
         (20, hls.Cycle.MONTHLY_AVERAGE, 2000000, 8.0 / 100, 16729),
         (25, hls.Cycle.MONTHLY_AVERAGE, 1000000, 6.0 / 100, 6443),
     ],
@@ -107,6 +101,33 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
         round(
             (P + df_simulated_offset["Interest"].sum())
             - df_simulated_offset["Repayment"].sum()
+        )
+        == 0
+    )
+
+    # run and check modified simulation: with increased interest
+
+    df_simulated_increased_interest = hls.simulate(
+        loan_start=today,
+        principal=P,
+        offset=0,
+        schedule_start=today,
+        interest_rate=(R0 + 0.01) * 100,
+        prev_interest_date=today,
+        interest_cycle=cycle,
+        repayment=planner.c0,
+        prev_repayment_date=today,
+        repayment_cycle=cycle,
+        repayment_use_stash=False,
+    )
+
+    assert df_simulated_increased_interest.iloc[-1]["LoanYears"] > loan_years
+    assert df_simulated_increased_interest["Interest"].sum() > total_interest
+    assert df_simulated_increased_interest["Repayment"].sum() > total_repayment
+    assert (
+        round(
+            (P + df_simulated_increased_interest["Interest"].sum())
+            - df_simulated_increased_interest["Repayment"].sum()
         )
         == 0
     )
