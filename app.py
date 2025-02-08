@@ -14,9 +14,6 @@ import zipfile
 # config
 
 loan_start = pd.to_datetime("2024-10-16")
-fixed_loan_length = timedelta(days=365 * 5)
-
-fixed_loan_end = loan_start + fixed_loan_length
 
 # helper
 
@@ -497,6 +494,15 @@ with col2:
         )
 
         restart_loan_today = st.toggle("Restart loan today", False)
+
+        toggle_override_fixed_loan_years = st.toggle("Override fixed loan term", False)
+        fixed_loan_years = 5
+        if toggle_override_fixed_loan_years:
+            fixed_loan_years = st.number_input(
+                "Fixed loan term override (yrs)", 1, 15, 5, 1
+            )
+        fixed_loan_length = timedelta(days=365 * fixed_loan_years)
+        fixed_loan_end = loan_start + fixed_loan_length
 
         if restart_loan_today:
             loan_start = pd.to_datetime("today")
