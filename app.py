@@ -885,10 +885,13 @@ with col1:
 
         with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
-        with st.expander("Detailed schedule: hope now"):
-            st.write(df_schedule_fixed_hope.style.format(schedule_format))
-        with st.expander("Detailed schedule: fear now"):
-            st.write(df_schedule_fixed_fear.style.format(schedule_format))
+
+        if show_fear_save_spend_invest_information:
+            with st.expander("Detailed schedule: hope now"):
+                st.write(df_schedule_fixed_hope.style.format(schedule_format))
+
+            with st.expander("Detailed schedule: fear now"):
+                st.write(df_schedule_fixed_fear.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
