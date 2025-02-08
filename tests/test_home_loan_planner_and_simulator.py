@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-import home_loan_planner
-import home_loan_simulator
+import home_loan_planner as hlp
+import home_loan_simulator as hls
 
 
 @pytest.mark.parametrize(
@@ -14,7 +14,7 @@ import home_loan_simulator
     ],
 )
 def test_planner(N, k, P, R0, c0):
-    planner = home_loan_planner.HomeLoanPlanner(
+    planner = hlp.HomeLoanPlanner(
         "TestLoan",
         N=N,
         k=k,
@@ -25,17 +25,21 @@ def test_planner(N, k, P, R0, c0):
 
 
 @pytest.mark.parametrize(
-    "N, P, R0, c0",
+    "N, P, R0, c0, cycle",
     [
-        (20, 2000000, 8.0 / 100, 16729),
-        (25, 1000000, 6.0 / 100, 6443),
+        (15, 500000, 5.0 / 100, 1819, hls.Cycle.FORTNIGHTLY),
+        (20, 2000000, 8.0 / 100, 16729, hls.Cycle.MONTHLY_AVERAGE),
+        (25, 1000000, 6.0 / 100, 6443, hls.Cycle.MONTHLY_AVERAGE),
     ],
 )
-def test_planner_and_simulator(N, P, R0, c0):
-    planner = home_loan_planner.HomeLoanPlanner(
+def test_planner_and_simulator(N, P, R0, c0, cycle):
+    allowed_cycles = [item for item in hls.Cycle if item != hls.Cycle.YEARLY]
+    assert cycle in allowed_cycles
+
+    planner = hlp.HomeLoanPlanner(
         "TestLoan",
         N=N,
-        k=12,
+        k=(365 / 14) if cycle == hls.Cycle.FORTNIGHTLY else 12,
         P=P,
         R0=R0,
     )
@@ -43,19 +47,60 @@ def test_planner_and_simulator(N, P, R0, c0):
 
     today = pd.to_datetime("today")
 
-    df_simulated = home_loan_simulator.simulate(
+    df_simulated = hls.simulate(
         loan_start=today,
         principal=P,
         offset=0,
         schedule_start=today,
         interest_rate=R0 * 100,
         prev_interest_date=today,
-        interest_cycle=home_loan_simulator.Cycle.MONTHLY_AVERAGE,
+        interest_cycle=cycle,
         repayment=planner.c0,
         prev_repayment_date=today,
-        repayment_cycle=home_loan_simulator.Cycle.MONTHLY_AVERAGE,
+        repayment_cycle=cycle,
         repayment_use_stash=False,
-        schedule_end=None,
     )
 
-    assert round(df_simulated.iloc[-1]["LoanYears"]) == N
+    loan_years = df_simulated.iloc[-1]["LoanYears"]
+    total_interest = df_simulated["Interest"].sum()
+    total_repayment = df_simulated["Repayment"].sum()
+
+    assert round(loan_years) == N
+    assert total_interest > 0
+    assert total_repayment > P
+
+    df_simulated_offset = hls.simulate(
+        loan_start=today,
+        principal=P,
+        offset=100000,
+        schedule_start=today,
+        interest_rate=R0 * 100,
+        prev_interest_date=today,
+        interest_cycle=cycle,
+        repayment=planner.c0,
+        prev_repayment_date=today,
+        repayment_cycle=cycle,
+        repayment_use_stash=False,
+    )
+
+    assert df_simulated_offset.iloc[-1]["LoanYears"] < loan_years
+    assert df_simulated_offset["Interest"].sum() < total_interest
+    assert df_simulated_offset["Repayment"].sum() < total_repayment
+
+    df_simulated_repayment_use_stash = hls.simulate(
+        loan_start=today,
+        principal=P,
+        offset=0,
+        schedule_start=today,
+        interest_rate=R0 * 100,
+        prev_interest_date=today,
+        interest_cycle=cycle,
+        repayment=planner.c0,
+        prev_repayment_date=today,
+        repayment_cycle=cycle,
+        repayment_use_stash=True,
+    )
+
+    assert df_simulated_repayment_use_stash.iloc[-1]["LoanYears"] == loan_years
+    assert df_simulated_repayment_use_stash["Interest"].sum() == total_interest
+    assert df_simulated_repayment_use_stash["Repayment"].sum() == total_repayment
