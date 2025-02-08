@@ -33,8 +33,12 @@ def test_planner(N, k, P, R0, c0):
     ],
 )
 def test_planner_and_simulator(N, P, R0, c0, cycle):
+    # check params
+
     allowed_cycles = [item for item in hls.Cycle if item != hls.Cycle.YEARLY]
     assert cycle in allowed_cycles
+
+    # setup loan using HomeLoanPlanner
 
     planner = hlp.HomeLoanPlanner(
         "TestLoan",
@@ -44,6 +48,8 @@ def test_planner_and_simulator(N, P, R0, c0, cycle):
         R0=R0,
     )
     assert round(planner.c0) == c0
+
+    # run base simulation using Home Loan Simulator
 
     today = pd.to_datetime("today")
 
@@ -61,6 +67,8 @@ def test_planner_and_simulator(N, P, R0, c0, cycle):
         repayment_use_stash=False,
     )
 
+    # check base simulation
+
     loan_years = df_simulated.iloc[-1]["LoanYears"]
     total_interest = df_simulated["Interest"].sum()
     total_repayment = df_simulated["Repayment"].sum()
@@ -68,6 +76,9 @@ def test_planner_and_simulator(N, P, R0, c0, cycle):
     assert round(loan_years) == N
     assert total_interest > 0
     assert total_repayment > P
+    assert round((P + total_interest) - total_repayment) == 0
+
+    # run and check modified simulation: with offset
 
     df_simulated_offset = hls.simulate(
         loan_start=today,
@@ -86,6 +97,15 @@ def test_planner_and_simulator(N, P, R0, c0, cycle):
     assert df_simulated_offset.iloc[-1]["LoanYears"] < loan_years
     assert df_simulated_offset["Interest"].sum() < total_interest
     assert df_simulated_offset["Repayment"].sum() < total_repayment
+    assert (
+        round(
+            (P + df_simulated_offset["Interest"].sum())
+            - df_simulated_offset["Repayment"].sum()
+        )
+        == 0
+    )
+
+    # run and check modified simulation: with activated usage of stash
 
     df_simulated_repayment_use_stash = hls.simulate(
         loan_start=today,
@@ -104,3 +124,10 @@ def test_planner_and_simulator(N, P, R0, c0, cycle):
     assert df_simulated_repayment_use_stash.iloc[-1]["LoanYears"] == loan_years
     assert df_simulated_repayment_use_stash["Interest"].sum() == total_interest
     assert df_simulated_repayment_use_stash["Repayment"].sum() == total_repayment
+    assert (
+        round(
+            (P + df_simulated_repayment_use_stash["Interest"].sum())
+            - df_simulated_repayment_use_stash["Repayment"].sum()
+        )
+        == 0
+    )
