@@ -493,6 +493,8 @@ with col2:
             "Do not use stashed money for repayment", False
         )
 
+        st.divider()
+
         restart_loan_today = st.toggle("Restart loan today", False)
 
         toggle_override_fixed_loan_years = st.toggle("Override fixed loan term", False)
@@ -523,61 +525,82 @@ with col2:
         st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
         st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
+        st.divider()
+
         show_other_schedules = st.toggle("Show other schedules", False)
 
-        show_save_spend_invest_information = st.toggle(
-            "Show save now, spend now, invest now", False
+        show_fear_save_spend_invest_information = st.toggle(
+            "Show hope, fear, save, spend, and invest now", False
         )
 
-        if show_save_spend_invest_information:
-            st.write("Save now: one time saving of an additional amount of money")
-            st.write("Spend now: one time spending of an additional amount of money")
-            st.write(
-                "Invest now: one time investment of a certain amount of money, then regular gain of money over a certain duration"
+        if show_fear_save_spend_invest_information:
+            st.write("Hope now: interest decrease")
+
+            hope_now_interest_change = st.number_input(
+                "Interest decrease (%)",
+                0.0,
+                10.0,
+                1.0,
             )
 
+            st.write("Fear now: interest increase")
+
+            fear_now_interest_change = st.number_input(
+                "Interest increase (%)",
+                0.0,
+                10.0,
+                2.0,
+            )
+
+            st.write("Save now: one time saving of an additional amount of money")
+
             save_now_amount = st.number_input(
-                "Save now amount override ($)",
+                "Amount ($)",
                 0,
                 100000,
                 3000,
             )
 
+            st.write("Spend now: one time spending of an additional amount of money")
+
             spend_now_amount = st.number_input(
-                "Spend now amount override ($)",
+                "Amount ($)",
                 0,
                 100000,
                 10000,
             )
 
+            st.write(
+                "Invest now: one time investment of a certain amount of money, then regular gain of money over a certain duration"
+            )
+
             invest_now_cost_amount = st.number_input(
-                "Invest now cost amount override ($)",
+                "Cost amount ($)",
                 0,
                 100000,
                 5000,
             )
 
             invest_now_win_amount = st.number_input(
-                "Invest now win amount override ($)",
+                "Win amount ($)",
                 0,
                 10000,
                 50,
             )
 
             invest_now_win_cycle = st.selectbox(
-                "Invest now win cycle override",
+                "Win cycle",
                 home_loan_simulator.Cycle,
                 index=1,
                 format_func=home_loan_simulator.Cycle.complex_str,
             )
 
             invest_now_win_duration = timedelta(
-                days=365
-                * st.number_input(
-                    "Invest now win duration override (years)", 0, 99, 10
-                ),
+                days=365 * st.number_input("Duration (yrs)", 0, 99, 10),
             )
         else:
+            hope_now_interest_change = 0
+            fear_now_interest_change = 0
             save_now_amount = 0
             spend_now_amount = 0
             invest_now_cost_amount = 0
@@ -789,12 +812,45 @@ with col1:
         schedule_end=fixed_loan_end,
     )
 
+    df_schedule_fixed_hope = home_loan_simulator.simulate(
+        loan_start=loan_start,
+        principal=balance_fixed,
+        offset=0,
+        schedule_start=schedule_start,
+        interest_rate=interest_fixed - hope_now_interest_change,
+        prev_interest_date=prev_interest_date,
+        interest_cycle=interest_cycle,
+        repayment=repayment_total_fixed,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
+        schedule_end=fixed_loan_end,
+    )
+
+    df_schedule_fixed_fear = home_loan_simulator.simulate(
+        loan_start=loan_start,
+        principal=balance_fixed,
+        offset=0,
+        schedule_start=schedule_start,
+        interest_rate=interest_fixed + fear_now_interest_change,
+        prev_interest_date=prev_interest_date,
+        interest_cycle=interest_cycle,
+        repayment=repayment_total_fixed,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
+        schedule_end=fixed_loan_end,
+    )
+
     with st.expander("Detailed schedule"):
         st.write(df_schedule_fixed.style.format(schedule_format))
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["ScheduleYears"]
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
+
+    total_repayments_fixed_hope = df_schedule_fixed_hope["Repayment"].sum()
+    total_repayments_fixed_fear = df_schedule_fixed_fear["Repayment"].sum()
 
     interest_per_month_fixed = (
         df_schedule_fixed.iloc[0]["Principal"] * (interest_fixed / 100) / 12
@@ -829,6 +885,10 @@ with col1:
 
         with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
+        with st.expander("Detailed schedule: hope now"):
+            st.write(df_schedule_fixed_hope.style.format(schedule_format))
+        with st.expander("Detailed schedule: fear now"):
+            st.write(df_schedule_fixed_fear.style.format(schedule_format))
 
     st.divider()
     st.write("##### Sums")
@@ -864,6 +924,8 @@ with col1:
     end_of_fixed_loan_balance_wo_extra = df_schedule_fixed_wo_extra.iloc[-1][
         "Principal"
     ]
+    end_of_fixed_loan_balance_hope = df_schedule_fixed_hope.iloc[-1]["Principal"]
+    end_of_fixed_loan_balance_fear = df_schedule_fixed_fear.iloc[-1]["Principal"]
 
     st.write(
         "Principal at the end of fixed loan term: "
@@ -1166,6 +1228,42 @@ with col2:
         leftover_repayment=repayment_fixed,
     )
 
+    df_schedule_variable_hope = home_loan_simulator.simulate(
+        loan_start=loan_start,
+        principal=balance_variable,
+        offset=balance_offset,
+        schedule_start=schedule_start,
+        interest_rate=interest_variable - hope_now_interest_change,
+        prev_interest_date=prev_interest_date,
+        interest_cycle=interest_cycle,
+        repayment=repayment_total_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance_hope,
+        leftover_repayment=repayment_total_fixed,
+    )
+
+    df_schedule_variable_fear = home_loan_simulator.simulate(
+        loan_start=loan_start,
+        principal=balance_variable,
+        offset=balance_offset,
+        schedule_start=schedule_start,
+        interest_rate=interest_variable + fear_now_interest_change,
+        prev_interest_date=prev_interest_date,
+        interest_cycle=interest_cycle,
+        repayment=repayment_total_variable,
+        prev_repayment_date=prev_repayment_date,
+        repayment_cycle=repayment_cycle,
+        repayment_use_stash=repayment_use_stash,
+        schedule_end=None,
+        leftover_incoming=fixed_loan_end,
+        leftover_amount=end_of_fixed_loan_balance_fear,
+        leftover_repayment=repayment_total_fixed,
+    )
+
     df_schedule_variable_save = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable - save_now_amount,
@@ -1231,6 +1329,10 @@ with col2:
     total_repayments_variable = df_schedule_variable["Repayment"].sum()
     total_interest_variable = df_schedule_variable["Interest"].sum()
 
+    total_years_variable_hope = df_schedule_variable_hope.iloc[-1]["ScheduleYears"]
+    total_years_variable_fear = df_schedule_variable_fear.iloc[-1]["ScheduleYears"]
+    total_repayments_variable_hope = df_schedule_variable_hope["Repayment"].sum()
+    total_repayments_variable_fear = df_schedule_variable_fear["Repayment"].sum()
     total_repayments_variable_save = df_schedule_variable_save["Repayment"].sum()
     total_repayments_variable_spend = df_schedule_variable_spend["Repayment"].sum()
     total_repayments_variable_invest = df_schedule_variable_invest["Repayment"].sum()
@@ -1271,7 +1373,13 @@ with col2:
         with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_variable_wo_extra.style.format(schedule_format))
 
-        if show_save_spend_invest_information:
+        if show_fear_save_spend_invest_information:
+            with st.expander("Detailed schedule: hope now"):
+                st.write(df_schedule_variable_hope.style.format(schedule_format))
+
+            with st.expander("Detailed schedule: fear now"):
+                st.write(df_schedule_variable_fear.style.format(schedule_format))
+
             with st.expander("Detailed schedule: save now"):
                 st.write(df_schedule_variable_save.style.format(schedule_format))
 
@@ -1557,7 +1665,23 @@ with col2:
         ":blue[Total repayment to go: "
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
     )
-    if show_save_spend_invest_information:
+    if show_fear_save_spend_invest_information:
+        st.write(
+            "--- hope -"
+            + f"{hope_now_interest_change:,.2f}%"
+            + " now -> "
+            + f"Δ=${(total_repayments_fixed_hope + total_repayments_variable_hope
+                     - total_repayments_fixed - total_repayments_variable):,.0f}"
+            + f" (-{total_years_variable - total_years_variable_hope:.2f} yrs)"
+        )
+        st.write(
+            "--- fear +"
+            + f"{fear_now_interest_change:,.2f}%"
+            + " now -> "
+            + f"Δ=${(total_repayments_fixed_fear + total_repayments_variable_fear 
+                     - total_repayments_fixed - total_repayments_variable):,.0f}"
+            + f" (+{total_years_variable_fear - total_years_variable:.2f} yrs)"
+        )
         st.write(
             "--- save "
             + f"\\${save_now_amount:,.0f}"
