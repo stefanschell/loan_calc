@@ -25,14 +25,20 @@ def test_planner(N, k, P, R0, c0):
 
 
 @pytest.mark.parametrize(
-    "N, P, R0, c0, cycle",
+    "N, cycle, P, R0, c0",
     [
-        (15, 500000, 5.0 / 100, 1819, hls.Cycle.FORTNIGHTLY),
-        (20, 2000000, 8.0 / 100, 16729, hls.Cycle.MONTHLY_AVERAGE),
-        (25, 1000000, 6.0 / 100, 6443, hls.Cycle.MONTHLY_AVERAGE),
+        (
+            15,
+            hls.Cycle.FORTNIGHTLY,
+            500000,
+            5.0 / 100,
+            1819,
+        ),
+        (20, hls.Cycle.MONTHLY_AVERAGE, 2000000, 8.0 / 100, 16729),
+        (25, hls.Cycle.MONTHLY_AVERAGE, 1000000, 6.0 / 100, 6443),
     ],
 )
-def test_planner_and_simulator(N, P, R0, c0, cycle):
+def test_planner_and_simulator(N, cycle, P, R0, c0):
     # check params
 
     allowed_cycles = [item for item in hls.Cycle if item != hls.Cycle.YEARLY]
