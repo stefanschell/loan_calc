@@ -53,7 +53,7 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
 
     today = pd.to_datetime("today")
 
-    df_simulated = hls.simulate(
+    df_base = hls.simulate(
         loan_start=today,
         principal=P,
         offset=0,
@@ -69,9 +69,9 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
 
     # check base simulation
 
-    loan_years = df_simulated.iloc[-1]["LoanYears"]
-    total_interest = df_simulated["Interest"].sum()
-    total_repayment = df_simulated["Repayment"].sum()
+    loan_years = df_base.iloc[-1]["LoanYears"]
+    total_interest = df_base["Interest"].sum()
+    total_repayment = df_base["Repayment"].sum()
 
     assert round(loan_years) == N
     assert total_interest > 0
@@ -80,7 +80,7 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
 
     # run and check modified simulation: with offset
 
-    df_simulated_offset = hls.simulate(
+    df_with_offset = hls.simulate(
         loan_start=today,
         principal=P,
         offset=100000,
@@ -94,20 +94,19 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
         repayment_use_stash=False,
     )
 
-    assert df_simulated_offset.iloc[-1]["LoanYears"] < loan_years
-    assert df_simulated_offset["Interest"].sum() < total_interest
-    assert df_simulated_offset["Repayment"].sum() < total_repayment
+    assert df_with_offset.iloc[-1]["LoanYears"] < loan_years
+    assert df_with_offset["Interest"].sum() < total_interest
+    assert df_with_offset["Repayment"].sum() < total_repayment
     assert (
         round(
-            (P + df_simulated_offset["Interest"].sum())
-            - df_simulated_offset["Repayment"].sum()
+            (P + df_with_offset["Interest"].sum()) - df_with_offset["Repayment"].sum()
         )
         == 0
     )
 
     # run and check modified simulation: with increased interest
 
-    df_simulated_increased_interest = hls.simulate(
+    df_increased_interest = hls.simulate(
         loan_start=today,
         principal=P,
         offset=0,
@@ -121,20 +120,20 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
         repayment_use_stash=False,
     )
 
-    assert df_simulated_increased_interest.iloc[-1]["LoanYears"] > loan_years
-    assert df_simulated_increased_interest["Interest"].sum() > total_interest
-    assert df_simulated_increased_interest["Repayment"].sum() > total_repayment
+    assert df_increased_interest.iloc[-1]["LoanYears"] > loan_years
+    assert df_increased_interest["Interest"].sum() > total_interest
+    assert df_increased_interest["Repayment"].sum() > total_repayment
     assert (
         round(
-            (P + df_simulated_increased_interest["Interest"].sum())
-            - df_simulated_increased_interest["Repayment"].sum()
+            (P + df_increased_interest["Interest"].sum())
+            - df_increased_interest["Repayment"].sum()
         )
         == 0
     )
 
     # run and check modified simulation: with activated usage of stash
 
-    df_simulated_repayment_use_stash = hls.simulate(
+    df_with_use_stash = hls.simulate(
         loan_start=today,
         principal=P,
         offset=0,
@@ -148,13 +147,13 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
         repayment_use_stash=True,
     )
 
-    assert df_simulated_repayment_use_stash.iloc[-1]["LoanYears"] == loan_years
-    assert df_simulated_repayment_use_stash["Interest"].sum() == total_interest
-    assert df_simulated_repayment_use_stash["Repayment"].sum() == total_repayment
+    assert df_with_use_stash.iloc[-1]["LoanYears"] == loan_years
+    assert df_with_use_stash["Interest"].sum() == total_interest
+    assert df_with_use_stash["Repayment"].sum() == total_repayment
     assert (
         round(
-            (P + df_simulated_repayment_use_stash["Interest"].sum())
-            - df_simulated_repayment_use_stash["Repayment"].sum()
+            (P + df_with_use_stash["Interest"].sum())
+            - df_with_use_stash["Repayment"].sum()
         )
         == 0
     )
