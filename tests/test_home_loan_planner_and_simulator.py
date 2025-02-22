@@ -80,9 +80,13 @@ def test_simulator_basics(N, cycle, P, R0):
     assert total_repayment > P
     assert round((P + total_interest) - total_repayment) == 0
 
+    interests = df_base["Interest"].copy()
+    interests = interests[interests.notna() & interests != 0]
+    assert (interests.diff().dropna() < 0).all()  # interest payments decrease over time
+
     repayments = df_base["Repayment"].iloc[:-1].copy()
     repayments = repayments[repayments.notna() & repayments != 0]
-    assert (repayments == planner.c0).all()
+    assert (repayments == planner.c0).all()  # repayments are according to plan
 
     # run and check modified simulation: with offset
 
