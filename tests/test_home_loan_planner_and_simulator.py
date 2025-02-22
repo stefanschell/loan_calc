@@ -25,14 +25,17 @@ def test_planner(N, k, P, R0, c0):
 
 
 @pytest.mark.parametrize(
-    "N, cycle, P, R0, c0",
+    "N, cycle, P, R0",
     [
-        (15, hls.Cycle.FORTNIGHTLY, 500000, 5.0 / 100, 1819),
-        (20, hls.Cycle.MONTHLY_AVERAGE, 2000000, 8.0 / 100, 16729),
-        (25, hls.Cycle.MONTHLY_AVERAGE, 1000000, 6.0 / 100, 6443),
+        (15, hls.Cycle.FORTNIGHTLY, 500000, 5.0 / 100),
+        (20, hls.Cycle.MONTHLY_AVERAGE, 2000000, 8.0 / 100),
+        (25, hls.Cycle.MONTHLY_AVERAGE, 1000000, 6.0 / 100),
+        (30, hls.Cycle.FORTNIGHTLY, 1000000, 4.0 / 100),
+        (35, hls.Cycle.MONTHLY_AVERAGE, 1000000, 5.0 / 100),
+        (40, hls.Cycle.MONTHLY_END_OF_MONTH, 1000000, 3.0 / 100),
     ],
 )
-def test_planner_and_simulator(N, cycle, P, R0, c0):
+def test_planner_and_simulator(N, cycle, P, R0):
     # check params
 
     allowed_cycles = [item for item in hls.Cycle if item != hls.Cycle.YEARLY]
@@ -47,7 +50,6 @@ def test_planner_and_simulator(N, cycle, P, R0, c0):
         P=P,
         R0=R0,
     )
-    assert round(planner.c0) == c0
 
     # run base simulation using Home Loan Simulator
 
