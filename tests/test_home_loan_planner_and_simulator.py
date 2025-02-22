@@ -82,7 +82,13 @@ def test_simulator_basics(N, cycle, P, R0):
 
     interests = df_base["Interest"].copy()
     interests = interests[interests.notna() & interests != 0]
-    assert (interests.diff().dropna() < 0).all()  # interest payments decrease over time
+    if (
+        cycle != hls.Cycle.MONTHLY_1ST_OF_MONTH
+        and cycle != hls.Cycle.MONTHLY_END_OF_MONTH
+    ):  # lengths of months needs to be the same
+        assert (
+            interests.diff().dropna() < 0
+        ).all()  # interest payments decrease over time
 
     repayments = df_base["Repayment"].iloc[:-1].copy()
     repayments = repayments[repayments.notna() & repayments != 0]
