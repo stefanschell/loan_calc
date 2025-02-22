@@ -13,7 +13,7 @@ import home_loan_simulator as hls
         (25, 12, 1000000, 6.0 / 100, 6443),
     ],
 )
-def test_planner(N, k, P, R0, c0):
+def test_planner_basics(N, k, P, R0, c0):
     planner = hlp.HomeLoanPlanner(
         "TestLoan",
         N=N,
@@ -35,7 +35,7 @@ def test_planner(N, k, P, R0, c0):
         (40, hls.Cycle.MONTHLY_END_OF_MONTH, 1000000, 3.0 / 100),
     ],
 )
-def test_planner_and_simulator(N, cycle, P, R0):
+def test_simulator_basics(N, cycle, P, R0):
     # check params
 
     allowed_cycles = [item for item in hls.Cycle if item != hls.Cycle.YEARLY]
