@@ -534,7 +534,7 @@ with col2:
         )
 
         if show_fear_save_spend_invest_information:
-            st.write("Hope: interest decrease")
+            st.write("Hope: interest decrease (variable only)")
 
             hope_interest_change = st.number_input(
                 "Interest decrease (%)",
@@ -543,7 +543,7 @@ with col2:
                 1.0,
             )
 
-            st.write("Fear: interest increase")
+            st.write("Fear: interest increase (variable only)")
 
             fear_interest_change = st.number_input(
                 "Interest increase (%)",
@@ -812,45 +812,12 @@ with col1:
         schedule_end=fixed_loan_end,
     )
 
-    df_schedule_fixed_hope = home_loan_simulator.simulate(
-        loan_start=loan_start,
-        principal=balance_fixed,
-        offset=0,
-        schedule_start=schedule_start,
-        interest_rate=interest_fixed - hope_interest_change,
-        prev_interest_date=prev_interest_date,
-        interest_cycle=interest_cycle,
-        repayment=repayment_total_fixed,
-        prev_repayment_date=prev_repayment_date,
-        repayment_cycle=repayment_cycle,
-        repayment_use_stash=repayment_use_stash,
-        schedule_end=fixed_loan_end,
-    )
-
-    df_schedule_fixed_fear = home_loan_simulator.simulate(
-        loan_start=loan_start,
-        principal=balance_fixed,
-        offset=0,
-        schedule_start=schedule_start,
-        interest_rate=interest_fixed + fear_interest_change,
-        prev_interest_date=prev_interest_date,
-        interest_cycle=interest_cycle,
-        repayment=repayment_total_fixed,
-        prev_repayment_date=prev_repayment_date,
-        repayment_cycle=repayment_cycle,
-        repayment_use_stash=repayment_use_stash,
-        schedule_end=fixed_loan_end,
-    )
-
     with st.expander("Detailed schedule"):
         st.write(df_schedule_fixed.style.format(schedule_format))
 
     total_years_fixed = df_schedule_fixed.iloc[-1]["ScheduleYears"]
     total_repayments_fixed = df_schedule_fixed["Repayment"].sum()
     total_interest_fixed = df_schedule_fixed["Interest"].sum()
-
-    total_repayments_fixed_hope = df_schedule_fixed_hope["Repayment"].sum()
-    total_repayments_fixed_fear = df_schedule_fixed_fear["Repayment"].sum()
 
     interest_per_month_fixed = (
         df_schedule_fixed.iloc[0]["Principal"] * (interest_fixed / 100) / 12
@@ -886,13 +853,6 @@ with col1:
         with st.expander("Detailed schedule: w/o extra repayment"):
             st.write(df_schedule_fixed_wo_extra.style.format(schedule_format))
 
-        if show_fear_save_spend_invest_information:
-            with st.expander("Detailed schedule: hope"):
-                st.write(df_schedule_fixed_hope.style.format(schedule_format))
-
-            with st.expander("Detailed schedule: fear"):
-                st.write(df_schedule_fixed_fear.style.format(schedule_format))
-
     st.divider()
     st.write("##### Sums")
 
@@ -927,8 +887,6 @@ with col1:
     end_of_fixed_loan_balance_wo_extra = df_schedule_fixed_wo_extra.iloc[-1][
         "Principal"
     ]
-    end_of_fixed_loan_balance_hope = df_schedule_fixed_hope.iloc[-1]["Principal"]
-    end_of_fixed_loan_balance_fear = df_schedule_fixed_fear.iloc[-1]["Principal"]
 
     st.write(
         "Principal at the end of fixed loan term: "
@@ -1245,7 +1203,7 @@ with col2:
         repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
-        leftover_amount=end_of_fixed_loan_balance_hope,
+        leftover_amount=end_of_fixed_loan_balance,
         leftover_repayment=repayment_total_fixed,
     )
 
@@ -1263,7 +1221,7 @@ with col2:
         repayment_use_stash=repayment_use_stash,
         schedule_end=None,
         leftover_incoming=fixed_loan_end,
-        leftover_amount=end_of_fixed_loan_balance_fear,
+        leftover_amount=end_of_fixed_loan_balance,
         leftover_repayment=repayment_total_fixed,
     )
 
@@ -1682,7 +1640,7 @@ with col2:
             "--- hope -"
             + f"{hope_interest_change:,.2f}%"
             + " -> "
-            + f"Δ=${(total_repayments_fixed_hope + total_repayments_variable_hope
+            + f"Δ=${(total_repayments_fixed + total_repayments_variable_hope
                      - total_repayments_fixed - total_repayments_variable):,.0f}"
             + f" (-{total_years_variable - total_years_variable_hope:.2f} yrs)"
         )
@@ -1690,7 +1648,7 @@ with col2:
             "--- fear +"
             + f"{fear_interest_change:,.2f}%"
             + " -> "
-            + f"Δ=${(total_repayments_fixed_fear + total_repayments_variable_fear 
+            + f"Δ=${(total_repayments_fixed + total_repayments_variable_fear 
                      - total_repayments_fixed - total_repayments_variable):,.0f}"
             + f" (+{total_years_variable_fear - total_years_variable:.2f} yrs)"
         )
