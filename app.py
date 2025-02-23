@@ -1667,13 +1667,16 @@ with col2:
                    (total_repayments_so_far_fixed + total_repayments_fixed +
                     total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)]"
         )
+    percentage = f" ({(total_repayments_fixed + total_repayments_variable) /
+                     (total_repayments_so_far_fixed + total_repayments_fixed +
+                      total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)"
     st.write(
         ":blue[Total repayment to go: "
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}"
-        + f" ({(total_repayments_fixed + total_repayments_variable) /
-               (total_repayments_so_far_fixed + total_repayments_fixed +
-                total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)]"
+        + (percentage if show_so_far_information else "")
+        + "]"
     )
+
     if show_fear_save_spend_invest_information:
         st.write(
             "--- hope -"
