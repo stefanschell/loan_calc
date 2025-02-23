@@ -585,7 +585,7 @@ with col2:
                 "Win amount ($)",
                 0,
                 10000,
-                50,
+                54,
             )
 
             invest_win_cycle = st.selectbox(
@@ -1662,11 +1662,17 @@ with col2:
 
         st.write(
             ":blue[Total repayment so far: "
-            + f"${(total_repayments_so_far_fixed + total_repayments_so_far_variable):,.0f}]"
+            + f"${(total_repayments_so_far_fixed + total_repayments_so_far_variable):,.0f}"
+            + f" ({(total_repayments_so_far_fixed + total_repayments_so_far_variable) /
+                   (total_repayments_so_far_fixed + total_repayments_fixed +
+                    total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)]"
         )
     st.write(
         ":blue[Total repayment to go: "
-        + f"${(total_repayments_fixed + total_repayments_variable):,.0f}]"
+        + f"${(total_repayments_fixed + total_repayments_variable):,.0f}"
+        + f" ({(total_repayments_fixed + total_repayments_variable) /
+               (total_repayments_so_far_fixed + total_repayments_fixed +
+                total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)]"
     )
     if show_fear_save_spend_invest_information:
         st.write(
