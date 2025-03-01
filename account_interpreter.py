@@ -263,7 +263,11 @@ def fit_balance(df_balance_in):
     initial_guess = [1000000.0, 0.3, 15]  # Initial guess for P, J, N
     popt, _ = curve_fit(my_fit_function, t, p, p0=initial_guess)
 
-    ti = np.linspace(t[0], t[-1], 100)
+    t_end = pd.Timestamp.timestamp(t_in.iloc[-1] + (t_in.iloc[-1] - t_in.iloc[0]))
+    t_end = t_end / (60 * 60 * 24 * 14)
+    t_end = t_end - t0
+
+    ti = np.linspace(t[0], t_end, 100)
     pi = my_fit_function(ti, *popt)
     pi = np.clip(pi, a_min=0, a_max=None)
 
