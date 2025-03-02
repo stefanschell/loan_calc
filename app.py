@@ -644,24 +644,20 @@ with col2:
     st.write("Extracted offset: " + f"\\${extracted_offset:,.0f}")
 
     st.write(
-        ":green[Extracted extra repayment (monthly): "
-        + f"\\${extracted_extra_repayment:,.0f}]"
+        "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
     )
 
-    override_extra_repayment = st.toggle("Override extra repayment")
+    extracted_extra_repayment = st.slider(
+        ":green[Extra repayment (monthly, $)]",
+        0,
+        20800,
+        5000,
+        100,
+    )
 
-    if override_extra_repayment:
-        extracted_extra_repayment = st.number_input(
-            "Extra repayment override (monthly, $)",
-            0,
-            20800,
-            5000,
-            100,
-        )
-
-    default_extrarepayment_variable = max(0, extracted_extra_repayment - 800)
-    default_extrarepayment_fixed = (
-        extracted_extra_repayment - default_extrarepayment_variable
+    default_extra_repayment_variable = max(0, extracted_extra_repayment - 800)
+    default_extra_repayment_fixed = (
+        extracted_extra_repayment - default_extra_repayment_variable
     )
 
 col1, col2 = st.columns(2)
@@ -749,7 +745,7 @@ with col1:
         ":green[Extra repayment (monthly, \\$, limited to \\$10000 yearly, i.e. \\$800 monthly)]",
         0,
         800,
-        default_extrarepayment_fixed,
+        default_extra_repayment_fixed,
         100,
         key="k1i",
     )
@@ -1110,7 +1106,7 @@ with col2:
         + ")]",
         0,
         20000,
-        default_extrarepayment_variable,
+        default_extra_repayment_variable,
         100,
         key="k2j",
     )
