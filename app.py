@@ -644,7 +644,8 @@ with col2:
     st.write("Extracted offset: " + f"\\${extracted_offset:,.0f}")
 
     st.write(
-        "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
+        ":green[Extracted extra repayment (monthly): "
+        + f"\\${extracted_extra_repayment:,.0f}]"
     )
 
     override_extra_repayment = st.toggle("Override extra repayment")
