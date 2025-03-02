@@ -157,9 +157,13 @@ df_balance_total = account_interpreter.get_total_balance_over_time(
     df_in, add_col_with_account_name=True, return_positive_balance=True
 )
 
-df_balance_total_fitted = account_interpreter.fit_balance(df_balance_total)
 
 with st.expander("Balance over time"):
+
+    extrapolation_length = st.slider("Extrapolation length", 0.0, 10.0, 0.5, 0.5)
+    df_balance_total_fitted = account_interpreter.fit_balance(
+        df_balance_total, extrapolation_length
+    )
 
     df_plot = pd.concat(
         [

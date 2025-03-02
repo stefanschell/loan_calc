@@ -248,7 +248,7 @@ def my_fit_function(t, P, J, N):
     return P * (1 - ((1 + J) ** t - 1) / ((1 + J) ** N - 1))
 
 
-def fit_balance(df_balance_in):
+def fit_balance(df_balance_in, extrapolation_length):
     t_in = df_balance_in["DateSeries"]
     p_in = df_balance_in["Balance"]
     a0_in = df_balance_in["AccountName"].iloc[0]
@@ -263,7 +263,9 @@ def fit_balance(df_balance_in):
     initial_guess = [1000000.0, 0.3, 15]  # Initial guess for P, J, N
     popt, _ = curve_fit(my_fit_function, t, p, p0=initial_guess)
 
-    t_end = pd.Timestamp.timestamp(t_in.iloc[-1] + (t_in.iloc[-1] - t_in.iloc[0]))
+    t_end = pd.Timestamp.timestamp(
+        t_in.iloc[-1] + extrapolation_length * (t_in.iloc[-1] - t_in.iloc[0])
+    )
     t_end = t_end / (60 * 60 * 24 * 14)
     t_end = t_end - t0
 
