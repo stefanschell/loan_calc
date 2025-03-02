@@ -51,7 +51,20 @@ schedule_format = {
 
 # setup
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="centered")
+
+st.markdown(
+    """
+    <style>
+    button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
+        font-size: 24px;
+        padding: 1rem 2rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("Home Loan")
 
 # aquire data
@@ -157,7 +170,6 @@ df_balance_offset = account_interpreter.get_balance_over_time(
 df_balance_total = account_interpreter.get_total_balance_over_time(
     df_in, add_col_with_account_name=True, return_positive_balance=True
 )
-
 
 with st.expander("Balance over time"):
 
@@ -300,10 +312,22 @@ total_repayments_so_far = (
     total_repayments_so_far_fixed + total_repayments_so_far_variable
 )
 
-col1, col2 = st.columns(2)
+tab_fixed, tab_variable, tab_fixed_and_variable = st.tabs(
+    ["Fixed", "Variable", "Fixed & Variable"]
+)
 
-with col1:
-    st.write("#### Fixed")
+with tab_fixed:
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
+    st.write(
+        ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
+    )
+    st.write(
+        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
+    )
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+    )
 
     with st.expander("Change of balance over time"):
 
@@ -341,8 +365,18 @@ with col1:
 
         st.plotly_chart(fig, key="p2")
 
-with col2:
-    st.write("#### Variable")
+with tab_variable:
+
+    st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
+    st.write(
+        ":orange[Base repayment so far: " + f"${base_repayment_so_far_variable:,.0f}]"
+    )
+    st.write(
+        ":green[Extra repayment so far: " + f"${extra_repayment_so_far_variable:,.0f}]"
+    )
+    st.write(
+        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
+    )
 
     with st.expander("Change of balance over time"):
 
@@ -380,42 +414,8 @@ with col2:
 
         st.plotly_chart(fig, key="p4")
 
-col1, col2 = st.columns(2)
+with tab_fixed_and_variable:
 
-with col1:
-
-    with st.expander("Interest, base, extra and total repayment so far"):
-        st.write(":red[Interest so far: " + f"${total_interest_so_far_fixed:,.0f}]")
-        st.write(
-            ":orange[Base repayment so far: " + f"${base_repayment_so_far_fixed:,.0f}]"
-        )
-        st.write(
-            ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
-        )
-        st.write(
-            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
-        )
-
-with col2:
-    with st.expander("Interest, base, extra and total repayment so far"):
-        st.write(":red[Interest so far: " + f"${total_interest_so_far_variable:,.0f}]")
-        st.write(
-            ":orange[Base repayment so far: "
-            + f"${base_repayment_so_far_variable:,.0f}]"
-        )
-        st.write(
-            ":green[Extra repayment so far: "
-            + f"${extra_repayment_so_far_variable:,.0f}]"
-        )
-        st.write(
-            ":blue[Total repayment so far: "
-            + f"${total_repayments_so_far_variable:,.0f}]"
-        )
-
-_, col2, _ = st.columns(3)
-
-with col2:
-    st.write("#### Fixed & Variable")
     st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
     st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
     st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
@@ -454,219 +454,204 @@ interest_variable = df_in[
 repayment_cycle = home_loan_simulator.Cycle.FORTNIGHTLY
 interest_cycle = home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH
 
-_, col2, _ = st.columns(3)
+with st.expander("Override settings"):
 
-with col2:
-    st.write("#### Fixed & Variable")
+    allowed_cycles = [
+        item
+        for item in home_loan_simulator.Cycle
+        if item != home_loan_simulator.Cycle.YEARLY
+    ]
 
-    with st.expander("Override settings"):
+    interest_cycle = st.selectbox(
+        "Interest cycle override",
+        allowed_cycles,
+        index=3,
+        format_func=home_loan_simulator.Cycle.complex_str,
+    )
 
-        allowed_cycles = [
-            item
-            for item in home_loan_simulator.Cycle
-            if item != home_loan_simulator.Cycle.YEARLY
-        ]
+    repayment_cycle = st.selectbox(
+        "Repayment cycle override",
+        allowed_cycles,
+        index=0,
+        format_func=home_loan_simulator.Cycle.complex_str,
+    )
 
-        interest_cycle = st.selectbox(
-            "Interest cycle override",
-            allowed_cycles,
-            index=3,
-            format_func=home_loan_simulator.Cycle.complex_str,
+    repayment_use_stash = not st.toggle("Do not use stashed money for repayment", False)
+
+    st.divider()
+
+    restart_loan_today = st.toggle("Restart loan today", False)
+
+    toggle_override_fixed_loan_years = st.toggle("Override fixed loan term", False)
+    fixed_loan_years = 5
+    if toggle_override_fixed_loan_years:
+        fixed_loan_years = st.number_input(
+            "Fixed loan term override (yrs)", 1, 15, 5, 1
         )
+    fixed_loan_length = timedelta(days=365 * fixed_loan_years)
+    fixed_loan_end = loan_start + fixed_loan_length
 
-        repayment_cycle = st.selectbox(
-            "Repayment cycle override",
-            allowed_cycles,
-            index=0,
-            format_func=home_loan_simulator.Cycle.complex_str,
-        )
-
-        repayment_use_stash = not st.toggle(
-            "Do not use stashed money for repayment", False
-        )
-
-        st.divider()
-
-        restart_loan_today = st.toggle("Restart loan today", False)
-
-        toggle_override_fixed_loan_years = st.toggle("Override fixed loan term", False)
-        fixed_loan_years = 5
-        if toggle_override_fixed_loan_years:
-            fixed_loan_years = st.number_input(
-                "Fixed loan term override (yrs)", 1, 15, 5, 1
-            )
-        fixed_loan_length = timedelta(days=365 * fixed_loan_years)
+    if restart_loan_today:
+        loan_start = pd.to_datetime("today")
         fixed_loan_end = loan_start + fixed_loan_length
+        schedule_start = loan_start
+        prev_interest_date = schedule_start
+        prev_repayment_date = schedule_start
 
-        if restart_loan_today:
-            loan_start = pd.to_datetime("today")
-            fixed_loan_end = loan_start + fixed_loan_length
-            schedule_start = loan_start
-            prev_interest_date = schedule_start
-            prev_repayment_date = schedule_start
+    show_so_far_information = not restart_loan_today
 
-        show_so_far_information = not restart_loan_today
+    st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
+    st.write("Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y"))
+    st.write("Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y"))
+    st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
+    st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
 
-        st.write("Start of loan:", loan_start.strftime("%d/%m/%Y"))
+    st.divider()
+
+    show_other_schedules = st.toggle("Show other schedules", False)
+
+    show_fear_save_spend_invest_information = st.toggle(
+        "Show hope, fear, save, spend, and invest", False
+    )
+
+    if show_fear_save_spend_invest_information:
+        st.write("Hope: interest decrease (variable only)")
+
+        hope_interest_change = st.number_input(
+            "Interest decrease (%)",
+            0.0,
+            10.0,
+            1.0,
+        )
+
+        st.write("Fear: interest increase (variable only)")
+
+        fear_interest_change = st.number_input(
+            "Interest increase (%)",
+            0.0,
+            10.0,
+            2.0,
+        )
+
+        st.write("Save: one time saving of an amount of money")
+
+        save_amount = st.number_input(
+            "Amount ($)",
+            0,
+            100000,
+            3000,
+        )
+
+        st.write("Spend: one time spending of an amount of money")
+
+        spend_amount = st.number_input(
+            "Amount ($)",
+            0,
+            100000,
+            10000,
+        )
+
         st.write(
-            "Last retrospective interest:", prev_interest_date.strftime("%d/%m/%Y")
-        )
-        st.write(
-            "Last retrospective repayment:", prev_repayment_date.strftime("%d/%m/%Y")
-        )
-        st.write("Start of schedule:", schedule_start.strftime("%d/%m/%Y"))
-        st.write("End of fixed loan term:", fixed_loan_end.strftime("%d/%m/%Y"))
-
-        st.divider()
-
-        show_other_schedules = st.toggle("Show other schedules", False)
-
-        show_fear_save_spend_invest_information = st.toggle(
-            "Show hope, fear, save, spend, and invest", False
+            "Invest: one time investment of an amount of money, regular gain of money for a duration"
         )
 
-        if show_fear_save_spend_invest_information:
-            st.write("Hope: interest decrease (variable only)")
+        invest_cost_amount = st.number_input(
+            "Cost amount ($)",
+            0,
+            100000,
+            5000,
+        )
 
-            hope_interest_change = st.number_input(
-                "Interest decrease (%)",
-                0.0,
-                10.0,
-                1.0,
-            )
+        invest_win_amount = st.number_input(
+            "Win amount ($)",
+            0,
+            10000,
+            54,
+        )
 
-            st.write("Fear: interest increase (variable only)")
+        invest_win_cycle = st.selectbox(
+            "Win cycle",
+            home_loan_simulator.Cycle,
+            index=1,
+            format_func=home_loan_simulator.Cycle.complex_str,
+        )
 
-            fear_interest_change = st.number_input(
-                "Interest increase (%)",
-                0.0,
-                10.0,
-                2.0,
-            )
+        invest_win_duration = timedelta(
+            days=365 * st.number_input("Duration (yrs)", 0, 99, 10),
+        )
+    else:
+        hope_interest_change = 0
+        fear_interest_change = 0
+        save_amount = 0
+        spend_amount = 0
+        invest_cost_amount = 0
+        invest_win_amount = None
+        invest_win_cycle = None
+        invest_win_duration = None
 
-            st.write("Save: one time saving of an amount of money")
+st.write("##### Config")
 
-            save_amount = st.number_input(
-                "Amount ($)",
-                0,
-                100000,
-                3000,
-            )
+history_length_days = math.ceil(
+    (df_in["DateSeries"].iloc[-1] - df_in["DateSeries"].iloc[0]).days
+)
 
-            st.write("Spend: one time spending of an amount of money")
+history_length_days_used = st.slider(
+    "Days for extraction of offset and extra repayment:",
+    1,
+    history_length_days,
+    history_length_days,
+    10,
+)
 
-            spend_amount = st.number_input(
-                "Amount ($)",
-                0,
-                100000,
-                10000,
-            )
+history_cutoff_date = df_in["DateSeries"].iloc[-1] - timedelta(
+    days=history_length_days_used
+)
 
-            st.write(
-                "Invest: one time investment of an amount of money, regular gain of money for a duration"
-            )
+extracted_offset = df_balance_offset[
+    df_balance_offset["DateSeries"] >= history_cutoff_date
+]["Balance"].mean()
 
-            invest_cost_amount = st.number_input(
-                "Cost amount ($)",
-                0,
-                100000,
-                5000,
-            )
+extracted_extra_repayment = (
+    df_change_variable[
+        (df_change_variable["interpolated"] == True)
+        & (df_change_variable["Label"] == "Extrarepayment")
+        & (df_change_variable["DateSeries"] >= history_cutoff_date)
+    ]["Change"]
+    .dropna()
+    .mean()
+)
 
-            invest_win_amount = st.number_input(
-                "Win amount ($)",
-                0,
-                10000,
-                54,
-            )
+round_to_hundred = lambda x: int(round(x / 100) * 100)
 
-            invest_win_cycle = st.selectbox(
-                "Win cycle",
-                home_loan_simulator.Cycle,
-                index=1,
-                format_func=home_loan_simulator.Cycle.complex_str,
-            )
+extracted_offset = round_to_hundred(extracted_offset)
+extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
 
-            invest_win_duration = timedelta(
-                days=365 * st.number_input("Duration (yrs)", 0, 99, 10),
-            )
-        else:
-            hope_interest_change = 0
-            fear_interest_change = 0
-            save_amount = 0
-            spend_amount = 0
-            invest_cost_amount = 0
-            invest_win_amount = None
-            invest_win_cycle = None
-            invest_win_duration = None
+st.write("Extracted offset: " + f"\\${extracted_offset:,.0f}")
 
-_, col2, _ = st.columns(3)
+st.write(
+    "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
+)
 
-with col2:
+extracted_extra_repayment = st.slider(
+    ":green[Extra repayment (monthly, $)]",
+    0,
+    20800,
+    extracted_extra_repayment,
+    100,
+)
 
-    st.write("##### Config")
+default_extra_repayment_variable = max(0, extracted_extra_repayment - 800)
+default_extra_repayment_fixed = (
+    extracted_extra_repayment - default_extra_repayment_variable
+)
 
-    history_length_days = math.ceil(
-        (df_in["DateSeries"].iloc[-1] - df_in["DateSeries"].iloc[0]).days
-    )
+tab_fixed, tab_variable, tab_fixed_and_variable = st.tabs(
+    ["Fixed", "Variable", "Fixed & Variable"]
+)
 
-    history_length_days_used = st.slider(
-        "Days for extraction of offset and extra repayment:",
-        1,
-        history_length_days,
-        history_length_days,
-        10,
-    )
-
-    history_cutoff_date = df_in["DateSeries"].iloc[-1] - timedelta(
-        days=history_length_days_used
-    )
-
-    extracted_offset = df_balance_offset[
-        df_balance_offset["DateSeries"] >= history_cutoff_date
-    ]["Balance"].mean()
-
-    extracted_extra_repayment = (
-        df_change_variable[
-            (df_change_variable["interpolated"] == True)
-            & (df_change_variable["Label"] == "Extrarepayment")
-            & (df_change_variable["DateSeries"] >= history_cutoff_date)
-        ]["Change"]
-        .dropna()
-        .mean()
-    )
-
-    round_to_hundred = lambda x: int(round(x / 100) * 100)
-
-    extracted_offset = round_to_hundred(extracted_offset)
-    extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
-
-    st.write("Extracted offset: " + f"\\${extracted_offset:,.0f}")
-
-    st.write(
-        "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
-    )
-
-    extracted_extra_repayment = st.slider(
-        ":green[Extra repayment (monthly, $)]",
-        0,
-        20800,
-        extracted_extra_repayment,
-        100,
-    )
-
-    default_extra_repayment_variable = max(0, extracted_extra_repayment - 800)
-    default_extra_repayment_fixed = (
-        extracted_extra_repayment - default_extra_repayment_variable
-    )
-
-col1, col2 = st.columns(2)
-
-with col1:
+with tab_fixed:
 
     # - Fixed
-
-    st.write("#### Fixed")
 
     st.write("##### Config")
 
@@ -1001,11 +986,9 @@ with col1:
 
         st.plotly_chart(fig3)
 
-with col2:
+with tab_variable:
 
     # - Variable
-
-    st.write("#### Variable")
 
     st.write("##### Config")
 
@@ -1531,13 +1514,9 @@ with col2:
 
         st.plotly_chart(fig3)
 
-# - Fixed & Variable
+with tab_fixed_and_variable:
 
-_, col2, _ = st.columns(3)
-
-with col2:
-
-    st.write("#### Fixed & Variable")
+    # - Fixed & Variable
 
     total_wo_extra = repayment_fixed + repayment_variable
     total_extra = repayment_extra_fixed + repayment_extra_variable
@@ -1604,20 +1583,20 @@ with col2:
         st.write(
             ":red[Interest so far & to go: "
             + f"${(
-            total_interest_so_far_fixed + total_interest_fixed +
-            total_interest_so_far_variable + total_interest_variable):,.0f}]"
+                total_interest_so_far_fixed + total_interest_fixed +
+                total_interest_so_far_variable + total_interest_variable):,.0f}]"
         )
 
         st.write(
             ":blue[Total repayment so far: "
             + f"${(total_repayments_so_far_fixed + total_repayments_so_far_variable):,.0f}"
             + f" ({(total_repayments_so_far_fixed + total_repayments_so_far_variable) /
-                   (total_repayments_so_far_fixed + total_repayments_fixed +
-                    total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)]"
+                    (total_repayments_so_far_fixed + total_repayments_fixed +
+                        total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)]"
         )
     percentage = f" ({(total_repayments_fixed + total_repayments_variable) /
-                     (total_repayments_so_far_fixed + total_repayments_fixed +
-                      total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)"
+                        (total_repayments_so_far_fixed + total_repayments_fixed +
+                        total_repayments_so_far_variable + total_repayments_variable) * 100:,.1f}%)"
     st.write(
         ":blue[Total repayment to go: "
         + f"${(total_repayments_fixed + total_repayments_variable):,.0f}"
@@ -1631,7 +1610,7 @@ with col2:
             + f"{hope_interest_change:,.2f}%"
             + " -> "
             + f"Δ=${(total_repayments_fixed + total_repayments_variable_hope
-                     - total_repayments_fixed - total_repayments_variable):,.0f}"
+                        - total_repayments_fixed - total_repayments_variable):,.0f}"
             + f" (-{total_years_variable - total_years_variable_hope:.2f} yrs)"
         )
         st.write(
@@ -1639,7 +1618,7 @@ with col2:
             + f"{fear_interest_change:,.2f}%"
             + " -> "
             + f"Δ=${(total_repayments_fixed + total_repayments_variable_fear 
-                     - total_repayments_fixed - total_repayments_variable):,.0f}"
+                        - total_repayments_fixed - total_repayments_variable):,.0f}"
             + f" (+{total_years_variable_fear - total_years_variable:.2f} yrs)"
         )
         st.write(
@@ -1679,6 +1658,6 @@ with col2:
         st.write(
             ":blue[Total repayment so far & to go: "
             + f"${(
-            total_repayments_so_far_fixed + total_repayments_fixed +
-            total_repayments_so_far_variable + total_repayments_variable):,.0f}]"
+                total_repayments_so_far_fixed + total_repayments_fixed +
+                total_repayments_so_far_variable + total_repayments_variable):,.0f}]"
         )
