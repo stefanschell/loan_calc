@@ -606,13 +606,8 @@ with col2:
 
     st.write("##### Config")
 
-    history = df_change_variable[
-        (df_change_variable["interpolated"] == True)
-        & (df_change_variable["Label"] == "Extrarepayment")
-    ]
-
     history_length_days = math.ceil(
-        (history["DateSeries"].iloc[-1] - history["DateSeries"].iloc[0]).days
+        (df_in["DateSeries"].iloc[-1] - df_in["DateSeries"].iloc[0]).days
     )
 
     history_length_days_used = st.slider(
@@ -623,7 +618,7 @@ with col2:
         10,
     )
 
-    history_cutoff_date = history["DateSeries"].iloc[-1] - timedelta(
+    history_cutoff_date = df_in["DateSeries"].iloc[-1] - timedelta(
         days=history_length_days_used
     )
 
@@ -631,9 +626,15 @@ with col2:
         df_balance_offset["DateSeries"] >= history_cutoff_date
     ]["Balance"].mean()
 
-    extracted_extra_repayment = history[history["DateSeries"] >= history_cutoff_date][
-        "Change"
-    ].mean()
+    extracted_extra_repayment = (
+        df_change_variable[
+            (df_change_variable["interpolated"] == True)
+            & (df_change_variable["Label"] == "Extrarepayment")
+            & (df_change_variable["DateSeries"] >= history_cutoff_date)
+        ]["Change"]
+        .dropna()
+        .mean()
+    )
 
     round_to_hundred = lambda x: int(round(x / 100) * 100)
 
