@@ -663,16 +663,6 @@ with col2:
         extracted_extra_repayment - default_extrarepayment_variable
     )
 
-    st.write(
-        ":green[Fixed loan extra repayment (monthly): "
-        + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
-    )
-
-    st.write(
-        ":green[Variable loan extra repayment (monthly): "
-        + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
-    )
-
 col1, col2 = st.columns(2)
 
 with col1:
