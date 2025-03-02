@@ -615,12 +615,12 @@ with col2:
         (history["DateSeries"].iloc[-1] - history["DateSeries"].iloc[0]).days
     )
 
-    history_length_days_used = st.number_input(
+    history_length_days_used = st.slider(
         "Days for extraction of offset and extra repayment:",
         1,
         history_length_days,
         history_length_days,
-        1,
+        10,
     )
 
     history_cutoff_date = history["DateSeries"].iloc[-1] - timedelta(
