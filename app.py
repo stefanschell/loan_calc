@@ -7,6 +7,7 @@ import account_interpreter
 import home_loan_simulator
 import home_loan_planner
 from datetime import timedelta
+import math
 import os
 import shutil
 import zipfile
@@ -450,15 +451,13 @@ interest_variable = df_in[
     (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Interest")
 ].iloc[-1]["ApproxInterest"]
 
-balance_offset = account_interpreter.find_balance(df_balance_offset, schedule_start)
-
 repayment_cycle = home_loan_simulator.Cycle.FORTNIGHTLY
 interest_cycle = home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH
 
 _, col2, _ = st.columns(3)
 
 with col2:
-    st.write("##### Settings")
+    st.write("#### Fixed & Variable")
 
     with st.expander("Override settings"):
 
@@ -605,63 +604,73 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
-    st.write("##### Quick config")
+    st.write("##### Config")
 
-    with st.expander("Override quick config"):
+    history = df_change_variable[
+        (df_change_variable["interpolated"] == True)
+        & (df_change_variable["Label"] == "Extrarepayment")
+    ]
 
-        extracted_extra_repayment_history = df_change_variable[
-            (df_change_variable["interpolated"] == True)
-            & (df_change_variable["Label"] == "Extrarepayment")
-        ]["Change"].dropna()
+    history_length_days = math.ceil(
+        (history["DateSeries"].iloc[-1] - history["DateSeries"].iloc[0]).days
+    )
 
-        extracted_extra_repayment_num_events = st.number_input(
-            "Number of previous events used for extraction of mean extra repayment:",
-            1,
-            len(extracted_extra_repayment_history),
-            len(extracted_extra_repayment_history),
-            1,
+    history_length_days_used = st.number_input(
+        "Days for extraction of offset and extra repayment:",
+        1,
+        history_length_days,
+        history_length_days,
+        1,
+    )
+
+    history_cutoff_date = history["DateSeries"].iloc[-1] - timedelta(
+        days=history_length_days_used
+    )
+
+    extracted_offset = df_balance_offset[
+        df_balance_offset["DateSeries"] >= history_cutoff_date
+    ]["Balance"].mean()
+
+    extracted_extra_repayment = history[history["DateSeries"] >= history_cutoff_date][
+        "Change"
+    ].mean()
+
+    round_to_hundred = lambda x: int(round(x / 100) * 100)
+
+    extracted_offset = round_to_hundred(extracted_offset)
+    extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
+
+    st.write("Extracted offset: " + f"\\${extracted_offset:,.0f}")
+
+    st.write(
+        "Extracted extra repayment (monthly): " + f"\\${extracted_extra_repayment:,.0f}"
+    )
+
+    override_extra_repayment = st.toggle("Override extra repayment")
+
+    if override_extra_repayment:
+        extracted_extra_repayment = st.number_input(
+            "Extra repayment override (monthly, $)",
+            0,
+            20800,
+            5000,
+            100,
         )
 
-        extracted_extra_repayment = extracted_extra_repayment_history.iloc[
-            -extracted_extra_repayment_num_events:
-        ].mean()
+    default_extrarepayment_variable = max(0, extracted_extra_repayment - 800)
+    default_extrarepayment_fixed = (
+        extracted_extra_repayment - default_extrarepayment_variable
+    )
 
-        round_to_hundred = lambda x: int(round(x / 100) * 100)
+    st.write(
+        ":green[Fixed loan extra repayment (monthly): "
+        + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
+    )
 
-        extracted_extra_repayment = round_to_hundred(extracted_extra_repayment)
-
-        st.write(
-            "Extracted extra repayment (monthly): "
-            + f"\\${extracted_extra_repayment:,.0f}"
-        )
-
-        override_extra_repayment = st.toggle("Override extra repayment")
-
-        if override_extra_repayment:
-            extracted_extra_repayment = st.number_input(
-                "Extra repayment override (monthly, $)",
-                0,
-                20800,
-                5000,
-                100,
-            )
-
-        st.write("Thus, we assume the following extra repayment distribution:")
-
-        default_extrarepayment_variable = max(0, extracted_extra_repayment - 800)
-        default_extrarepayment_fixed = (
-            extracted_extra_repayment - default_extrarepayment_variable
-        )
-
-        st.write(
-            ":green[Fixed loan extra repayment (monthly): "
-            + f"${round(default_extrarepayment_fixed / 100) * 100:,.0f}]"
-        )
-
-        st.write(
-            ":green[Variable loan extra repayment (monthly): "
-            + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
-        )
+    st.write(
+        ":green[Variable loan extra repayment (monthly): "
+        + f"${round(default_extrarepayment_variable / 100) * 100:,.0f}]"
+    )
 
 col1, col2 = st.columns(2)
 
@@ -1047,7 +1056,7 @@ with col2:
         toggle_offset = st.toggle("Override offset", False, key="k2g")
 
         if toggle_offset:
-            balance_offset = st.number_input(
+            extracted_offset = st.number_input(
                 "Offset override ($)", 0, 300000, 100000, 1000, key="k2h"
             )
 
@@ -1079,7 +1088,7 @@ with col2:
             + ")]"
         )
 
-    st.write("Offset: " + f"${balance_offset:,.0f}")
+    st.write("Offset: " + f"${extracted_offset:,.0f}")
 
     if show_other_schedules:
         with st.expander("Calculate theoretical schedule"):
@@ -1089,7 +1098,7 @@ with col2:
                 "Fixed",
                 N=years_planner_variable,
                 k=((365 / 14) if repayment_cycle.is_fortnightly() else 12),
-                P=balance_variable - balance_offset,
+                P=balance_variable - extracted_offset,
                 R0=interest_variable / 100,
             )
 
@@ -1149,7 +1158,7 @@ with col2:
     df_schedule_variable = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
@@ -1167,7 +1176,7 @@ with col2:
     df_schedule_variable_wo_extra = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
@@ -1185,7 +1194,7 @@ with col2:
     df_schedule_variable_hope = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable - hope_interest_change,
         prev_interest_date=prev_interest_date,
@@ -1203,7 +1212,7 @@ with col2:
     df_schedule_variable_fear = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable + fear_interest_change,
         prev_interest_date=prev_interest_date,
@@ -1221,7 +1230,7 @@ with col2:
     df_schedule_variable_save = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable - save_amount,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
@@ -1239,7 +1248,7 @@ with col2:
     df_schedule_variable_spend = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable + spend_amount,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
@@ -1257,7 +1266,7 @@ with col2:
     df_schedule_variable_invest = home_loan_simulator.simulate(
         loan_start=loan_start,
         principal=balance_variable + invest_cost_amount,
-        offset=balance_offset,
+        offset=extracted_offset,
         schedule_start=schedule_start,
         interest_rate=interest_variable,
         prev_interest_date=prev_interest_date,
@@ -1293,7 +1302,7 @@ with col2:
     extra_win_for_us_invest = df_schedule_variable_invest["ExtraWinForUs"].sum()
 
     interest_per_month_variable = (
-        (df_schedule_variable.iloc[0]["Principal"] - balance_offset)
+        (df_schedule_variable.iloc[0]["Principal"] - extracted_offset)
         * (interest_variable / 100)
         / 12
     )
@@ -1418,7 +1427,7 @@ with col2:
         st.plotly_chart(fig1a, key="1av")
 
         principal_smaller_offset = df_schedule_variable[
-            df_schedule_variable["Principal"] <= balance_offset
+            df_schedule_variable["Principal"] <= extracted_offset
         ]
 
         fig1b = px.scatter(
@@ -1447,7 +1456,7 @@ with col2:
 
             if principal_smaller_offset_first_date < fixed_loan_end:
                 principal_smaller_offset_second_date = df_schedule_variable[
-                    (df_schedule_variable["Principal"] <= balance_offset)
+                    (df_schedule_variable["Principal"] <= extracted_offset)
                     & (df_schedule_variable["Date"] > fixed_loan_end)
                 ].iloc[0]["Date"]
                 st.write(
@@ -1540,7 +1549,7 @@ _, col2, _ = st.columns(3)
 
 with col2:
 
-    st.write("### Fixed & Variable")
+    st.write("#### Fixed & Variable")
 
     total_wo_extra = repayment_fixed + repayment_variable
     total_extra = repayment_extra_fixed + repayment_extra_variable
