@@ -651,7 +651,7 @@ with col2:
         ":green[Extra repayment (monthly, $)]",
         0,
         20800,
-        5000,
+        extracted_extra_repayment,
         100,
     )
 
