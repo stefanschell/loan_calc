@@ -57,8 +57,8 @@ st.markdown(
     """
     <style>
     button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
-        font-size: 18px;
-        padding: 1rem 2rem;
+        font-size: 20px;
+        padding: 0.2rem;
     }
     </style>
     """,
