@@ -98,7 +98,7 @@ def simulate(
     leftover_repayment=None,
     extra_win_amount=None,
     extra_win_cycle: Cycle = None,
-    extra_win_duration=None,
+    extra_win_duration: pd.Timedelta = None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
 
