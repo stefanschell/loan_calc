@@ -62,8 +62,7 @@ def increment_date(date: pd.Timestamp, cycle: Cycle) -> pd.Timestamp:
             date = (date + one_month).replace(day=1)  # first of next month
             date = (date + one_month).replace(day=1)  # first of month after next
             date = date - one_day  # end of next month
-            if date_is_last_day_of_month:
-                return date
+            return date
 
         else:
             # special behavior: we are calling this method with date not being at the end of the month,
