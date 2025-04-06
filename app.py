@@ -263,7 +263,6 @@ df_change_variable = account_interpreter.add_interpolated_value(
     drop_original=False,
 )
 
-
 total_interest_so_far_fixed = df_change_fixed[
     (df_change_fixed["Label"] == "Interest")
     & (df_change_fixed["interpolated"] == False)
