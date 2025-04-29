@@ -537,7 +537,7 @@ with st.expander("Override settings"):
         save_amount = st.number_input(
             "Amount ($)",
             0,
-            100000,
+            200000,
             3000,
         )
 
@@ -546,7 +546,7 @@ with st.expander("Override settings"):
         spend_amount = st.number_input(
             "Amount ($)",
             0,
-            100000,
+            200000,
             10000,
         )
 
@@ -1264,6 +1264,8 @@ with tab_variable:
 
     total_years_variable_hope = df_schedule_variable_hope.iloc[-1]["ScheduleYears"]
     total_years_variable_fear = df_schedule_variable_fear.iloc[-1]["ScheduleYears"]
+    total_years_variable_save = df_schedule_variable_save.iloc[-1]["ScheduleYears"]
+    total_years_variable_spend = df_schedule_variable_spend.iloc[-1]["ScheduleYears"]
     total_repayments_variable_hope = df_schedule_variable_hope["Repayment"].sum()
     total_repayments_variable_fear = df_schedule_variable_fear["Repayment"].sum()
     total_repayments_variable_save = df_schedule_variable_save["Repayment"].sum()
@@ -1625,12 +1627,14 @@ with tab_fixed_and_variable:
             + f"\\${save_amount:,.0f}"
             + " -> "
             + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}"
+            + f" (+{total_years_variable - total_years_variable_save:.2f} yrs)"
         )
         st.write(
             "--- spend "
             + f"\\${spend_amount:,.0f}"
             + " -> "
             + f"Δ=${(total_repayments_variable_spend - total_repayments_variable):,.0f}"
+            + f" (+{total_years_variable_spend - total_years_variable:.2f} yrs)"
         )
         st.write(
             "--- invest "
