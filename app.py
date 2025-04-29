@@ -1627,7 +1627,7 @@ with tab_fixed_and_variable:
             + f"\\${save_amount:,.0f}"
             + " -> "
             + f"Δ=${(total_repayments_variable_save - total_repayments_variable):,.0f}"
-            + f" (+{total_years_variable - total_years_variable_save:.2f} yrs)"
+            + f" (-{total_years_variable - total_years_variable_save:.2f} yrs)"
         )
         st.write(
             "--- spend "
