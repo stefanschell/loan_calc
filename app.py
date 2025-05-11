@@ -588,37 +588,48 @@ with st.expander("Override settings"):
         invest_win_cycle = None
         invest_win_duration = None
 
+    st.divider()
+
+    history_length_days = math.ceil(
+        (df_in["DateSeries"].iloc[-1] - df_in["DateSeries"].iloc[0]).days
+    )
+
+    history_length_days_used = st.slider(
+        "Days for extraction of offset and extra repayment:",
+        1,
+        history_length_days,
+        history_length_days,
+        10,
+    )
+
+    upper_cutoff_for_extraction = st.slider(
+        "Upper cutoff for extraction of extra repayment:",
+        5000,
+        500000,
+        20000,
+        1000,
+    )
+
+    history_cutoff_date = df_in["DateSeries"].iloc[-1] - timedelta(
+        days=history_length_days_used
+    )
+
+    extracted_offset = df_balance_offset[
+        df_balance_offset["DateSeries"] >= history_cutoff_date
+    ]["Balance"].mean()
+
+    extracted_extra_repayment = (
+        df_change_variable[
+            (df_change_variable["interpolated"] == True)
+            & (df_change_variable["Label"] == "Extrarepayment")
+            & (df_change_variable["DateSeries"] >= history_cutoff_date)
+            & (df_change_variable["Change"] <= upper_cutoff_for_extraction)
+        ]["Change"]
+        .dropna()
+        .mean()
+    )
+
 st.write("##### Config")
-
-history_length_days = math.ceil(
-    (df_in["DateSeries"].iloc[-1] - df_in["DateSeries"].iloc[0]).days
-)
-
-history_length_days_used = st.slider(
-    "Days for extraction of offset and extra repayment:",
-    1,
-    history_length_days,
-    history_length_days,
-    10,
-)
-
-history_cutoff_date = df_in["DateSeries"].iloc[-1] - timedelta(
-    days=history_length_days_used
-)
-
-extracted_offset = df_balance_offset[
-    df_balance_offset["DateSeries"] >= history_cutoff_date
-]["Balance"].mean()
-
-extracted_extra_repayment = (
-    df_change_variable[
-        (df_change_variable["interpolated"] == True)
-        & (df_change_variable["Label"] == "Extrarepayment")
-        & (df_change_variable["DateSeries"] >= history_cutoff_date)
-    ]["Change"]
-    .dropna()
-    .mean()
-)
 
 round_to_hundred = lambda x: int(round(x / 100) * 100)
 
