@@ -92,13 +92,13 @@ def simulate(
     prev_repayment_date: pd.Timestamp,
     repayment_cycle: Cycle,
     repayment_use_stash,
-    schedule_end: pd.Timestamp = None,
-    leftover_incoming: pd.Timestamp = None,
+    schedule_end: pd.Timestamp | None = None,
+    leftover_incoming: pd.Timestamp | None = None,
     leftover_amount=None,
     leftover_repayment=None,
     extra_win_amount=None,
-    extra_win_cycle: Cycle = None,
-    extra_win_duration: pd.Timedelta = None,
+    extra_win_cycle: Cycle | None = None,
+    extra_win_duration: pd.Timedelta | None = None,
 ) -> pd.DataFrame:
     curr_date = schedule_start
 

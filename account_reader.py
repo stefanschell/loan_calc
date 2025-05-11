@@ -3,7 +3,7 @@ from os import listdir
 from os.path import isfile, join
 
 
-def read_statement_from_file(df, file, account_name):
+def read_statement_from_file(df: pd.DataFrame, file, account_name) -> pd.DataFrame:
     df_in = pd.read_csv(file)
 
     df_in["File"] = file
@@ -18,7 +18,9 @@ def read_statement_from_file(df, file, account_name):
     return df
 
 
-def read_account_from_folder(path_loans, account_name, df):
+def read_account_from_folder(
+    path_loans, account_name, df: pd.DataFrame
+) -> pd.DataFrame:
     path_account = join(path_loans, account_name)
     csvs_account = [
         join(path_account, f)
@@ -32,7 +34,7 @@ def read_account_from_folder(path_loans, account_name, df):
     return df
 
 
-def label_row(row):
+def label_row(row) -> str:
     if row["AccountName"] == "Offset":
         if row["Debit"] < 0:
             return "OffsetDown"
@@ -48,11 +50,12 @@ def label_row(row):
             return "Repayment"
         if row["Credit"] > 0:
             return "Extrarepayment"
-    else:
-        return "Unknown"
+    return "Unknown"
 
 
-def read_accounts_from_folders(data_folder, date_from=None, date_to=None):
+def read_accounts_from_folders(
+    data_folder, date_from=None, date_to=None
+) -> pd.DataFrame:
     path_loans = join(data_folder, "Loans")
 
     df = None
