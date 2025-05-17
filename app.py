@@ -618,15 +618,19 @@ with st.expander("Override settings"):
         df_balance_offset["DateSeries"] >= history_cutoff_date
     ]["Balance"].mean()
 
+    extracted_extra_repayment = df_change_variable[
+        (df_change_variable["interpolated"] == False)
+        & (df_change_variable["Label"] == "Extrarepayment")
+        & (df_change_variable["DateSeries"] >= history_cutoff_date)
+        & (df_change_variable["Change"] <= upper_cutoff_for_extraction)
+    ].dropna()
     extracted_extra_repayment = (
-        df_change_variable[
-            (df_change_variable["interpolated"] == True)
-            & (df_change_variable["Label"] == "Extrarepayment")
-            & (df_change_variable["DateSeries"] >= history_cutoff_date)
-            & (df_change_variable["Change"] <= upper_cutoff_for_extraction)
-        ]["Change"]
-        .dropna()
-        .mean()
+        extracted_extra_repayment["Change"].sum()
+        / (
+            extracted_extra_repayment.iloc[-1]["DateSeries"]
+            - extracted_extra_repayment.iloc[0]["DateSeries"]
+        ).days
+        * (365 / 12)
     )
 
 st.write("##### Config")
