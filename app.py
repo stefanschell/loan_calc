@@ -623,7 +623,7 @@ with st.expander("Override settings"):
         & (df_change_variable["Label"] == "Extrarepayment")
         & (df_change_variable["DateSeries"] >= history_cutoff_date)
         & (df_change_variable["Change"] <= upper_cutoff_for_extraction)
-    ].dropna()
+    ]
     extracted_extra_repayment = (
         extracted_extra_repayment["Change"].sum()
         / (
