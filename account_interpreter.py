@@ -9,13 +9,26 @@ def get_linked_transaction(row: pd.Series, df: pd.DataFrame) -> str | None:
     other_row = df[
         (df["AccountName"] != row["AccountName"])
         & (df["DateSeries"] == row["DateSeries"])
-        & ((df["Debit"] == -row["Credit"]) | (df["Credit"] == -row["Debit"]))
+        & (
+            (
+                df["Debit"].notna()
+                & pd.notna(row["Credit"])
+                & (df["Debit"] == -row["Credit"])
+            )
+            | (
+                df["Credit"].notna()
+                & pd.notna(row["Debit"])
+                & (df["Credit"] == -row["Debit"])
+            )
+        )
     ]
     if len(other_row) == 1:
-        if row["Debit"] is not None and row["Debit"] < 0:
-            return "To " + other_row.iloc[0]["AccountName"]
-        if row["Credit"] is not None and row["Credit"] > 0:
-            return "From " + other_row.iloc[0]["AccountName"]
+        other_row = other_row.iloc[0]
+        other_account_name = other_row["AccountName"]
+        if row["Debit"] < 0 and other_row["Credit"] > 0:
+            return "To " + other_account_name
+        elif row["Credit"] > 0 and other_row["Debit"] < 0:
+            return "From " + other_account_name
     return None
 
 
