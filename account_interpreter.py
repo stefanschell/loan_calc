@@ -13,11 +13,15 @@ def get_linked_transaction(row: pd.Series, df: pd.DataFrame) -> str | None:
             (
                 df["Debit"].notna()
                 & pd.notna(row["Credit"])
+                & (df["Debit"] < 0)
+                & (row["Credit"] > 0)
                 & (df["Debit"] == -row["Credit"])
             )
             | (
                 df["Credit"].notna()
                 & pd.notna(row["Debit"])
+                & (df["Credit"] > 0)
+                & (row["Debit"] < 0)
                 & (df["Credit"] == -row["Debit"])
             )
         )
