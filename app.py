@@ -454,22 +454,6 @@ schedule_start = max(prev_interest_date, prev_repayment_date)
 
 years_so_far = (schedule_start - loan_start).days / 365
 
-balance_fixed = account_interpreter.find_balance(df_balance_fixed, schedule_start)
-repayment_fixed = df_in[
-    (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Repayment")
-].iloc[-1]["Credit"]
-interest_fixed = df_in[
-    (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Interest")
-].iloc[-1]["ApproxInterest"]
-
-balance_variable = account_interpreter.find_balance(df_balance_variable, schedule_start)
-repayment_variable = df_in[
-    (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Repayment")
-].iloc[-1]["Credit"]
-interest_variable = df_in[
-    (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Interest")
-].iloc[-1]["ApproxInterest"]
-
 repayment_cycle = home_loan_simulator.Cycle.FORTNIGHTLY
 interest_cycle = home_loan_simulator.Cycle.MONTHLY_END_OF_MONTH
 
@@ -678,6 +662,22 @@ default_extra_repayment_variable = max(0, extracted_extra_repayment - 800)
 default_extra_repayment_fixed = (
     extracted_extra_repayment - default_extra_repayment_variable
 )
+
+balance_fixed = account_interpreter.find_balance(df_balance_fixed, schedule_start)
+repayment_fixed = df_in[
+    (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Repayment")
+].iloc[-1]["Credit"]
+interest_fixed = df_in[
+    (df_in["AccountName"] == "Fixed") & (df_in["Label"] == "Interest")
+].iloc[-1]["ApproxInterest"]
+
+balance_variable = account_interpreter.find_balance(df_balance_variable, schedule_start)
+repayment_variable = df_in[
+    (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Repayment")
+].iloc[-1]["Credit"]
+interest_variable = df_in[
+    (df_in["AccountName"] == "Variable") & (df_in["Label"] == "Interest")
+].iloc[-1]["ApproxInterest"]
 
 tab_fixed, tab_variable, tab_fixed_and_variable = st.tabs(
     ["Fixed", "Variable", "Fixed & Variable"]
