@@ -178,7 +178,7 @@ def add_interpolated_value(
     is_first_call=False,
 ):
     if is_first_call:
-        df["interpolated"] = False
+        df["Interpolated"] = False
 
     new_rows = []
 
@@ -204,7 +204,7 @@ def add_interpolated_value(
             )
 
             new_row = curr_row.to_dict()
-            new_row["interpolated"] = True
+            new_row["Interpolated"] = True
 
             if timespan_data_include.days > 0:
                 new_row[col_name] = (

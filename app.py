@@ -49,6 +49,12 @@ schedule_format = {
     "Stash": "${:,.0f}",
 }
 
+interpolation_format = {
+    "DateSeries": lambda x: x.strftime("%d/%m/%Y"),
+    "Change": "${:,.0f}",
+    "Interpolated": lambda x: "Yes" if x else "No",
+}
+
 # setup
 
 st.set_page_config(layout="centered")
@@ -275,21 +281,21 @@ df_change_variable = account_interpreter.add_interpolated_value(
 
 total_interest_so_far_fixed = df_change_fixed[
     (df_change_fixed["Label"] == "Interest")
-    & (df_change_fixed["interpolated"] == False)
+    & (df_change_fixed["Interpolated"] == False)
 ]["Change"].sum()
 
 base_repayment_so_far_fixed = df_change_fixed[
     (df_change_fixed["Label"] == "Repayment")
-    & (df_change_fixed["interpolated"] == False)
+    & (df_change_fixed["Interpolated"] == False)
 ]["Change"].sum()
 
 extra_repayment_so_far_fixed = df_change_fixed[
     (df_change_fixed["Label"] == "Extrarepayment")
-    & (df_change_fixed["interpolated"] == False)
+    & (df_change_fixed["Interpolated"] == False)
 ]["Change"].sum()
 
 redraw_so_far_fixed = df_change_fixed[
-    (df_change_fixed["Label"] == "Redraw") & (df_change_fixed["interpolated"] == False)
+    (df_change_fixed["Label"] == "Redraw") & (df_change_fixed["Interpolated"] == False)
 ]["Change"].sum()
 
 total_net_repayment_so_far_fixed = (
@@ -298,22 +304,22 @@ total_net_repayment_so_far_fixed = (
 
 total_interest_so_far_variable = df_change_variable[
     (df_change_variable["Label"] == "Interest")
-    & (df_change_variable["interpolated"] == False)
+    & (df_change_variable["Interpolated"] == False)
 ]["Change"].sum()
 
 base_repayment_so_far_variable = df_change_variable[
     (df_change_variable["Label"] == "Repayment")
-    & (df_change_variable["interpolated"] == False)
+    & (df_change_variable["Interpolated"] == False)
 ]["Change"].sum()
 
 extra_repayment_so_far_variable = df_change_variable[
     (df_change_variable["Label"] == "Extrarepayment")
-    & (df_change_variable["interpolated"] == False)
+    & (df_change_variable["Interpolated"] == False)
 ]["Change"].sum()
 
 redraw_so_far_variable = df_change_variable[
     (df_change_variable["Label"] == "Redraw")
-    & (df_change_variable["interpolated"] == False)
+    & (df_change_variable["Interpolated"] == False)
 ]["Change"].sum()
 
 total_net_repayment_so_far_variable = (
@@ -356,7 +362,7 @@ with tab_fixed:
     with st.expander("Change of balance over time"):
 
         fig = px.line(
-            df_change_fixed[df_change_fixed["interpolated"] == False],
+            df_change_fixed[df_change_fixed["Interpolated"] == False],
             x="DateSeries",
             y=["Change"],
             color="Label",
@@ -371,7 +377,7 @@ with tab_fixed:
         st.plotly_chart(fig, key="p1")
 
         fig = px.line(
-            df_change_fixed[df_change_fixed["interpolated"] == True],
+            df_change_fixed[df_change_fixed["Interpolated"] == True],
             x="DateSeries",
             y=["Change"],
             color="Label",
@@ -388,6 +394,12 @@ with tab_fixed:
         fig.update_yaxes(title_text="Change ($)")
 
         st.plotly_chart(fig, key="p2")
+
+        if st.toggle("Show table", False, key="p2a"):
+            df_change_fixed_sorted = df_change_fixed.sort_values(
+                by=["DateSeries", "Interpolated"]
+            )
+            st.write(df_change_fixed_sorted.style.format(interpolation_format))
 
 with tab_variable:
 
@@ -407,7 +419,7 @@ with tab_variable:
     with st.expander("Change of balance over time"):
 
         fig = px.line(
-            df_change_variable[df_change_variable["interpolated"] == False],
+            df_change_variable[df_change_variable["Interpolated"] == False],
             x="DateSeries",
             y=["Change"],
             color="Label",
@@ -422,7 +434,7 @@ with tab_variable:
         st.plotly_chart(fig, key="p3")
 
         fig = px.line(
-            df_change_variable[df_change_variable["interpolated"] == True],
+            df_change_variable[df_change_variable["Interpolated"] == True],
             x="DateSeries",
             y=["Change"],
             color="Label",
@@ -439,6 +451,12 @@ with tab_variable:
         fig.update_yaxes(title_text="Change ($)")
 
         st.plotly_chart(fig, key="p4")
+
+        if st.toggle("Show table", False, key="k4b"):
+            df_change_variable_sorted = df_change_variable.sort_values(
+                by=["DateSeries", "Interpolated"]
+            )
+            st.write(df_change_variable_sorted.style.format(interpolation_format))
 
 with tab_fixed_and_variable:
 
@@ -633,7 +651,7 @@ with st.expander("Override settings"):
     ]["Balance"].mean()
 
     extracted_extra_repayment = df_change_variable[
-        (df_change_variable["interpolated"] == False)
+        (df_change_variable["Interpolated"] == False)
         & (df_change_variable["Label"] == "Extrarepayment")
         & (df_change_variable["DateSeries"] >= history_cutoff_date)
         & (df_change_variable["Change"] <= upper_cutoff_for_extraction)
