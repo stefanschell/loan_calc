@@ -226,6 +226,16 @@ df_change_fixed = account_interpreter.add_interpolated_value(
     drop_original=False,
 )
 
+df_change_fixed = account_interpreter.add_interpolated_value(
+    df_change_fixed,
+    "Extrarepayment",
+    "Change",
+    timespan_search=timedelta(days=35),
+    timespan_include=timedelta(days=20),
+    timespane_normalize=timedelta(days=365 / 12),
+    drop_original=False,
+)
+
 df_change_variable = account_interpreter.get_change_over_time(
     df_in,
     "Variable",
