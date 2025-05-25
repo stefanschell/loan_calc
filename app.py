@@ -278,8 +278,12 @@ extra_repayment_so_far_fixed = df_change_fixed[
     & (df_change_fixed["interpolated"] == False)
 ]["Change"].sum()
 
+redraw_so_far_fixed = df_change_fixed[
+    (df_change_fixed["Label"] == "Redraw") & (df_change_fixed["interpolated"] == False)
+]["Change"].sum()
+
 total_repayments_so_far_fixed = (
-    base_repayment_so_far_fixed + extra_repayment_so_far_fixed
+    base_repayment_so_far_fixed + extra_repayment_so_far_fixed - redraw_so_far_fixed
 )
 
 total_interest_so_far_variable = df_change_variable[
@@ -297,8 +301,15 @@ extra_repayment_so_far_variable = df_change_variable[
     & (df_change_variable["interpolated"] == False)
 ]["Change"].sum()
 
+redraw_so_far_variable = df_change_variable[
+    (df_change_variable["Label"] == "Redraw")
+    & (df_change_variable["interpolated"] == False)
+]["Change"].sum()
+
 total_repayments_so_far_variable = (
-    base_repayment_so_far_variable + extra_repayment_so_far_variable
+    base_repayment_so_far_variable
+    + extra_repayment_so_far_variable
+    - redraw_so_far_variable
 )
 
 total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_variable
@@ -306,6 +317,8 @@ total_interest_so_far = total_interest_so_far_fixed + total_interest_so_far_vari
 base_repayment_so_far = base_repayment_so_far_fixed + base_repayment_so_far_variable
 
 extra_repayment_so_far = extra_repayment_so_far_fixed + extra_repayment_so_far_variable
+
+redraw_so_far = redraw_so_far_fixed + redraw_so_far_variable
 
 total_repayments_so_far = (
     total_repayments_so_far_fixed + total_repayments_so_far_variable
@@ -324,8 +337,9 @@ with tab_fixed:
     st.write(
         ":green[Extra repayment so far: " + f"${extra_repayment_so_far_fixed:,.0f}]"
     )
+    st.write("Redraw so far: " + f"${redraw_so_far_fixed:,.0f} (not allowed for fixed)")
     st.write(
-        ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+        ":blue[Total net repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
     )
 
     with st.expander("Change of balance over time"):
@@ -373,8 +387,10 @@ with tab_variable:
     st.write(
         ":green[Extra repayment so far: " + f"${extra_repayment_so_far_variable:,.0f}]"
     )
+    st.write("Redraw so far: " + f"${redraw_so_far_variable:,.0f}")
     st.write(
-        ":blue[Total repayment so far: " + f"${total_repayments_so_far_variable:,.0f}]"
+        ":blue[Total net repayment so far: "
+        + f"${total_repayments_so_far_variable:,.0f}]"
     )
 
     with st.expander("Change of balance over time"):
@@ -418,7 +434,8 @@ with tab_fixed_and_variable:
     st.write(":red[Interest so far: " + f"${total_interest_so_far:,.0f}]")
     st.write(":orange[Base repayment so far: " + f"${base_repayment_so_far:,.0f}]")
     st.write(":green[Extra repayment so far: " + f"${extra_repayment_so_far:,.0f}]")
-    st.write(":blue[Total repayment so far: " + f"${total_repayments_so_far:,.0f}]")
+    st.write("Redraw so far: " + f"${redraw_so_far:,.0f}")
+    st.write(":blue[Total net repayment so far: " + f"${total_repayments_so_far:,.0f}]")
 
 # Prospective
 
@@ -863,12 +880,13 @@ with tab_fixed:
             + ")]"
         )
         st.write(
-            ":blue[Total repayment so far: " + f"${total_repayments_so_far_fixed:,.0f}]"
+            ":blue[Total net repayment so far: "
+            + f"${total_repayments_so_far_fixed:,.0f}]"
         )
     st.write(":blue[Total repayment to go: " + f"${total_repayments_fixed:,.0f}]")
     if show_so_far_information:
         st.write(
-            ":blue[Total repayment so far & to go: "
+            ":blue[Total (net) repayment so far & to go: "
             + f"${total_repayments_so_far_fixed + total_repayments_fixed:,.0f}]"
         )
 
@@ -1361,13 +1379,13 @@ with tab_variable:
         )
 
         st.write(
-            ":blue[Total repayment so far: "
+            ":blue[Total net repayment so far: "
             + f"${total_repayments_so_far_variable:,.0f}]"
         )
     st.write(":blue[Total repayment to go: " + f"${total_repayments_variable:,.0f}]")
     if show_so_far_information:
         st.write(
-            ":blue[Total repayment so far & to go: "
+            ":blue[Total (net) repayment so far & to go: "
             + f"${total_repayments_so_far_variable + total_repayments_variable:,.0f}]"
         )
 
@@ -1604,7 +1622,7 @@ with tab_fixed_and_variable:
         )
 
         st.write(
-            ":blue[Total repayment so far: "
+            ":blue[Total net repayment so far: "
             + f"${(total_repayments_so_far_fixed + total_repayments_so_far_variable):,.0f}"
             + f" ({(total_repayments_so_far_fixed + total_repayments_so_far_variable) /
                     (total_repayments_so_far_fixed + total_repayments_fixed +
@@ -1674,7 +1692,7 @@ with tab_fixed_and_variable:
         )
     if show_so_far_information:
         st.write(
-            ":blue[Total repayment so far & to go: "
+            ":blue[Total (net) repayment so far & to go: "
             + f"${(
                 total_repayments_so_far_fixed + total_repayments_fixed +
                 total_repayments_so_far_variable + total_repayments_variable):,.0f}]"
