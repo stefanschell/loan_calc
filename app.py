@@ -135,6 +135,8 @@ df_in = (
 
 df_in = account_interpreter.add_interest_information(df_in)
 
+df_in = account_interpreter.link_transactions(df_in)
+
 # Retrospective
 
 st.write("# Retrospective")

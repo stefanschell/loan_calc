@@ -3,9 +3,33 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
+def get_linked_transaction(row: pd.Series, df: pd.DataFrame) -> str | None:
+    if row["Label"] == "Interest":
+        return "Self"
+    other_row = df[
+        (df["AccountName"] != row["AccountName"])
+        & (df["DateSeries"] == row["DateSeries"])
+        & ((df["Debit"] == -row["Credit"]) | (df["Credit"] == -row["Debit"]))
+    ]
+    if len(other_row) == 1:
+        if row["Debit"] is not None and row["Debit"] < 0:
+            return "To " + other_row.iloc[0]["AccountName"]
+        if row["Credit"] is not None and row["Credit"] > 0:
+            return "From " + other_row.iloc[0]["AccountName"]
+    return None
+
+
+def link_transactions(df) -> pd.DataFrame:
+    df["OtherAccountName"] = df.apply(
+        lambda row: get_linked_transaction(row, df),
+        axis=1,
+    )
+    return df
+
+
 def get_balance_over_time(
     df, account_name, add_col_with_account_name=False, return_positive_balance=False
-):
+) -> pd.DataFrame:
     df = pd.DataFrame(df)
 
     df = df[df["AccountName"] == account_name]
